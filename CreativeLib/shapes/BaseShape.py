@@ -2,13 +2,20 @@
 from ..enviornment.Canvas import Canvas
 
 class BaseShape(object):
-	def __init__(self):
+	def __init__(self, **kwargs):
 		self._verticies = []
-		self._fill_color=None
-		self._stroke_color=None
-		self._stroke_width=None
+		self._fill_color='none'
+		self._stroke_color='black'
+		self._stroke_width=1
 		self._close_path = False
 
+		self.is_circle=False
+
+		for k,v in kwargs.items():
+			if hasattr(self, k):
+				setattr(self, k, v)
+			else:
+				print(f'attr "{k}" does not exist.')
 
 		Canvas.draw_queue.append(self)
 
@@ -60,3 +67,10 @@ class BaseShape(object):
 
 	def add_vertex(self, coords:tuple):
 		self._verticies.append(coords)
+
+
+	def translate(self, x, y):
+		raise Exception('Inherited class should implement')
+
+	def rotate(self, degrees):
+		raise Exception('Inherited class should implement')
