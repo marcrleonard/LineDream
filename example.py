@@ -1,26 +1,19 @@
+import random
 
-from Shaper import Path, Canvas, Rectangle, Square, Ellipse, Point
+from shaper import Path, Canvas, Rectangle, Square, Ellipse, Point
 
-Canvas.width=200
-Canvas.height=200
-Canvas.background_color='beige'
 
-r = Point((100, 100))
-r.stroke_color = 'black'
+Canvas.width=1000
+Canvas.height=700
+Canvas.background_color='black'
 
-p=Path([(3,3),(30,20),(4,18)])
-p.close_path=True
-p.fill_color='blue'
-p.stroke_color='none'
+points = []
+for pp in range(200):
+	x = random.randint(0, Canvas.width)
+	y = random.randint(0, 200)
 
-r = Rectangle(130,130,20,15)
-r.fill_color='green'
+	p = Point(x,y)
+	p.stroke_color='white'
 
-s = Square(20, 170, 5)
-s.stroke_color='yellow'
-s.fill_color='red'
 
-e = Ellipse((120, 30), 5, 8)
-e.fill_color='orange'
-
-Canvas.save(f'test.svg')
+Canvas.save(f'example.svg')
