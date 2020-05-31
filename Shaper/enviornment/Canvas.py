@@ -19,6 +19,11 @@ class BaseCanvas(object):
 
 		self.draw_queue = []
 
+		self._frame_index = 0
+
+	@property
+	def frame_index(self):
+		return self._frame_index
 
 	def draw(self):
 
