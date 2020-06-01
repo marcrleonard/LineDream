@@ -12,9 +12,9 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'scrawl'
+NAME = 'LineDream'
 DESCRIPTION = 'A creative coding library..'
-URL = 'https://github.com/marcrleonard/scrawl'
+URL = 'https://github.com/marcrleonard/LineDream'
 EMAIL = 'marc.r.leonard@gmail.com'
 AUTHOR = 'Marc Leonard'
 REQUIRES_PYTHON = '>=3.7.0'
