@@ -1,6 +1,6 @@
 # import datetime
 # from p5 import noise
-from CreativeLib import Path, Canvas, Circle
+from scrawl import Path, Canvas, Circle
 import math
 import random
 random.seed(100)

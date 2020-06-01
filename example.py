@@ -1,6 +1,6 @@
 import random
 
-from shaper import Path, Canvas, Rectangle, Square, Ellipse, Point
+from scrawl import Path, Canvas, Rectangle, Square, Ellipse, Point
 
 
 Canvas.width=1000
