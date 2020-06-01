@@ -13,12 +13,12 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'LineDream'
-DESCRIPTION = 'A creative coding library..'
+DESCRIPTION = 'A creative coding library...'
 URL = 'https://github.com/marcrleonard/LineDream'
 EMAIL = 'marc.r.leonard@gmail.com'
 AUTHOR = 'Marc Leonard'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
