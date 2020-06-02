@@ -4,6 +4,19 @@ Currently, output files are saved as SVGs. There is not yet support for a draw l
 
 The library was originally created to make art for a pen plotter, however, the inner object structure could be applied to many different rendering platforms.
 
+Installation
+------------
+`pip install LineDream`
+
+Example
+-------
+```python
+from LineDream import Circle, Canvas, Path
+
+
+
+```
+
 Todos:
 -----
 - Integrate TextPath with Hershey
