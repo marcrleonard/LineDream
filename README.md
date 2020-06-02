@@ -12,15 +12,16 @@ Example
 -------
 ```python
 from LineDream import Circle, Canvas, Path
+Canvas.width = 400
+Canvas.height = 200
 
 
-
+Canvas.save('output.svg')
 ```
 
 Todos:
 -----
 - Integrate TextPath with Hershey
 - Convert all vertexes to Numpy arrays
-- Add .transform()
 - Add .rotate()
-- Add .scale()
+- Add .scale() (partially implemented in some classes)
