@@ -81,3 +81,6 @@ class BaseShape(object):
 
 	def rotate(self, degrees, origin=None):
 		raise Exception('Inherited class should implement')
+
+	def scale(self, degrees, origin=None):
+		raise Exception('Inherited class should implement')
