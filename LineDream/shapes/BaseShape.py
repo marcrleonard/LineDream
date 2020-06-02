@@ -70,7 +70,14 @@ class BaseShape(object):
 
 
 	def translate(self, x, y):
-		raise Exception('Inherited class should implement')
+		# THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.
+		# This will work for shapes/objects that user vertex's.. but not for things like Circles
 
-	def rotate(self, degrees):
+		for idx, (o_x,o_y) in enumerate(self._verticies):
+			o_x = o_x + x
+			o_y = o_y + y
+
+			self._verticies[idx] = (o_x, o_y)
+
+	def rotate(self, degrees, origin=None):
 		raise Exception('Inherited class should implement')
