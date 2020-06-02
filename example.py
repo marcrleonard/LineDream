@@ -1,8 +1,8 @@
 import random
 from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath
 
-Canvas.width=1000
-Canvas.height=700
+Canvas.width=900
+Canvas.height=500
 Canvas.background_color='black'
 
 #todo: add 'LineDream' text
@@ -36,9 +36,9 @@ for degrees in range(360,180,-10):
 
 	dist_from_circle = 250
 
-	line_len = 100
+	line_len = 40
 	if long:
-		line_len = 200
+		line_len = 100
 		long=False
 	else:
 		long=True
