@@ -5,7 +5,7 @@
 </defs>
 <rect x="0" y="0" width="100%" height="100%" fill="beige" />
 <ellipse cx="100" cy="100" rx="0.5" ry="0.5" fill="none" stroke="black" stroke-width="1" />
-<ellipse cx="120" cy="105" rx="0.5" ry="0.5" fill="none" stroke="red" stroke-width="1" />
+<ellipse cx="120" cy="105" rx="0.5" ry="0.5" fill="none" stroke="black" stroke-width="1" />
 <path d="M3,3 L30,20 L4,18 Z" fill="blue" stroke="none" stroke-width="1" />
 <path d="M23,8 L50,25 L24,23 Z" fill="blue" stroke="none" stroke-width="1" />
 <path d="M120.0,122.5 L140.0,122.5 L140.0,137.5 L120.0,137.5 Z" fill="green" stroke="black" stroke-width="1" />
