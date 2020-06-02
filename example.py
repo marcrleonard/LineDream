@@ -1,28 +1,33 @@
 import random
-
-from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point
-
+from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath
 
 Canvas.width=1000
 Canvas.height=700
 Canvas.background_color='black'
 
-points = []
-for pp in range(200):
+
+for pp in range(100):
 	x = random.randint(0, Canvas.width)
-	y = random.randint(0, 200)
+	y = random.randint(0, 400)
 
 	coords = (x,y)
-	points.append(coords)
-
 	p = Point(*coords)
-	p.stroke_color='white'
 
-points.sort(key = lambda x: x[0])
-for idx in range(0, len(points), 10):
-	p_start_x, p_start_y = points[idx]
+	p.stroke_color= 'white'
 
-	l = Path([(p_start_x, 220),(p_start_x, 500)])
-	l.stroke_color = 'white'
+c_size = 180
+
+circle_center = Canvas.width/2, Canvas.height+c_size/2
+c = Circle(*circle_center, 180)
+c.stroke_color='white'
+
+c = Circle(*circle_center, 200)
+c.stroke_color='white'
+
+c = Circle(*circle_center, 220)
+c.stroke_color='white'
+
+x,y = CircleMath.distance_to_coords(20, 220)
+Circle(x)
 
 Canvas.save(f'example.svg')

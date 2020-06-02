@@ -7,5 +7,7 @@ The library was originally created to make art for a pen plotter.
 Todos:
 -----
 - Integrate TextPath with Hershey
+- Convert all vertexes to Numpy arrays
 - Add .transform()
 - Add .rotate()
+- Add .scale()

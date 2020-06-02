@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# this base file was taken from https://github.com/navdeep-G/setup.py
+
+# to run the entire script... use:
+#       python3 setup.py upload
+
 # Note: To use the 'upload' functionality of this file, you must:
 #   $ pipenv install twine --dev
 
