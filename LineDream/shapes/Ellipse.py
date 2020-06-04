@@ -14,7 +14,7 @@ class Ellipse(BaseShape):
 	def add_vertex(self, coords:tuple):
 		raise Exception("Ellipses do not have vertexes")
 
-	def translate(self, x=0, y=0):
+	def transform(self, x=0, y=0):
 		self.x = self.x + x
 		self.y = self.y + y
 

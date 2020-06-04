@@ -69,7 +69,7 @@ class BaseShape(object):
 		self._verticies.append(coords)
 
 
-	def translate(self, x, y):
+	def transform(self, x, y):
 		# THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.
 		# This will work for shapes/objects that user vertex's.. but not for things like Circles
 
