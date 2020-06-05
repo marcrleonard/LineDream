@@ -10,6 +10,7 @@ class BaseShape(object):
 		self._close_path = False
 
 		self.is_circle=False
+		self.is_multipath = False
 
 		for k,v in kwargs.items():
 			if hasattr(self, k):
@@ -78,6 +79,38 @@ class BaseShape(object):
 			o_y = o_y + y
 
 			self._verticies[idx] = (o_x, o_y)
+
+	@property
+	def min_x(self):
+		rv = 0
+		for x,y in self.verticies:
+			if x < rv:
+				rv = x
+		return rv
+
+	@property
+	def max_x(self):
+		rv = 0
+		for x, y in self.verticies:
+			if x > rv:
+				rv = x
+		return rv
+
+	@property
+	def min_y(self):
+		rv = 0
+		for x, y in self.verticies:
+			if y < rv:
+				rv = y
+		return rv
+
+	@property
+	def max_y(self):
+		rv = 0
+		for x, y in self.verticies:
+			if y > rv:
+				rv = y
+		return rv
 
 	def rotate(self, degrees, origin=None):
 		raise Exception('Inherited class should implement')

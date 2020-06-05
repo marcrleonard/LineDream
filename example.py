@@ -1,5 +1,5 @@
 import random
-from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath
+from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextShape
 
 Canvas.width=900
 Canvas.height=500
@@ -57,11 +57,9 @@ for degrees in range(360,180,-10):
 # vs = [[(-6.0, -6.0), (-6.0, -6.0), (-6.0, -5.0)], [(-6.0, -6.0), (-6.0, -5.0), (-5.0, -5.0)], [(-5.0, -5.0), (-5.0, -2.0), (-2.0, 0.0), (0.0, 3.0), (3.0, 5.0), (5.0, 6.0), (6.0, 6.0)], [(-5.0, -5.0), (-5.0, -2.0), (-2.0, 0.0), (0.0, 2.0), (2.0, 4.0), (4.0, 5.0), (5.0, 5.0), (5.0, 6.0)]]
 vs = [[(-7.0, -12.0), (-7.0, 9.0)], [(-7.0, -12.0), (2.0, -12.0), (5.0, -11.0), (6.0, -10.0), (7.0, -8.0), (7.0, -6.0), (6.0, -4.0), (5.0, -3.0), (2.0, -2.0)], [(-7.0, -2.0), (2.0, -2.0), (5.0, -1.0), (6.0, 0.0), (7.0, 2.0), (7.0, 5.0), (6.0, 7.0), (5.0, 8.0), (2.0, 9.0), (-7.0, 9.0)]]
 
-#
-for v in vs:
-	p = Path(v)
-	p.stroke_color='white'
-	p.transform(30, 30)
+tt = TextShape('LineDream', stroke_color='white')
+# tt.stroke_color='white'
+tt.transform(30, 30)
 
 
 Canvas.save(f'example.svg')

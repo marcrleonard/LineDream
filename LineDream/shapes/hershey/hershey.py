@@ -21,11 +21,9 @@
 
 from lxml import etree
 
-import hersheydata
-import inkex
-import simplestyle
-
-
+from .aux_hershey import hersheydata
+from .aux_hershey import inkex
+from .aux_hershey import simplestyle
 
 Debug = True
 FONT_GROUP_V_SPACING = 45   # all the fonts are nearly identical in height, so a constant
@@ -36,52 +34,63 @@ FONT_GROUP_V_SPACING = 45   # all the fonts are nearly identical in height, so a
 class Hershey( inkex.Effect ):
 	def __init__( self ):
 		inkex.Effect.__init__( self )
-		self.OptionParser.add_option( "--tab",  #NOTE: value is not used.
-			action="store", type="string",
-			dest="tab", default="splash",
-			help="The active tab when Apply was pressed" )
-		self.OptionParser.add_option( "--text",
-			action="store", type="string", 
-			dest="text", default="Hershey Text for Inkscape",
-			help="The input text to render")
-		self.OptionParser.add_option( "--action",
-			action="store", type="string",
-			dest="action", default="render",
-			help="The active option when Apply was pressed" )
-		self.OptionParser.add_option( "--fontface",
-			action="store", type="string",
-			dest="fontface", default="rowmans",
-			help="The selected font face when Apply was pressed" )
+		# self.OptionParser.add_option( "--tab",  #NOTE: value is not used.
+		# 	action="store", type="string",
+		# 	dest="tab", default="splash",
+		# 	help="The active tab when Apply was pressed" )
+		# self.OptionParser.add_option( "--text",
+		# 	action="store", type="string",
+		# 	dest="text", default="Hershey Text for Inkscape",
+		# 	help="The input text to render")
+		# self.OptionParser.add_option( "--action",
+		# 	action="store", type="string",
+		# 	dest="action", default="render",
+		# 	help="The active option when Apply was pressed" )
+		# self.OptionParser.add_option( "--fontface",
+		# 	action="store", type="string",
+		# 	dest="fontface", default="rowmans",
+		# 	help="The selected font face when Apply was pressed" )
 
 		self.text_output_str = None
 		self.text_output_obj = None
 
 		self.letter_paths = {}
 
-	def effect( self ):
-
+	def effect( self, text, fontface ):
+		
+		self.text = text
+		self.action = 'render'
+		self.fontface  = fontface
+		
 		OutputGenerated = False
+
+		g = None
 
 		# Group generated paths together, to make the rendered letters easier to manipulate in Inkscape.
 		g_attribs = {inkex.addNS('label','inkscape'):'Hershey Text' }
-		g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
+		# g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
 
 		style = { 'stroke' : '#000000', 'fill' : 'none', 'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
 		# Apply rounding to ends so that user gets best impression of final printed text appearance.
-		g.set( 'style',simplestyle.formatStyle(style))	
+		# g.set( 'style',simplestyle.formatStyle(style))
 
-		font = eval('hersheydata.' + str(self.options.fontface))
+		font = eval('hersheydata.' + str(self.fontface))
 		clearfont = hersheydata.futural  
 		#Baseline: modernized roman simplex from JHF distribution.
 		
 		w = 0  #Initial spacing offset
 		spacing = 3  # spacing between letters
 
-		if self.options.action == "render":
+		if self.action == "render":
 			#evaluate text string and render in the chosen font
-			letterVals = [ord(q) - 32 for q in self.options.text] 
+
+			letters = []
+			for letter in self.text:
+				letters.append(ord(letter)-32)
+
+			letterVals = [ord(q) - 32 for q in self.text]
 			for idx, q in enumerate(letterVals):
-				letter = self.options.text[idx]
+				letter = self.text[idx]
 				if (q <= 0) or (q > 95):
 					w += 2*spacing
 				else:
@@ -90,8 +99,8 @@ class Hershey( inkex.Effect ):
 
 					w = self.draw_svg_text(q, font, w, 0, g)
 					OutputGenerated = True
-			t = 'translate(' + str(self.view_center[0] - w/2) + ',' + str(self.view_center[1]) + ')'
-			g.set( 'transform',t)					
+			# t = 'translate(' + str(self.view_center[0] - w/2) + ',' + str(self.view_center[1]) + ')'
+			# g.set( 'transform',t)
 		# elif self.options.action == 'sample':
 		# 	t = self.render_table_of_all_fonts( 'group_allfonts', g, spacing, clearfont )
 		# 	g.set( 'transform',t)
@@ -122,8 +131,8 @@ class Hershey( inkex.Effect ):
 			self.current_layer.remove(g)	#remove empty group, if no SVG was generated.
 
 
-		self.text_output_str = (etree.tostring(g, pretty_print=True)).decode('utf-8')
-		self.text_output_obj = g
+		# self.text_output_str = (etree.tostring(g, pretty_print=True)).decode('utf-8')
+		# self.text_output_obj = g
 
 	def getDocHeight( self):
 		doc_height = self.unittouu(self.document.getroot().get('height'))
@@ -161,7 +170,7 @@ class Hershey( inkex.Effect ):
 			w = wmaxname
 			font = eval('hersheydata.' + f[0])
 			#evaluate text string
-			letterVals = [ord(q) - 32 for q in self.options.text] 
+			letterVals = [ord(q) - 32 for q in self.text]
 			for q in letterVals:
 				if (q < 0) or (q > 95):
 					w += 2*spacing
@@ -255,7 +264,7 @@ class Hershey( inkex.Effect ):
 
 		trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
 		text_attribs = {'d': pathString, 'transform': trans}
-		inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), text_attribs)
+		# inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), text_attribs)
 		return midpoint + float(splitString[1])  # new offset value
 
 	def svg_text_width(self, char, face, offset):
@@ -271,7 +280,8 @@ if __name__ == '__main__':
 	aa = ['hershey.py', '--tab="splash"', '--text=Blah!', '--action=render', '--fontface=futural', '/Users/marcleonard/Projects/plotplanner/svgs/tree_test_text.svg']
 	# aa = ['hershey.py', '--tab="splash"', '--text=Blah!', '--action=render', '--fontface=futuram', '/Users/marcleonard/Projects/plotplanner/svgs/tree_test_text.svg']
 	e = Hershey()
-	e.affect(args=aa, output=False)
+	# e.affect()
+	e.effect('Blah!', 'futural')
 	# print(e.text_output_obj)
 	# print(e.text_output_str)
 	import json

@@ -58,6 +58,7 @@ class BaseCanvas(object):
 
 				verts = shape.verticies
 
+
 				# verts = vertices.tolist()
 				if verts == [[0.0, 0.0, 0.0]]:
 					# print(f'verts contains one item of {[[0.0, 0.0, 0.0]]} ... continuing.')
