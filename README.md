@@ -71,7 +71,7 @@ Canvas.save(f'example.svg')
 
 Todos:
 -----
-- Integrate TextPath with Hershey
+- Integrate TextPath with Hershey (initial implementation complete)
 - Convert all vertexes to Numpy arrays
 - Add .rotate()
 - Add .scale() (partially implemented in some classes)
