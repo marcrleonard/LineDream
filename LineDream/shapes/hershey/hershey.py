@@ -54,7 +54,7 @@ class Hershey( inkex.Effect ):
 		self.text_output_str = None
 		self.text_output_obj = None
 
-		self.letter_paths = {}
+		self.letter_paths = []
 
 	def effect( self, text, fontface ):
 		
@@ -94,8 +94,13 @@ class Hershey( inkex.Effect ):
 				if (q <= 0) or (q > 95):
 					w += 2*spacing
 				else:
-					_paths = self.letter_path(q, font, w, 0, g)
-					self.letter_paths[letter] = _paths
+					_paths, midpoint, offset = self.letter_path(q, font, w, 0, g)
+					self.letter_paths.append( {
+						'letter':letter,
+						'midpoint': midpoint,
+						'offset': offset,
+						'paths':_paths
+					})
 
 					w = self.draw_svg_text(q, font, w, 0, g)
 					OutputGenerated = True
@@ -223,7 +228,7 @@ class Hershey( inkex.Effect ):
 
 		# print(vs)
 
-		return vs
+		return vs, midpoint, offset
 
 
 	def draw_svg_text(self, char, face, offset, vertoffset, parent):
@@ -232,36 +237,6 @@ class Hershey( inkex.Effect ):
 		splitString = pathString.split()
 		midpoint = offset - float(splitString[0])
 		pathString = pathString[pathString.find("M"):]  # portion after first move
-
-		vs = [
-
-		]
-
-		ss = pathString.split(' ')
-
-		p = []
-		x=None
-		for s in ss:
-			if s == 'M':
-				if len(p)>0:
-					vs.append(p)
-					p=[]
-			else:
-				if s == 'L':
-					continue
-
-				if x:
-					p.append((x,float(s)))
-					x=None
-
-				else:
-					x=float(s)
-		if len(p) > 0:
-			vs.append(p)
-
-
-		# print(vs)
-
 		trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
 		text_attribs = {'d': pathString, 'transform': trans}
 		# inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), text_attribs)

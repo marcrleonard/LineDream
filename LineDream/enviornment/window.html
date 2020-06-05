@@ -4,23 +4,27 @@
   <head>
     <meta charset="utf-8">
     <title>title</title>
-    <link rel="stylesheet" href="style.css">
+<!--    <link rel="stylesheet" href="style.css">-->
     
     
 <script>
 
 function refresh(node)
 {
-   var times = 3000; // gap in Milli Seconds;
+   var times = 41; // gap in Milli Seconds;
+   var times = 400; // gap in Milli Seconds;
 
    (function startRefresh()
    {
+     // node.srcset = '../../example.svg';
       var address;
       if(node.src.indexOf('?')>-1)
        address = node.src.split('?')[0];
       else 
        address = node.src;
-      node.src = address+"?time="+new Date().getTime();
+
+node.src = '../../example.svg?time='+new Date().getTime();
+      // node.src = address+"
 
       setTimeout(startRefresh,times);
    })();
@@ -38,6 +42,6 @@ window.onload = function()
     
   </head>
   <body>
-    <img id=img scr=''></img>
+    <img style="width: 100%" id=img scr='' srcset=""/>
   </body>
 </html>

@@ -112,6 +112,12 @@ class BaseShape(object):
 				rv = y
 		return rv
 
+	@property
+	def center(self):
+		x = (self.max_x - self.min_x)/2
+		y = (self.max_y - self.min_y)/2
+		return (x,y)
+
 	def rotate(self, degrees, origin=None):
 		raise Exception('Inherited class should implement')
 

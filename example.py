@@ -1,11 +1,9 @@
 import random
-from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextShape
+from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextPaths
 
 Canvas.width=900
 Canvas.height=500
 Canvas.background_color='black'
-
-#todo: add 'LineDream' text
 
 for pp in range(100):
 	x = random.randint(0, Canvas.width)
@@ -28,8 +26,6 @@ c.stroke_color='white'
 c = Circle(*circle_center, 220)
 c.stroke_color='white'
 
-#180 to 0
-# make rays
 
 long=True
 for degrees in range(360,180,-10):
@@ -53,13 +49,10 @@ for degrees in range(360,180,-10):
 
 	Path([(x1,y1), (x2,y2)], stroke_color='white')
 
-
-# vs = [[(-6.0, -6.0), (-6.0, -6.0), (-6.0, -5.0)], [(-6.0, -6.0), (-6.0, -5.0), (-5.0, -5.0)], [(-5.0, -5.0), (-5.0, -2.0), (-2.0, 0.0), (0.0, 3.0), (3.0, 5.0), (5.0, 6.0), (6.0, 6.0)], [(-5.0, -5.0), (-5.0, -2.0), (-2.0, 0.0), (0.0, 2.0), (2.0, 4.0), (4.0, 5.0), (5.0, 5.0), (5.0, 6.0)]]
-vs = [[(-7.0, -12.0), (-7.0, 9.0)], [(-7.0, -12.0), (2.0, -12.0), (5.0, -11.0), (6.0, -10.0), (7.0, -8.0), (7.0, -6.0), (6.0, -4.0), (5.0, -3.0), (2.0, -2.0)], [(-7.0, -2.0), (2.0, -2.0), (5.0, -1.0), (6.0, 0.0), (7.0, 2.0), (7.0, 5.0), (6.0, 7.0), (5.0, 8.0), (2.0, 9.0), (-7.0, 9.0)]]
-
-tt = TextShape('LineDream', stroke_color='white')
-# tt.stroke_color='white'
-tt.transform(30, 30)
-
+# EXPERIMENTAL
+tt = TextPaths('LineDream', kerning=10, stroke_color='white', stroke_width=2)
+tt.transform(100, 100)
+tt.scale(1.4)
 
 Canvas.save(f'example.svg')
+

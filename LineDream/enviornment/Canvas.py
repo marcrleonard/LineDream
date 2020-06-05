@@ -30,7 +30,7 @@ class BaseCanvas(object):
 		for d in self.draw_queue:
 			print(d)
 
-	def save(self, filename):
+	def save(self, filename, open_viewer=False):
 		svg_canvas = drawSvg.Drawing(self.width, self.height, origin=(0, 0), displayInline=False)
 
 		# There may be a better way to do this through the init above, but I found it confusing.
@@ -91,6 +91,10 @@ class BaseCanvas(object):
 			svg_canvas.append(svg_obj)
 
 		svg_canvas.saveSvg(filename)
+
+		if open_viewer:
+			import webbrowser
+			webbrowser.open('http://example.com')  # Go to example.com
 
 	def flush(self):
 		self.draw_queue=[]
