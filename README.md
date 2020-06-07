@@ -77,3 +77,4 @@ Todos:
 - Convert all vertexes to Numpy arrays
 - Add .rotate()
 - Add .scale() (partially implemented in some classes)
+- Add 'tag' notion
