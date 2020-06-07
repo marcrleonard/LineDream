@@ -13,6 +13,9 @@ Installation
 Example
 -------
 ```python
+import random
+from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextPaths
+
 Canvas.width=900
 Canvas.height=500
 Canvas.background_color='black'
@@ -37,7 +40,6 @@ c.stroke_color='white'
 
 c = Circle(*circle_center, 220)
 c.stroke_color='white'
-
 
 long=True
 for degrees in range(360,180,-10):

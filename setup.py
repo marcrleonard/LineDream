@@ -23,7 +23,7 @@ URL = 'https://github.com/marcrleonard/LineDream'
 EMAIL = 'marc.r.leonard@gmail.com'
 AUTHOR = 'Marc Leonard'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.1.2'
+VERSION = '0.1.4'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
