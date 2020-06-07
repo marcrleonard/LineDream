@@ -11,9 +11,11 @@ SHAPES TO ADD:
 '''
 
 class BaseCanvas(object):
-	def __init__(self, x=1200, y=800):
+	def __init__(self, x=1200, y=800, units=None):
 		self.width = x
 		self.height = y
+
+		self.units=units
 
 		self.background_color= None
 
@@ -24,6 +26,8 @@ class BaseCanvas(object):
 	@property
 	def frame_index(self):
 		return self._frame_index
+
+
 
 	def draw(self):
 
@@ -36,6 +40,10 @@ class BaseCanvas(object):
 		# There may be a better way to do this through the init above, but I found it confusing.
 		# it was much easier to just hardcode it.
 		svg_canvas.viewBox = (0, 0, self.width, self.height)
+
+		if self.units:
+			svg_canvas.width = f'{self.width}{self.units}'
+			svg_canvas.height = f'{self.height}{self.units}'
 
 		if self.background_color:
 			svg_canvas.append(
