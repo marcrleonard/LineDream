@@ -4,6 +4,7 @@ from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, C
 Canvas.width=900
 Canvas.height=500
 Canvas.background_color='black'
+Canvas.units = 'mm'
 
 for pp in range(100):
 	x = random.randint(0, Canvas.width)
