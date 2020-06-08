@@ -75,6 +75,6 @@ Todos:
 -----
 - Integrate TextPath with Hershey (initial implementation complete)
 - Convert all vertexes to Numpy arrays
-- Add .rotate()
 - Add .scale() (partially implemented in some classes)
 - Add 'tag' notion
+- Add PathGroup()

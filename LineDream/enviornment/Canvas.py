@@ -62,7 +62,7 @@ class BaseCanvas(object):
 							fill=shape.fill_color, stroke=shape.stroke_color,
 							stroke_width=shape.stroke_width)
 
-			if shape.verticies:
+			elif shape.verticies:
 
 				verts = shape.verticies
 
@@ -94,7 +94,9 @@ class BaseCanvas(object):
 				svg_obj = drawSvg.Lines(start_x, start_y, *other_verts, fill=shape.fill_color, stroke=shape.stroke_color,
 										stroke_width=shape.stroke_width, close=shape.close_path)
 
-
+			else:
+				print("Shape found with no verticies... Skipping...")
+				continue
 
 			svg_canvas.append(svg_obj)
 

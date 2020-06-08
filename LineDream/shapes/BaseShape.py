@@ -1,5 +1,6 @@
 # this should mirror what is available in an svg
 from ..enviornment.Canvas import Canvas
+from ..helpers.CircleMath import CircleMath
 
 class BaseShape(object):
 	def __init__(self, **kwargs):
@@ -119,7 +120,18 @@ class BaseShape(object):
 		return (x,y)
 
 	def rotate(self, degrees, origin=None):
-		raise Exception('Inherited class should implement')
+
+		if not origin:
+			x = [p[0] for p in self.verticies]
+			y = [p[1] for p in self.verticies]
+			origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
+
+		_verticies = CircleMath.rotate(self.verticies, origin=origin, degrees=degrees)
+
+		# this operation should just be done in place.
+		for idx, v in enumerate(self.verticies):
+			self.verticies[idx] = _verticies[idx]
+
 
 	def scale(self, degrees, origin=None):
 		raise Exception('Inherited class should implement')
