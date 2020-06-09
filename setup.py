@@ -27,7 +27,8 @@ VERSION = '0.1.6'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'drawSvg'
+    'drawSvg',
+    'numpy'
 ]
 
 # What packages are optional?
