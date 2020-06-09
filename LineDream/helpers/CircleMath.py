@@ -20,4 +20,6 @@ class CircleMath:
 					  [np.sin(angle), np.cos(angle)]])
 		o = np.atleast_2d(origin)
 		p = np.atleast_2d(p)
-		return np.squeeze((R @ (p.T - o.T) + o.T).T)
+		rv = np.squeeze((R @ (p.T - o.T) + o.T).T)
+		#todo: remove this once native numpy arrays are supported
+		return rv.tolist()

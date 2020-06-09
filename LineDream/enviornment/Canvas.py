@@ -62,7 +62,7 @@ class BaseCanvas(object):
 							fill=shape.fill_color, stroke=shape.stroke_color,
 							stroke_width=shape.stroke_width)
 
-			elif shape.verticies:
+			elif len(shape.verticies) > 0:
 
 				verts = shape.verticies
 

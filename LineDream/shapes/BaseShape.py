@@ -64,6 +64,7 @@ class BaseShape(object):
 
 	@property
 	def verticies(self):
+
 		return self._verticies
 
 
@@ -126,11 +127,7 @@ class BaseShape(object):
 			y = [p[1] for p in self.verticies]
 			origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
 
-		_verticies = CircleMath.rotate(self.verticies, origin=origin, degrees=degrees)
-
-		# this operation should just be done in place.
-		for idx, v in enumerate(self.verticies):
-			self.verticies[idx] = _verticies[idx]
+		self._verticies = CircleMath.rotate(self.verticies, origin=origin, degrees=degrees)
 
 
 	def scale(self, degrees, origin=None):
