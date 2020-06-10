@@ -10,6 +10,10 @@ Installation
 ------------
 `pip install LineDream`
 
+Documentation
+-------------
+https://linedream.readthedocs.io/en/latest/
+
 Example
 -------
 ```python
