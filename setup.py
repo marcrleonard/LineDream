@@ -23,7 +23,7 @@ URL = 'https://github.com/marcrleonard/LineDream'
 EMAIL = 'marc.r.leonard@gmail.com'
 AUTHOR = 'Marc Leonard'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.1.6'
+VERSION = '0.1.7'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -81,7 +81,7 @@ class UploadCommand(Command):
     def run(self):
         try:
             self.status('Removing previous builds…')
-            rmtree(os.path.join(here, 'dist'))
+            rmtree(os.path.join(here, 'dist/'))
         except OSError:
             pass
 
@@ -94,6 +94,11 @@ class UploadCommand(Command):
         self.status('Pushing git tags…')
         os.system('git tag v{0}'.format(about['__version__']))
         os.system('git push --tags')
+
+
+        self.status('Cleaning up...')
+        rmtree(os.path.join(here, 'build/'))
+        rmtree(os.path.join(here, 'LineDream.egg-info/'))
 
         sys.exit()
 
