@@ -67,6 +67,14 @@ class BaseShape(object):
 
 		return self._verticies
 
+	# @property
+	# def length(self):
+	# 	x = np.array(xcoordinates)
+	# 	y = np.array(ycoordinates)
+	#
+	# 	dist_array = (x[:-1] - x[1:]) ** 2 + (y[:-1] - y[1:]) ** 2
+	#
+	# 	np.sum(np.sqrt(dist_array))
 
 	def add_vertex(self, coords:tuple):
 		self._verticies.append(coords)
