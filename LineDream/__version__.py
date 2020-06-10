@@ -1,4 +1,4 @@
-# Part of LienDReam: A Python package based on Processing
+# Part of LineDream: A Python package for creative coding
 # Copyright (C) 2020- Marc Leonard
 #
 # This program is free software: you can redistribute it and/or modify
