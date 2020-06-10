@@ -1,6 +1,8 @@
 import drawSvg
-
-
+import cairosvg
+import numpy as np
+from PIL import Image
+import io
 '''
 SHAPES TO ADD:
 	- Rectangle/Square?
@@ -100,11 +102,33 @@ class BaseCanvas(object):
 
 			svg_canvas.append(svg_obj)
 
-		svg_canvas.saveSvg(filename)
+		if filename:
+			svg_canvas.saveSvg(filename)
 
-		if open_viewer:
-			import webbrowser
-			webbrowser.open('http://example.com')  # Go to example.com
+		else:
+			rv = svg_canvas.asSvg()
+
+			ss = cairosvg.svg2png(
+				bytestring=rv.encode(),
+				output_height=self.height,
+				output_width=self.width
+
+			)
+
+			img = Image.open(io.BytesIO(ss))
+
+			# return img
+			arr = np.asarray(img)
+
+			arr.astype(dtype='f4')
+			return arr
+
+			# return rv
+
+
+		# if open_viewer:
+		# 	import webbrowser
+		# 	webbrowser.open('http://example.com')  # Go to example.com
 
 	def flush(self):
 		self.draw_queue=[]
