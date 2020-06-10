@@ -16,14 +16,7 @@ from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
-# Package meta-data.
-NAME = 'LineDream'
-DESCRIPTION = 'A creative coding library...'
-URL = 'https://github.com/marcrleonard/LineDream'
-EMAIL = 'marc.r.leonard@gmail.com'
-AUTHOR = 'Marc Leonard'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.1.8'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -45,20 +38,22 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
-try:
-    with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-        long_description = '\n' + f.read()
-except FileNotFoundError:
-    long_description = DESCRIPTION
+
+with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = '\n' + f.read()
+
+meta_data = {}
+with open(os.path.join(here, 'LineDream', '__version__.py'), 'r', encoding='utf-8') as f:
+    exec(f.read(), meta_data)
 
 # Load the package's __version__.py module as a dictionary.
-about = {}
-if not VERSION:
-    project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
-    with open(os.path.join(here, project_slug, '__version__.py')) as f:
-        exec(f.read(), about)
-else:
-    about['__version__'] = VERSION
+# about = {}
+# if not VERSION:
+#     project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
+#     with open(os.path.join(here, project_slug, '__version__.py')) as f:
+#         exec(f.read(), about)
+# else:
+#     about['__version__'] = VERSION
 
 
 class UploadCommand(Command):
@@ -87,7 +82,7 @@ class UploadCommand(Command):
         os.system('twine upload dist/*')
 
         self.status('Pushing git tags…')
-        os.system('git tag v{0}'.format(about['__version__']))
+        os.system('git tag v{0}'.format(meta_data['__version__']))
         os.system('git push --tags')
 
 
@@ -101,15 +96,17 @@ class UploadCommand(Command):
 
 # Where the magic happens:
 setup(
-    name=NAME,
-    version=about['__version__'],
-    description=DESCRIPTION,
+    name=meta_data['__title__'],
+    version=meta_data['__version__'],
+    description=meta_data['__description__'],
     long_description=long_description,
     long_description_content_type='text/markdown',
-    author=AUTHOR,
-    author_email=EMAIL,
+
+    author=meta_data['__author__'],
+    url=meta_data['__url__'],
+    author_email=meta_data['__author_email__'],
+    license=meta_data['__license__'],
     python_requires=REQUIRES_PYTHON,
-    url=URL,
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
@@ -120,7 +117,6 @@ setup(
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
-    license='MIT',
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
