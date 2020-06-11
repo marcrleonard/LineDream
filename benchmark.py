@@ -1,6 +1,6 @@
 from p5 import noise, Vector
 import random
-from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextPaths
+from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextPaths
 import math
 import moderngl
 import moderngl_window
@@ -75,7 +75,7 @@ while True:
 		# this will allow you to create many lines that are more/less than 1 unit apart.
 
 		# NOTE: This does not have the noise value attached. So this first y value is vanilla and therefor weird looking.
-		p = Path()
+		p = Line()
 		p.stroke_width = .3
 		noise_position = 4
 

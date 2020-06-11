@@ -1,5 +1,5 @@
 
-from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point
+from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point
 
 Canvas.width=200
 Canvas.height=200
@@ -12,12 +12,12 @@ pt2 = Point(100, 100)
 pt2.stroke_color = 'black'
 pt2.transform(20,5)
 
-p=Path([(3,3),(30,20),(4,18)])
+p=Line([(3, 3), (30, 20), (4, 18)])
 p.close_path=True
 p.fill_color='blue'
 p.stroke_color='none'
 
-p2=Path([(3,3),(30,20),(4,18)])
+p2=Line([(3, 3), (30, 20), (4, 18)])
 p2.close_path=True
 p2.fill_color='blue'
 p2.stroke_color='none'

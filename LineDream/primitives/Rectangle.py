@@ -31,10 +31,10 @@ class Rectangle(BaseShape):
 
 		# this order is very important.
 		# It adds the vertex's in a clockwise rotation
-		self.add_vertex((t_l_x, t_l_y))
-		self.add_vertex((t_r_x, t_r_y))
-		self.add_vertex((b_r_x, b_r_y))
-		self.add_vertex((b_l_x, b_l_y))
+		self.add_vertex(t_l_x, t_l_y)
+		self.add_vertex(t_r_x, t_r_y)
+		self.add_vertex(b_r_x, b_r_y)
+		self.add_vertex(b_l_x, b_l_y)
 
 class Square(Rectangle):
 	def __init__(self, c_x, c_y, width, **kwargs):
