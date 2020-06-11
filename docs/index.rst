@@ -6,14 +6,12 @@
 Welcome to LineDream's documentation!
 =====================================
 
-before
 
 .. toctree::
    :maxdepth: 2
 
    primitives/Primitives
 
-after
 
 Indices and tables
 ==================
