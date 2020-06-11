@@ -18,7 +18,7 @@ Example
 -------
 ```python
 import random
-from LineDream import Path, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextPaths
+from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextPaths
 
 Canvas.width=900
 Canvas.height=500

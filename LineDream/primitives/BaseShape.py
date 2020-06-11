@@ -76,8 +76,8 @@ class BaseShape(object):
 	#
 	# 	np.sum(np.sqrt(dist_array))
 
-	def add_vertex(self, coords:tuple):
-		self._verticies.append(coords)
+	def add_vertex(self, x, y, z=0):
+		self._verticies.append((x,y))
 
 
 	def transform(self, x, y):

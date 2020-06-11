@@ -1,5 +1,5 @@
 from .hershey.hershey import Hershey
-from .Path import Path
+from .Line import Line
 import copy
 
 
@@ -34,7 +34,7 @@ class TextPaths():
 			h_x, h_y = self._get_max(copy.deepcopy(ps))
 			letter = []
 			for lp in ps:
-				p = Path(lp, **self.kwargs)
+				p = Line(lp, **self.kwargs)
 				p.transform(midpoint+(self.kerning*idx), 0)
 
 				letter.append(p)
