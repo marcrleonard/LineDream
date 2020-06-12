@@ -18,7 +18,7 @@ Example
 -------
 ```python
 import random
-from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextPaths
+from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextLine
 
 Canvas.width=900
 Canvas.height=500
@@ -65,10 +65,10 @@ for degrees in range(360,180,-10):
 	x2 = circle_center[0] + d_x
 	y2 = circle_center[1] + d_y
 
-	Path([(x1,y1), (x2,y2)], stroke_color='white')
+	Line([(x1,y1), (x2,y2)], stroke_color='white')
 
 # EXPERIMENTAL
-tt = TextPaths('LineDream', kerning=10, stroke_color='white', stroke_width=2)
+tt = TextLine('LineDream', kerning=10, stroke_color='white', stroke_width=2)
 tt.transform(100, 100)
 tt.scale(1.4)
 
@@ -77,6 +77,9 @@ Canvas.save(f'example.svg')
 
 Todos:
 -----
+- Test/document colors/opacity
+- Document Canvas
+- Document primative attrs
 - Integrate TextPath with Hershey (initial implementation complete)
 - Convert all vertexes to Numpy arrays
 - Add .scale() (partially implemented in some classes)
