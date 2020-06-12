@@ -29,13 +29,65 @@ A line, simply put, is multiple sets of coordinates which when rendered create l
     # ... We've added two vertex's to our Line!
 
 Circle
+======
+
+.. code-block:: python
+
+    from LineDream import Circle
+
+    # Create a Circle at (30,20)
+    # It's radius is 10
+    Circle(30,20, 10)
 
 Ellipse
+=======
+
+.. code-block:: python
+
+    from LineDream import Ellipse
+
+    # Create an Ellipse at (30,20)
+    # It's width is 10
+    # It's Height is 15
+    Ellipse(30,20, 10, 15)
 
 Square
+======
+
+.. code-block:: python
+
+    from LineDream import Square
+
+    # Create a square with it's center at (40,50)
+    # It's width and height are 10
+    Rectangle(40, 50, 10)
+
 
 Rectangle
+=========
+
+.. code-block:: python
+
+    from LineDream import Rectangle
+
+    # Create a rectangle with it's center at (40,50)
+    # It's width is 5
+    # It's height is 20
+    Rectangle(40, 50, 5, 20)
 
 TextLines (experimental)
+========================
+
+This is an experimental feature. Currently, it (sloppily) uses Herhsey Text.
+It has been hacked out of the Inkscape extension.
+
+.. code-block:: python
+
+    from LineDream import TextLines
+
+    # Create a path that says 'LineDreamIsAwesome'
+    TextLines('LineDreamIsAwesome', kerning=5)
 
 LineGroup (experimental)
+========================
+Coming soon...
