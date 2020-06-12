@@ -4,7 +4,7 @@ import copy
 
 
 
-class TextPaths():
+class TextLine():
 	'''This is a collection of paths that create text'''
 	def __init__(self, input_text, kerning=5, **kwargs):
 		self.kwargs = kwargs
