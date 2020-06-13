@@ -4,7 +4,7 @@ from ..helpers.CircleMath import CircleMath
 
 class BaseShape(object):
 	def __init__(self, **kwargs):
-		self._verticies = []
+		self._vertices = []
 		self._fill_color='none'
 		self._stroke_color='black'
 		self._stroke_width=1
@@ -63,9 +63,9 @@ class BaseShape(object):
 		self._stroke_width = v
 
 	@property
-	def verticies(self):
+	def vertices(self):
 
-		return self._verticies
+		return self._vertices
 
 	# @property
 	# def length(self):
@@ -77,23 +77,23 @@ class BaseShape(object):
 	# 	np.sum(np.sqrt(dist_array))
 
 	def add_vertex(self, x, y, z=0):
-		self._verticies.append((x,y))
+		self._vertices.append((x, y))
 
 
 	def transform(self, x, y):
 		# THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.
 		# This will work for shapes/objects that user vertex's.. but not for things like Circles
 
-		for idx, (o_x,o_y) in enumerate(self._verticies):
+		for idx, (o_x,o_y) in enumerate(self._vertices):
 			o_x = o_x + x
 			o_y = o_y + y
 
-			self._verticies[idx] = (o_x, o_y)
+			self._vertices[idx] = (o_x, o_y)
 
 	@property
 	def min_x(self):
 		rv = 0
-		for x,y in self.verticies:
+		for x,y in self.vertices:
 			if x < rv:
 				rv = x
 		return rv
@@ -101,7 +101,7 @@ class BaseShape(object):
 	@property
 	def max_x(self):
 		rv = 0
-		for x, y in self.verticies:
+		for x, y in self.vertices:
 			if x > rv:
 				rv = x
 		return rv
@@ -109,7 +109,7 @@ class BaseShape(object):
 	@property
 	def min_y(self):
 		rv = 0
-		for x, y in self.verticies:
+		for x, y in self.vertices:
 			if y < rv:
 				rv = y
 		return rv
@@ -117,25 +117,25 @@ class BaseShape(object):
 	@property
 	def max_y(self):
 		rv = 0
-		for x, y in self.verticies:
+		for x, y in self.vertices:
 			if y > rv:
 				rv = y
 		return rv
 
 	@property
 	def center(self):
-		x = (self.max_x - self.min_x)/2
-		y = (self.max_y - self.min_y)/2
+		x = ((self.max_x - self.min_x)/2) + self.min_x
+		y = ((self.max_y - self.min_y)/2) + self.min_y
 		return (x,y)
 
 	def rotate(self, degrees, origin=None):
 
 		if not origin:
-			x = [p[0] for p in self.verticies]
-			y = [p[1] for p in self.verticies]
+			x = [p[0] for p in self.vertices]
+			y = [p[1] for p in self.vertices]
 			origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
 
-		self._verticies = CircleMath.rotate(self.verticies, origin=origin, degrees=degrees)
+		self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)
 
 
 	def scale(self, degrees, origin=None):

@@ -96,11 +96,11 @@ class TextLine():
 
 		for letter in self.letters:
 			al = copy.deepcopy(letter)
-			max_x, _ = al[0].verticies.pop()
+			max_x, _ = al[0].vertices.pop()
 			min_x = max_x
 			letter_center_x = (max_x+min_x)/2
 			for p in al:
-				for x,y in p.verticies:
+				for x,y in p.vertices:
 					if x>max_x:
 						max_x = x
 					if x<min_x:
@@ -109,7 +109,7 @@ class TextLine():
 			for p in letter:
 
 				_, origin_y = p.center
-				for idx, (x,y) in enumerate(p.verticies):
+				for idx, (x,y) in enumerate(p.vertices):
 
 					dist_x =  x - letter_center_x
 					dist_y =  y - origin_y
@@ -120,6 +120,6 @@ class TextLine():
 					new_x = letter_center_x+d_x
 					new_y = origin_y+d_y
 
-					p.verticies[idx] = (new_x, new_y)
+					p.vertices[idx] = (new_x, new_y)
 
 				# print(f'{vertex} -> {x}, {y}')
