@@ -79,7 +79,6 @@ Todos:
 -----
 - Test/document colors/opacity
 - Document Canvas
-- Document primative attrs
 - Integrate TextPath with Hershey (initial implementation complete)
 - Convert all vertexes to Numpy arrays
 - Add .scale() (partially implemented in some classes)
