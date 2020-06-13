@@ -67,6 +67,24 @@ class BaseShape(object):
 
 		return self._vertices
 
+	@property
+	def first_vertex(self):
+		# or do you just raise an exception?
+		rv = (None, None)
+		if self.vertices:
+			rv = self.vertices[0]
+
+		return rv
+
+	@property
+	def last_vertex(self):
+		# or do you just raise an exception?
+		rv = (None, None)
+		if self.vertices:
+			rv = self.vertices[-1]
+
+		return rv
+
 	# @property
 	# def length(self):
 	# 	x = np.array(xcoordinates)
@@ -92,7 +110,7 @@ class BaseShape(object):
 
 	@property
 	def min_x(self):
-		rv = 0
+		rv = self.first_vertex[0]
 		for x,y in self.vertices:
 			if x < rv:
 				rv = x
@@ -100,7 +118,7 @@ class BaseShape(object):
 
 	@property
 	def max_x(self):
-		rv = 0
+		rv = self.first_vertex[0]
 		for x, y in self.vertices:
 			if x > rv:
 				rv = x
@@ -108,7 +126,7 @@ class BaseShape(object):
 
 	@property
 	def min_y(self):
-		rv = 0
+		rv = self.first_vertex[1]
 		for x, y in self.vertices:
 			if y < rv:
 				rv = y
@@ -116,7 +134,7 @@ class BaseShape(object):
 
 	@property
 	def max_y(self):
-		rv = 0
+		rv = self.first_vertex[1]
 		for x, y in self.vertices:
 			if y > rv:
 				rv = y
