@@ -4,14 +4,12 @@ Primitives
 ----------
 This is the list of primitive object shapes and types that LineDream provides. These are the building blocks of all the art you will create.
 
-All* primitive objects have access to:
+All primitive objects have access to:
 
-* :ref:`primitive-attributes`
-* :ref:`styling-attributes`
-* :ref:`transformation-methods`
+* :ref:`primitive-attributes` - Attrs that describe the shape
+* :ref:`styling-attributes` - Attrs that change the way the shape looks
+* :ref:`transformation-methods` - Methods that move, rotate, and scale the shapes
 
-
-\*There are a few minor exceptions
 
 Line
 ====
