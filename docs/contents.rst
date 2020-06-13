@@ -8,6 +8,7 @@ Table of Contents
 
    Installation
    Example
+   Canvas
    Primitives
    PrimitivesAttributes
    StylingAttributes
