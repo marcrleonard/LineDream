@@ -50,7 +50,9 @@ class BaseCanvas(object):
 				drawSvg.Rectangle(x=0, y=0, width='100%', height='100%', fill=self.background_color)
 			)
 
-		for shape in self.draw_queue:
+		# reversed is in here to show/write the objects in order they were added to the queue.
+		# This should better reflect the serial way objects were created.
+		for shape in reversed(self.draw_queue):
 
 			if shape.is_circle:
 
