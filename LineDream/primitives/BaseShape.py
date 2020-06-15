@@ -1,10 +1,14 @@
 # this should mirror what is available in an svg
+import math
+
+import numpy as np
+
 from ..enviornment.Canvas import Canvas
 from ..helpers.CircleMath import CircleMath
 
 class BaseShape(object):
 	def __init__(self, **kwargs):
-		self._vertices = []
+		self._vertices = np.array([])
 		self._fill_color='none'
 		self._stroke_color='black'
 		self._stroke_width=1
@@ -95,18 +99,31 @@ class BaseShape(object):
 	# 	np.sum(np.sqrt(dist_array))
 
 	def add_vertex(self, x, y, z=0):
-		self._vertices.append((x, y))
+
+		l = self._vertices.tolist()
+		l.append((x,y,z))
+
+		self._vertices = np.array(l)
 
 
-	def transform(self, x, y):
+	def transform(self, x, y, z=0):
 		# THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.
 		# This will work for shapes/objects that user vertex's.. but not for things like Circles
+		#
+		# for idx, (o_x,o_y) in enumerate(self._vertices):
+		# 	o_x = o_x + x
+		# 	o_y = o_y + y
+		#
+		# 	self._vertices[idx] = (o_x, o_y)
 
-		for idx, (o_x,o_y) in enumerate(self._vertices):
-			o_x = o_x + x
-			o_y = o_y + y
+		# tmat = matrix.translation_matrix(x, y, z)
 
-			self._vertices[idx] = (o_x, o_y)
+		translate_matrix = np.identity(3)
+		translate_matrix[0, -1] = x
+		translate_matrix[1, -1] = y
+		translate_matrix[2, -1] = z
+
+		self._vertices = self._vertices.dot(translate_matrix)
 
 	@property
 	def min_x(self):
@@ -146,15 +163,115 @@ class BaseShape(object):
 		y = ((self.max_y - self.min_y)/2) + self.min_y
 		return (x,y)
 
-	def rotate(self, degrees, origin=None):
+	# def rotate(self, degrees, origin=None):
+	#
+	# 	if not origin:
+	# 		x = [p[0] for p in self.vertices]
+	# 		y = [p[1] for p in self.vertices]
+	# 		origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
+	#
+	# 	self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)
 
-		if not origin:
-			x = [p[0] for p in self.vertices]
-			y = [p[1] for p in self.vertices]
-			origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
 
-		self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)
+	def rotate(self, theta, axis=np.array([0, 0, 1])):
+		"""Rotate the display by the given angle along the given axis.
+
+		:param theta: The angle by which to rotate (in radians)
+		:type theta: float
+
+		:param axis: The axis along which to rotate (defaults to the z-axis)
+		:type axis: np.ndarray or list
+
+		:returns: The rotation matrix used to apply the transformation.
+		:rtype: np.ndarray
+
+	   """
+
+		#CONVERT DEGREES TO RADIANS
+		theta = theta * math.pi / 180
+
+		axis = np.array(axis[:])
+
+		#
+
+		# tmat = matrix.rotation_matrix(axis, theta)
+
+		#
+
+		# NOTE: THIS ALL MIGHT NEED TO BE RADIANS
+		# This might be the wrong interpretatino...
+		x = axis[0]
+		y = axis[1]
+		z = axis[2]
+
+		# x, y, z = _normalize(axis)
+
+		s = np.sin(theta)
+		c = np.cos(theta)
+		c1 = 1 - c
+
+		rotation = np.identity(3)
+
+		rotation[0, 0] = x * x * c1 + c
+		rotation[0, 1] = x * y * c1 - z * s
+		rotation[0, 2] = x * z * c1 + y * s
+		rotation[1, 0] = y * x * c1 + z * s
+		rotation[1, 1] = y * y * c1 + c
+		rotation[1, 2] = y * z * c1 - x * s
+		rotation[2, 0] = x * z * c1 - y * s
+		rotation[2, 1] = y * z * c1 + x * s
+		rotation[2, 2] = z * z * c1 + c
+
+		self._vertices = self._vertices.dot(rotation)
 
 
-	def scale(self, degrees, origin=None):
-		raise Exception('Inherited class should implement')
+	def rotate_x(self, theta):
+		"""Rotate the view along the x axis.
+
+		:param theta: angle by which to rotate (in radians)
+		:type theta: float
+
+		:returns: The rotation matrix used to apply the transformation.
+		:rtype: np.ndarray
+
+		"""
+		self.rotate(theta, axis=np.array([1, 0, 0]))
+
+	def rotate_y(self, theta):
+		"""Rotate the view along the y axis.
+
+		:param theta: angle by which to rotate (in radians)
+		:type theta: float
+
+		:returns: The rotation matrix used to apply the transformation.
+		:rtype: np.ndarray
+
+	   """
+		self.rotate(theta, axis=np.array([0, 1, 0]))
+
+	def rotate_z(self, theta):
+		"""Rotate the view along the z axis.
+
+		:param theta: angle by which to rotate (in radians)
+		:type theta: float
+
+		:returns: The rotation matrix used to apply the transformation.
+		:rtype: np.ndarray
+
+	   """
+		self.rotate(theta, axis=np.array([0, 0, 1]))
+
+
+	def scale(self, amt, amt_y=None, origin=None):
+
+		if amt_y==None:
+			amt_y = amt
+
+		scale_matrix = np.identity(4)
+		scale_matrix[0, 0] = amt
+		scale_matrix[1, 1] = amt_y
+		scale_matrix[2, 2] = 1 # default for z
+
+		self._vertices = self._vertices.dot(scale_matrix)
+
+		# raise Exception('Inherited class should implement')

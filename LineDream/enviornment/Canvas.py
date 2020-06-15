@@ -68,10 +68,12 @@ class BaseCanvas(object):
 
 				verts = shape.vertices
 
+				verts = verts.tolist()
 
-				# verts = vertices.tolist()
-				if verts == [[0.0, 0.0, 0.0]]:
-					# print(f'verts contains one item of {[[0.0, 0.0, 0.0]]} ... continuing.')
+
+				# # verts = vertices.tolist()
+				if len(verts)== 0 :
+					print(f'verts contains one item of {[[0.0, 0.0, 0.0]]} ... continuing.')
 					continue
 
 				start_l = verts.pop(0)

@@ -6,8 +6,9 @@ class Line(BaseShape):
 		super().__init__(**kwargs)
 
 		if verticies:
+
 			for (x,y) in verticies:
-				self.add_vertex(x,y)
+				self.add_vertex(x,y,0)
 
 
 
