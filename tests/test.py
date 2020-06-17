@@ -28,7 +28,7 @@ r.fill_color='green'
 
 r = Rectangle(40,40,20,15)
 r.fill_color='blue'
-r.rotate(20, (40,40))
+r.rotate(20)
 
 r2 = Rectangle(130,130,20,15)
 r2.fill_color='green'
