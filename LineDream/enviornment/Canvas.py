@@ -52,7 +52,7 @@ class BaseCanvas(object):
 
 		# reversed is in here to show/write the objects in order they were added to the queue.
 		# This should better reflect the serial way objects were created.
-		for shape in reversed(self.draw_queue):
+		for shape in self.draw_queue:
 
 			if shape.is_circle:
 
