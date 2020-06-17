@@ -28,7 +28,7 @@ r.fill_color='green'
 
 r = Rectangle(40,40,20,15)
 r.fill_color='blue'
-r.rotate(20)
+r.rotate(20, (40,40))
 
 r2 = Rectangle(130,130,20,15)
 r2.fill_color='green'
@@ -57,4 +57,19 @@ Canvas.save(output_file_name)
 
 with open(output_file_name, 'r') as t:
 	with open('test_master_output.svg', 'r') as m:
-		assert t.read() == m.read()
+
+		t_l = t.readlines()
+		t_m = m.readlines()
+
+		zipped_lines = zip(t_l, t_m)
+
+		for idx, (test_line, master_line) in enumerate(zipped_lines):
+
+			test_line = test_line.lstrip().rstrip()
+			master_line = master_line.lstrip().rstrip()
+
+			if not (test_line == master_line):
+				print(f"{idx} Line Failed:")
+				print(f"   Master Line: {master_line}")
+				print(f"   Test Line:   {test_line}")
+			# assert t.read() == m.read()
