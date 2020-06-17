@@ -75,8 +75,9 @@ class BaseShape(object):
 	def first_vertex(self):
 		# or do you just raise an exception?
 		rv = (None, None)
-		if self.vertices:
-			rv = self.vertices[0]
+		if  self.vertices.size > 0:
+			_rv = self.vertices[0]
+			rv = (_rv[0], _rv[1])
 
 		return rv
 
@@ -84,8 +85,9 @@ class BaseShape(object):
 	def last_vertex(self):
 		# or do you just raise an exception?
 		rv = (None, None)
-		if self.vertices:
-			rv = self.vertices[-1]
+		if  self.vertices.size > 0:
+			_rv = self.vertices[-1]
+			rv = (_rv[0], _rv[1])
 
 		return rv
 
@@ -101,7 +103,7 @@ class BaseShape(object):
 	def add_vertex(self, x, y, z=0):
 
 		l = self._vertices.tolist()
-		l.append((x,y,z))
+		l.append([x,y,z,1])
 
 		self._vertices = np.array(l)
 
@@ -118,17 +120,22 @@ class BaseShape(object):
 
 		# tmat = matrix.translation_matrix(x, y, z)
 
-		translate_matrix = np.identity(3)
+		translate_matrix = np.identity(4)
 		translate_matrix[0, -1] = x
 		translate_matrix[1, -1] = y
 		translate_matrix[2, -1] = z
 
-		self._vertices = self._vertices.dot(translate_matrix)
+
+		self._vertices = np.dot(self._vertices, translate_matrix.T)[:, :4]
+
 
 	@property
 	def min_x(self):
 		rv = self.first_vertex[0]
-		for x,y in self.vertices:
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
 			if x < rv:
 				rv = x
 		return rv
@@ -136,7 +143,10 @@ class BaseShape(object):
 	@property
 	def max_x(self):
 		rv = self.first_vertex[0]
-		for x, y in self.vertices:
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
 			if x > rv:
 				rv = x
 		return rv
@@ -144,7 +154,10 @@ class BaseShape(object):
 	@property
 	def min_y(self):
 		rv = self.first_vertex[1]
-		for x, y in self.vertices:
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
 			if y < rv:
 				rv = y
 		return rv
@@ -152,7 +165,10 @@ class BaseShape(object):
 	@property
 	def max_y(self):
 		rv = self.first_vertex[1]
-		for x, y in self.vertices:
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
 			if y > rv:
 				rv = y
 		return rv
@@ -173,7 +189,7 @@ class BaseShape(object):
 	# 	self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)
 
 
-	def rotate(self, theta, axis=np.array([0, 0, 1])):
+	def rotate(self, theta, origin=None, axis=np.array([0, 0, 1])):
 		"""Rotate the display by the given angle along the given axis.
 
 		:param theta: The angle by which to rotate (in radians)
@@ -210,7 +226,7 @@ class BaseShape(object):
 		c = np.cos(theta)
 		c1 = 1 - c
 
-		rotation = np.identity(3)
+		rotation = np.identity(4)
 
 		rotation[0, 0] = x * x * c1 + c
 		rotation[0, 1] = x * y * c1 - z * s
@@ -222,7 +238,23 @@ class BaseShape(object):
 		rotation[2, 1] = y * z * c1 + x * s
 		rotation[2, 2] = z * z * c1 + c
 
-		self._vertices = self._vertices.dot(rotation)
+		if origin == None:
+			x_c,y_c = self.center
+		else:
+			x_c = origin[0]
+			y_c = origin[1]
+
+		self.transform(-x_c, -y_c)
+
+
+		rotation[0, -1] = x_c
+		rotation[1, -1] = y_c
+		rotation[2, -1] = 1
+
+		self._vertices = np.dot(self._vertices, rotation.T)[:, :4]
+
+		# self.transform(x_c, y_c)
+		# self._vertices = self._vertices.dot(rotation)
 
 
 	def rotate_x(self, theta):
@@ -271,7 +303,10 @@ class BaseShape(object):
 		scale_matrix[0, 0] = amt
 		scale_matrix[1, 1] = amt_y
 		scale_matrix[2, 2] = 1 # default for z
+		print(self._vertices)
 
 		self._vertices = self._vertices.dot(scale_matrix)
 
+		print(self._vertices)
+		print(self._vertices)
 		# raise Exception('Inherited class should implement')
