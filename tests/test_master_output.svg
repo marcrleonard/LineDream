@@ -13,6 +13,8 @@
 <path d="M140.0,127.5 L160.0,127.5 L160.0,142.5 L140.0,142.5 Z" fill="green" stroke="black" stroke-width="1" />
 <path d="M17.5,167.5 L22.5,167.5 L22.5,172.5 L17.5,172.5 Z" fill="red" stroke="yellow" stroke-width="1" />
 <path d="M37.5,172.5 L42.5,172.5 L42.5,177.5 L37.5,177.5 Z" fill="red" stroke="yellow" stroke-width="1" />
+<ellipse cx="40.0" cy="175.0" rx="0.5" ry="0.5" fill="none" stroke="black" stroke-width="1" />
 <ellipse cx="120" cy="30" rx="5" ry="8" fill="orange" stroke="black" stroke-width="1" />
+<ellipse cx="5" cy="100" rx="20" ry="20" fill="red" stroke="white" stroke-width="10" />
 <ellipse cx="140" cy="35" rx="5" ry="8" fill="orange" stroke="black" stroke-width="1" />
 </svg>
