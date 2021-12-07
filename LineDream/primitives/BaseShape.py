@@ -1,5 +1,6 @@
 # this should mirror what is available in an svg
 import math
+import sys
 
 import numpy as np
 
@@ -81,15 +82,16 @@ class BaseShape(object):
 
 		return rv
 
-	@property
-	def last_vertex(self):
-		# or do you just raise an exception?
-		rv = (None, None)
-		if  self.vertices.size > 0:
-			_rv = self.vertices[-1]
-			rv = (_rv[0], _rv[1])
-
-		return rv
+	# Not sure why this was here, but it was not used so I'm commenting out.
+	# @property
+	# def last_vertex(self):
+	# 	# or do you just raise an exception?
+	# 	rv = (None, None)
+	# 	if  self.vertices.size > 0:
+	# 		_rv = self.vertices[-1]
+	# 		rv = (_rv[0], _rv[1])
+	#
+	# 	return rv
 
 	# @property
 	# def length(self):
@@ -296,6 +298,8 @@ class BaseShape(object):
 
 	def scale(self, amt, amt_y=None, origin=None):
 
+		sys.stderr.write("Scale is not fully implemented yet.\n")
+
 		if amt_y==None:
 			amt_y = amt
 
@@ -303,10 +307,7 @@ class BaseShape(object):
 		scale_matrix[0, 0] = amt
 		scale_matrix[1, 1] = amt_y
 		scale_matrix[2, 2] = 1 # default for z
-		print(self._vertices)
 
 		self._vertices = self._vertices.dot(scale_matrix)
 
-		print(self._vertices)
-		print(self._vertices)
 		# raise Exception('Inherited class should implement')
