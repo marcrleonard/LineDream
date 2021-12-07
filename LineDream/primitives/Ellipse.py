@@ -11,10 +11,10 @@ class Ellipse(BaseShape):
 
 		self.is_circle=True
 
-	def add_vertex(self, coords:tuple):
+	def add_vertex(self, *coords):
 		raise Exception("Ellipses do not have vertexes")
 
-	def transform(self, x=0, y=0):
+	def transform(self, x=0, y=0, z=0):
 		self.x = self.x + x
 		self.y = self.y + y
 
