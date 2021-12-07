@@ -29,10 +29,15 @@ class BaseCanvas(object):
 
 
 
-	def draw(self):
-
-		for d in self.draw_queue:
-			print(d)
+	# def draw(self):
+	# 	'''
+	# 	Force a draw of teh canvas...
+	# 	This is not implemented
+	# 	:return:
+	# 	'''
+	#
+	# 	for d in self.draw_queue:
+	# 		print(d)
 
 	def save(self, filename, open_viewer=False):
 		svg_canvas = drawSvg.Drawing(self.width, self.height, origin=(0, 0), displayInline=False)
