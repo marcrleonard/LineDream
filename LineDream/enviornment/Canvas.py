@@ -29,10 +29,15 @@ class BaseCanvas(object):
 
 
 
-	def draw(self):
-
-		for d in self.draw_queue:
-			print(d)
+	# def draw(self):
+	# 	'''
+	# 	Force a draw of teh canvas...
+	# 	This is not implemented
+	# 	:return:
+	# 	'''
+	#
+	# 	for d in self.draw_queue:
+	# 		print(d)
 
 	def save(self, filename, open_viewer=False):
 		svg_canvas = drawSvg.Drawing(self.width, self.height, origin=(0, 0), displayInline=False)
@@ -52,7 +57,7 @@ class BaseCanvas(object):
 
 		# reversed is in here to show/write the objects in order they were added to the queue.
 		# This should better reflect the serial way objects were created.
-		for shape in reversed(self.draw_queue):
+		for shape in self.draw_queue:
 
 			if shape.is_circle:
 
@@ -68,10 +73,12 @@ class BaseCanvas(object):
 
 				verts = shape.vertices
 
+				verts = verts.tolist()
 
-				# verts = vertices.tolist()
-				if verts == [[0.0, 0.0, 0.0]]:
-					# print(f'verts contains one item of {[[0.0, 0.0, 0.0]]} ... continuing.')
+
+				# # verts = vertices.tolist()
+				if len(verts)== 0 :
+					print(f'verts contains one item of {[[0.0, 0.0, 0.0]]} ... continuing.')
 					continue
 
 				start_l = verts.pop(0)

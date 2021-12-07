@@ -7,12 +7,14 @@
 <ellipse cx="100" cy="100" rx="0.5" ry="0.5" fill="none" stroke="black" stroke-width="1" />
 <ellipse cx="120" cy="105" rx="0.5" ry="0.5" fill="none" stroke="black" stroke-width="1" />
 <path d="M3,3 L30,20 L4,18 Z" fill="blue" stroke="none" stroke-width="1" />
-<path d="M23,8 L50,25 L24,23 Z" fill="blue" stroke="none" stroke-width="1" />
+<path d="M23.0,8.0 L50.0,25.0 L24.0,23.0 Z" fill="blue" stroke="none" stroke-width="1" />
 <path d="M120.0,122.5 L140.0,122.5 L140.0,137.5 L120.0,137.5 Z" fill="green" stroke="black" stroke-width="1" />
 <path d="M33.16822486708343,29.532103910849 L51.9620772828016,36.372506777362375 L46.83177513291657,50.467896089151 L28.0379227171984,43.627493222637625 Z" fill="blue" stroke="black" stroke-width="1" />
 <path d="M140.0,127.5 L160.0,127.5 L160.0,142.5 L140.0,142.5 Z" fill="green" stroke="black" stroke-width="1" />
 <path d="M17.5,167.5 L22.5,167.5 L22.5,172.5 L17.5,172.5 Z" fill="red" stroke="yellow" stroke-width="1" />
 <path d="M37.5,172.5 L42.5,172.5 L42.5,177.5 L37.5,177.5 Z" fill="red" stroke="yellow" stroke-width="1" />
+<ellipse cx="40.0" cy="175.0" rx="0.5" ry="0.5" fill="none" stroke="black" stroke-width="1" />
 <ellipse cx="120" cy="30" rx="5" ry="8" fill="orange" stroke="black" stroke-width="1" />
+<ellipse cx="5" cy="100" rx="20" ry="20" fill="red" stroke="white" stroke-width="10" />
 <ellipse cx="140" cy="35" rx="5" ry="8" fill="orange" stroke="black" stroke-width="1" />
 </svg>
