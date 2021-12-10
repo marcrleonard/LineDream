@@ -5,6 +5,21 @@ from .BaseShape import BaseShape
 
 class Rectangle(BaseShape):
 	def __init__(self, c_x, c_y, width, height, **kwargs):
+		'''
+		Creates a Rectangle Primative
+
+		Parameters
+		----------
+		c_x : int
+			center of rectangle x coord
+
+		c_y: int
+			center of rectangle y coord
+
+		:param width:
+		:param height:
+		:param kwargs:
+		'''
 		super().__init__(**kwargs)
 		self.c_x = c_x
 		self.c_y = c_y
@@ -37,5 +52,15 @@ class Rectangle(BaseShape):
 		self.add_vertex(b_l_x, b_l_y)
 
 class Square(Rectangle):
-	def __init__(self, c_x, c_y, width, **kwargs):
+	def __init__(self, c_x:int, c_y:int, width, **kwargs):
+		"""
+		Create a square primative
+
+		:param c_x: center of square x coordinate
+		:param c_y: center of square y coordinate
+		:param width: height/width of the square.
+		:param kwargs: style dict
+		"""
+
+
 		super().__init__(c_x, c_y, width, width,**kwargs)

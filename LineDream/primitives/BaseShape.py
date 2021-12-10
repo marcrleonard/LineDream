@@ -4,27 +4,33 @@ import sys
 
 import numpy as np
 
-from ..enviornment.Canvas import Canvas
+from ..enviornment.Canvas import _Canvas
 from ..helpers.CircleMath import CircleMath
+import sys
 
 class BaseShape(object):
+	'''All provided primatives inherit from this class. If a user wants to make thier own primative, its reccomended to
+	inherit from this class so the new primative is added to the draw queue.'''
 	def __init__(self, **kwargs):
 		self._vertices = np.array([])
 		self._fill_color='none'
 		self._stroke_color='black'
 		self._stroke_width=1
 		self._close_path = False
+		self._fill_opacity = 1.0
 
 		self.is_circle=False
+		self.is_arc=False
 		self.is_multipath = False
 
 		for k,v in kwargs.items():
 			if hasattr(self, k):
 				setattr(self, k, v)
 			else:
-				print(f'attr "{k}" does not exist.')
+				sys.stderr.write(f'attr "{k}" does not exist.')
+				# print(f'attr "{k}" does not exist.')
 
-		Canvas.draw_queue.append(self)
+		_Canvas.draw_queue.append(self)
 
 
 	def __str__(self):
@@ -35,6 +41,7 @@ class BaseShape(object):
 
 	@property
 	def fill_color(self):
+		'''The fill color of the shape'''
 		return self._fill_color
 
 	@fill_color.setter
@@ -43,16 +50,26 @@ class BaseShape(object):
 
 
 	@property
+	def fill_opacity(self):
+		'''The fill opacity of the shape'''
+		return self._fill_opacity
+
+	@fill_opacity.setter
+	def fill_opacity(self, v):
+		self._fill_opacity = v
+
+	@property
 	def close_path(self):
+		'''Upon rendering the shape, the last vertex will connect to the first vertex'''
 		return self._close_path
 
 	@close_path.setter
 	def close_path(self, v:bool):
 		self._close_path = v
 
-
 	@property
 	def stroke_color(self):
+		'''The stroke color of the shape'''
 		return self._stroke_color
 
 	@stroke_color.setter
@@ -61,6 +78,7 @@ class BaseShape(object):
 
 	@property
 	def stroke_width(self):
+		'''The stroke width of the shape'''
 		return self._stroke_width
 
 	@stroke_width.setter
@@ -69,11 +87,12 @@ class BaseShape(object):
 
 	@property
 	def vertices(self):
-
+		'''The list of vertices'''
 		return self._vertices
 
 	@property
 	def first_vertex(self):
+		'''The first vertex of the shape'''
 		# or do you just raise an exception?
 		rv = (None, None)
 		if  self.vertices.size > 0:
@@ -102,7 +121,72 @@ class BaseShape(object):
 	#
 	# 	np.sum(np.sqrt(dist_array))
 
+	@property
+	def min_x(self):
+		'''The smallest x value of all the vertices'''
+		rv = self.first_vertex[0]
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
+			if x < rv:
+				rv = x
+		return rv
+
+	@property
+	def max_x(self):
+		'''The largest x value of all the vertices'''
+		rv = self.first_vertex[0]
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
+			if x > rv:
+				rv = x
+		return rv
+
+	@property
+	def min_y(self):
+		'''The smallest y value of all the vertices'''
+		rv = self.first_vertex[1]
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
+			if y < rv:
+				rv = y
+		return rv
+
+	@property
+	def max_y(self):
+		'''The largest y value of all the vertices'''
+		rv = self.first_vertex[1]
+
+		_v = self.vertices.tolist()
+
+		for x,y, z, _ in _v:
+			if y > rv:
+				rv = y
+		return rv
+
+	@property
+	def center(self):
+		'''The center of the shape based on the min/max x/y'''
+		x = ((self.max_x - self.min_x)/2) + self.min_x
+		y = ((self.max_y - self.min_y)/2) + self.min_y
+		return (x,y)
+
+	# def rotate(self, degrees, origin=None):
+	#
+	# 	if not origin:
+	# 		x = [p[0] for p in self.vertices]
+	# 		y = [p[1] for p in self.vertices]
+	# 		origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
+	#
+	# 	self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)
+
 	def add_vertex(self, x, y, z=0):
+		'''Append a set of vertexes to the primitive shape'''
 
 		l = self._vertices.tolist()
 		l.append([x,y,z,1])
@@ -111,6 +195,8 @@ class BaseShape(object):
 
 
 	def transform(self, x, y, z=0):
+		'''Transform the vertices based on x/y coords'''
+
 		# THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.
 		# This will work for shapes/objects that user vertex's.. but not for things like Circles
 		#
@@ -129,66 +215,6 @@ class BaseShape(object):
 
 
 		self._vertices = np.dot(self._vertices, translate_matrix.T)[:, :4]
-
-
-	@property
-	def min_x(self):
-		rv = self.first_vertex[0]
-
-		_v = self.vertices.tolist()
-
-		for x,y, z, _ in _v:
-			if x < rv:
-				rv = x
-		return rv
-
-	@property
-	def max_x(self):
-		rv = self.first_vertex[0]
-
-		_v = self.vertices.tolist()
-
-		for x,y, z, _ in _v:
-			if x > rv:
-				rv = x
-		return rv
-
-	@property
-	def min_y(self):
-		rv = self.first_vertex[1]
-
-		_v = self.vertices.tolist()
-
-		for x,y, z, _ in _v:
-			if y < rv:
-				rv = y
-		return rv
-
-	@property
-	def max_y(self):
-		rv = self.first_vertex[1]
-
-		_v = self.vertices.tolist()
-
-		for x,y, z, _ in _v:
-			if y > rv:
-				rv = y
-		return rv
-
-	@property
-	def center(self):
-		x = ((self.max_x - self.min_x)/2) + self.min_x
-		y = ((self.max_y - self.min_y)/2) + self.min_y
-		return (x,y)
-
-	# def rotate(self, degrees, origin=None):
-	#
-	# 	if not origin:
-	# 		x = [p[0] for p in self.vertices]
-	# 		y = [p[1] for p in self.vertices]
-	# 		origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
-	#
-	# 	self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)
 
 
 	def rotate(self, theta, origin=None, axis=np.array([0, 0, 1])):

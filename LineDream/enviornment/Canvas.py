@@ -11,6 +11,7 @@ SHAPES TO ADD:
 '''
 
 class BaseCanvas(object):
+	'''The canvas object controls all the render controls.'''
 	def __init__(self, x=1200, y=800, units=None):
 		self.width = x
 		self.height = y
@@ -59,7 +60,19 @@ class BaseCanvas(object):
 		# This should better reflect the serial way objects were created.
 		for shape in self.draw_queue:
 
-			if shape.is_circle:
+			#todo: add arc...
+			# drawSvg.Arc()
+
+			if shape.is_arc:
+				svg_obj = drawSvg.Arc(cx=shape.x, cy=shape.y * -1, r=shape.radius, cw=True,
+									  startDeg=shape.start_angle, endDeg=shape.end_angle,
+										  fill=shape.fill_color, stroke=shape.stroke_color,
+										  stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity,
+									  close=shape.close_path
+				)
+
+
+			elif shape.is_circle:
 
 				# the lib wants to always make Y coods negative. This is likely because of the assumption
 				# the moving physically down on the Y axis puts an object in the correct region.
@@ -67,7 +80,8 @@ class BaseCanvas(object):
 
 				svg_obj = drawSvg.Ellipse(shape.x, shape.y*-1, shape.radius_x, shape.radius_y,
 							fill=shape.fill_color, stroke=shape.stroke_color,
-							stroke_width=shape.stroke_width)
+							stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity)
+
 
 			elif len(shape.vertices) > 0:
 
@@ -101,7 +115,7 @@ class BaseCanvas(object):
 					other_verts.append(y)
 
 				svg_obj = drawSvg.Lines(start_x, start_y, *other_verts, fill=shape.fill_color, stroke=shape.stroke_color,
-										stroke_width=shape.stroke_width, close=shape.close_path)
+										stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity, close=shape.close_path)
 
 			else:
 				print("Shape found with no verticies... Skipping...")
@@ -116,6 +130,7 @@ class BaseCanvas(object):
 			webbrowser.open('http://example.com')  # Go to example.com
 
 	def flush(self):
+		'''Clear the render queue'''
 		self.draw_queue=[]
 
-Canvas = BaseCanvas()
+_Canvas = BaseCanvas()

@@ -2,8 +2,9 @@ import math
 import numpy as np
 
 class CircleMath:
-	def __init__(self):
-		pass
+	'''
+	A class with helper methods for circles
+	'''
 
 	@staticmethod
 	def distance_to_coords(degrees, distance):
@@ -23,3 +24,7 @@ class CircleMath:
 		rv = np.squeeze((R @ (p.T - o.T) + o.T).T)
 		#todo: remove this once native numpy arrays are supported
 		return rv.tolist()
+
+	@staticmethod
+	def degrees_to_radians(degrees):
+		return (math.radians(degrees / math.pi))
