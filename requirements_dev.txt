@@ -3,3 +3,4 @@ numpy ~= 1.21.4
 coverage ~= 6.2
 pytest ~= 6.2.5
 lxml ~= 4.6.4
+pdoc == 8.0.1
