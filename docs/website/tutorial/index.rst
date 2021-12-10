@@ -17,6 +17,21 @@ LineDream library was originally created to make art for a pen plotter, however,
 .. include:: Installation.rst
 
 
+.. include:: source/LineDream.rst
+
+
+----
+
+:doc:`my document <source/modules>`
+:doc:`my document <../my_doc>`
+
+another
+-------
+
+.. automodule:: LineDream
+    :members:
+
+
 Example
 -------
 
