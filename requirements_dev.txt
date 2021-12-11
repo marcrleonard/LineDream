@@ -4,3 +4,4 @@ coverage ~= 6.2
 pytest ~= 6.2.5
 lxml ~= 4.6.4
 pdoc == 8.0.1
+Jinja2 == 3.0.3

@@ -1,1 +1,72 @@
 {% extends "base_template.html" %}
+
+{% block content %}
+ <div class="row mt-6">
+            <div class="col-md-8 mx-auto text-center">
+                <h1>The easy to use <span class="text-warning">creative coding</span> library for Python</h1>
+                <p class="lead mb-5">LineDream makes creating generative art simple and intuitive. <br>Output SVGs for the web or for pen plotters.</p>
+                <a href="https://github.com/marcrleonard/LineDream" class="btn btn-success svg-icon">
+                    <em class="" data-feather="github"></em>
+                    View on GitHub
+                </a>
+                <a href="https://github.com/marcrleonard/LineDream" class="btn btn-success svg-icon">
+                    <em class="" data-feather="github"></em>
+                    Tutorials
+                </a>
+                <a href="documentation" class="btn btn-success svg-icon">
+                    <em class="" data-feather="github"></em>
+                    API Documentation
+                </a>
+            </div>
+        </div>
+ <div class="row mt-5">
+            <div class="col-md-6 mx-auto">
+                <div class="code-window" style="background: #263238">
+                    <div class="dots">
+                        <div class="red"></div>
+                        <div class="orange"></div>
+                        <div class="green"></div>
+                    </div>
+                    <div class="highlight mt-4" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #89DDFF; font-style: italic">from</span> <span style="color: #FFCB6B">LineDream</span> <span style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">Rectangle</span>
+
+<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">width</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">300</span>
+<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">height</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">300</span>
+<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">background_color</span><span style="color: #89DDFF">=</span><span style="color: #C3E88D">'white'</span>
+
+<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #82AAFF">range</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">18</span><span style="color: #89DDFF">):</span>
+	<span style="color: #EEFFFF">Rectangle</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">150</span><span style="color: #89DDFF">,</span><span style="color: #F78C6C">150</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">200</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">200</span><span style="color: #89DDFF">).</span><span style="color: #EEFFFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">10</span><span style="color: #89DDFF">*</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">)</span>
+
+<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">save</span><span style="color: #89DDFF">(</span><span style="color: #C3E88D">"rectangles.svg"</span><span style="color: #89DDFF">)</span>
+</pre></div>
+                </div>
+            </div>
+            <div class="col-md-6 mx-auto code-window" style="height: 300px">
+                <img style="overflow: hidden; height: 100%" src="static/rectangles.svg" class="rounded mx-auto d-block ">
+           </div>
+        </div>
+{% endblock %}
+
+{% block secondary_content %}
+<!--Features Section-->
+<section class="py-6">
+    <div class="container">
+        <div class="row">
+            <div class="mx-auto text-center">
+            <h2 class="text-center text-md-left">Install <span class="text-success">LineDream</span></h2>
+                <div class="mx-auto">
+                    <div class="code-window">
+                        <div class="dots">
+                            <div class="red"></div>
+                            <div class="orange"></div>
+                            <div class="green"></div>
+                        </div>
+                        <pre class="language-javascript line-numbers"><code class="language-javascript">pip install LineDream</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
