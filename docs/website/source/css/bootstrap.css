@@ -26,7 +26,8 @@
   --secondary: #0000ff;
   --success: #5cc72a;
   --info: #00e5ff;
-  --warning: #f6c343;
+  --warning: #FFCB6B;
+  /*--warning: #f6c343;*/
   --danger: #ff1744;
   --light: #f8f9fa;
   --dark: black;
@@ -1628,8 +1629,8 @@ fieldset:disabled a.btn {
 
 .btn-warning {
   color: #212529;
-  background-color: #f6c343;
-  border-color: #f6c343; }
+  background-color: #FFCB6B;
+  border-color: #FFCB6B; }
   .btn-warning:hover {
     color: #212529;
     background-color: #f4b71e;
@@ -1814,7 +1815,8 @@ fieldset:disabled a.btn {
   color: #f6c343;
   background-color: transparent;
   background-image: none;
-  border-color: #f6c343; }
+  border-color: #f6c343;
+}
   .btn-outline-warning:hover {
     color: #212529;
     background-color: #f6c343;
@@ -1883,7 +1885,11 @@ fieldset:disabled a.btn {
   color: black;
   background-color: transparent;
   background-image: none;
-  border-color: black; }
+  border-color: black;
+
+  box-shadow: 2px 2px 0px #f6c343;
+  /*filter: drop-shadow(2px 2px 0px #f6c343);*/
+}
   .btn-outline-dark:hover {
     color: #ffffff;
     background-color: black;
@@ -4904,7 +4910,12 @@ a.text-info:hover, a.text-info:focus {
   color: #00b7cc !important; }
 
 .text-warning {
-  color: #f6c343 !important; }
+  color: #000000 !important;
+  filter: drop-shadow(2px 2px 0px #f6c343);
+  /*color: #f6c343 !important;*/
+  /*filter: drop-shadow(2px 2px 0px #000000);*/
+
+}
 
 a.text-warning:hover, a.text-warning:focus {
   color: #f4b312 !important; }
@@ -5018,7 +5029,10 @@ a:not(.heading-brand) {
 
 .heading-brand {
   font-weight: 800;
-  font-size: 1.75rem; }
+  font-size: 1.85rem;
+    /*filter: drop-shadow(2px 2px 0px #f6c343);*/
+
+}
 
 .svg-icon {
   display: -ms-inline-flexbox;
@@ -5030,9 +5044,10 @@ a:not(.heading-brand) {
 
 /* Buttons */
 .btn {
-  box-shadow: 0 4px 6px rgba(255, 255, 0, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08); }
-  .btn:active, .btn:focus, .btn:focus {
-    box-shadow: none !important; }
+  /*box-shadow: 0 4px 6px rgba(255, 255, 0, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08); }*/
+  /*.btn:active, .btn:focus, .btn:focus {*/
+  /*  box-shadow: none !important; */
+}
 
 /*Forms*/
 .form-control {
@@ -5086,7 +5101,8 @@ footer a {
 
 /*Gradients*/
 .bg-gradient {
-  background: linear-gradient(#fffbf1, #fcf5f1); }
+  background: linear-gradient(#f2fafd, #e5f1f5); }
+  /*background: linear-gradient(#fffbf1, #fcf5f1); }*/
 
 /*Code Window*/
 .code-window {

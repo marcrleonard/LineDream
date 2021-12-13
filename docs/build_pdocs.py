@@ -4,6 +4,11 @@ import pdoc
 import re
 import os
 import shutil
+from pygments import highlight as pyg_highlight
+from pygments.lexers import python as python_lexer
+from pygments.formatters import html
+
+import os
 
 # theme from https://www.designbombs.com/freebie/prism/
 
@@ -20,7 +25,28 @@ def get_tags(s, tag, replace_tag=None):
 
 	return s
 
-p  = pdoc.pdoc('LineDream',  )
+t_p = pathlib.Path('website/source/templates')
+
+# pdoc.render_helpers.lexer = python.Python3Lexer()
+# pdoc.render_helpers.formatter = html.HtmlFormatter(cssstyles='material', noclasses=True)
+
+from markupsafe import Markup
+
+def _highlight(src):
+	lexer = python_lexer.Python3Lexer()
+	formatter = html.HtmlFormatter(style='material', noclasses=True)
+	output = pyg_highlight(src, lexer, formatter)
+	return Markup(output)
+
+pdoc.render.env.filters['highlight'] = _highlight
+pdoc.render.configure(template_directory=t_p)
+p  = pdoc.pdoc('LineDream')
+
+root = None
+if not root:
+	root = os.getenv('linedream_site', None) or 'http://localhost:63342/LineDream/docs/website/build/'
+
+
 
 nav = get_tags(p, 'nav', 'div')
 nav = nav.replace('<h2>API Documentation</h2>', '<h3>Table of Contents</h3>')
@@ -30,16 +56,18 @@ for template_name, html_str in [
 	('doc_nav.html', nav),
 	('doc_main.html', docs),
 ]:
-	with open(f'website/templates/{template_name}', 'w') as f:
+	with open(f'website/source/templates/{template_name}', 'w') as f:
 		f.write(html_str)
 
 
 from jinja2 import Environment, PackageLoader, FileSystemLoader, select_autoescape
 env = Environment(
-    loader = PackageLoader('website', 'templates'),
+    loader = PackageLoader('website', 'source/templates'),
     # loader = FileSystemLoader(t_path),
     autoescape=select_autoescape()
 )
+
+
 
 os.makedirs('website/build', exist_ok=True)
 
@@ -58,13 +86,17 @@ for path, template in pages:
 		os.makedirs(f'website/build/{path}', exist_ok=True)
 
 	with open(f'website/build/{f_name}', 'w') as f:
-		f.write(template_obj.render())
+		f.write(template_obj.render({
+			'url_root':root
+		}))
 
 # move css into the folder
 
 folders_to_copy = [
-	('website/css/', 'website/build/css/'),
-	('website/static/', 'website/build/static/')
+	('website/source/css/', 'website/build/css/'),
+	('website/source/static/', 'website/build/static/'),
+	('website/build/css/', 'website/build/documentation/css/')	# TEMP COPY FOR EASE OF DEVELOPMENT
+
 ]
 
 for source_dir, target_dir in folders_to_copy:
@@ -84,3 +116,17 @@ for source_dir, target_dir in folders_to_copy:
 		else:
 			os.makedirs(new_path, exist_ok=True)
 
+
+
+tut_page = 'Tutorial'
+links = []
+
+s = 'website/source/tutorial'
+file_names = os.listdir(s)
+	# os.makedirs(target_dir, exist_ok=True)
+
+for file_name in file_names:
+	rst_stuff = pathlib.Path(s, file_name).read_text()
+	o = pdoc.markdown2.markdown(rst_stuff)
+
+	os.makedirs(target_dir, exist_ok=True)

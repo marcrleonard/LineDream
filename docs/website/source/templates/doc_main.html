@@ -1,0 +1,1909 @@
+<div class="pdoc">
+            <section>
+                    <h1 class="modulename">
+LineDream    </h1>
+
+                
+                        <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #89DDFF; font-style: italic">from</span> <span style="color: #FFCB6B">.primitives.Line</span> <span style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">Line</span>
+<span style="color: #89DDFF; font-style: italic">from</span> <span style="color: #FFCB6B">.primitives.BaseShape</span> <span style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">BaseShape</span>
+<span style="color: #89DDFF; font-style: italic">from</span> <span style="color: #FFCB6B">.primitives.Ellipse</span> <span style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">Circle</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">Ellipse</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">Point</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">Arc</span>
+<span style="color: #89DDFF; font-style: italic">from</span> <span style="color: #FFCB6B">.primitives.Rectangle</span> <span style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">Rectangle</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">Square</span>
+<span style="color: #89DDFF; font-style: italic">from</span> <span style="color: #FFCB6B">.enviornment.Canvas</span> <span style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">_Canvas</span>
+<span style="color: #89DDFF; font-style: italic">from</span> <span style="color: #FFCB6B">.helpers.CircleMath</span> <span style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">CircleMath</span>
+<span style="color: #546E7A; font-style: italic"># from .primitives.TextLine import TextLine</span>
+<span style="color: #546E7A; font-style: italic"># from .enviornment.Tweaks import Tweaks</span>
+
+<span style="color: #EEFFFF">Canvas</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">_Canvas</span>
+<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #546E7A; font-style: italic">Canvas Singleton Object. This controls the output &#39;canvas&#39;, and rendering of the draw loop.</span>
+
+<span style="color: #546E7A; font-style: italic"># Attributes</span>
+<span style="color: #546E7A; font-style: italic">	width</span>
+<span style="color: #546E7A; font-style: italic">	height</span>
+<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #546E7A; font-style: italic"># Note, I had to do this Canvas=_Canvas thing so these ^ doc strings would work.</span>
+
+<span style="color: #EEFFFF">__all__</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">[</span>
+	<span style="color: #C3E88D">&#39;Line&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;Circle&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;Ellipse&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;Arc&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;Point&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;Rectangle&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;Square&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;CircleMath&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;BaseShape&#39;</span><span style="color: #89DDFF">,</span>
+	<span style="color: #C3E88D">&#39;Canvas&#39;</span><span style="color: #89DDFF">,</span>
+<span style="color: #89DDFF">]</span>
+</pre></div>
+
+        </details>
+
+            </section>
+                <section id="Line">
+                                <div class="attr class">
+        <a class="headerlink" href="#Line">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Line</span><wbr>(<span class="base"><a href="#BaseShape">LineDream.BaseShape</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">Line</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">BaseShape</span><span style="color: #89DDFF">):</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">verticies</span><span style="color: #89DDFF">:[</span><span style="color: #EEFFFF">Tuple</span><span style="color: #89DDFF">]=None,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">verticies</span><span style="color: #89DDFF">:</span>
+
+			<span style="color: #BB80B3">for</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">verticies</span><span style="color: #89DDFF">:</span>
+				<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>All provided primatives inherit from this class. If a user wants to make thier own primative, its reccomended to
+inherit from this class so the new primative is added to the draw queue.</p>
+</div>
+
+
+                            <div id="Line.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Line.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Line</span><span class="signature">(verticies: [typing.Tuple] = None, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">verticies</span><span style="color: #89DDFF">:[</span><span style="color: #EEFFFF">Tuple</span><span style="color: #89DDFF">]=None,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">verticies</span><span style="color: #89DDFF">:</span>
+
+			<span style="color: #BB80B3">for</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">verticies</span><span style="color: #89DDFF">:</span>
+				<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#BaseShape">BaseShape</a></dt>
+                                <dd id="Line.fill_color" class="variable"><a href="#BaseShape.fill_color">fill_color</a></dd>
+                <dd id="Line.fill_opacity" class="variable"><a href="#BaseShape.fill_opacity">fill_opacity</a></dd>
+                <dd id="Line.close_path" class="variable"><a href="#BaseShape.close_path">close_path</a></dd>
+                <dd id="Line.stroke_color" class="variable"><a href="#BaseShape.stroke_color">stroke_color</a></dd>
+                <dd id="Line.stroke_width" class="variable"><a href="#BaseShape.stroke_width">stroke_width</a></dd>
+                <dd id="Line.vertices" class="variable"><a href="#BaseShape.vertices">vertices</a></dd>
+                <dd id="Line.first_vertex" class="variable"><a href="#BaseShape.first_vertex">first_vertex</a></dd>
+                <dd id="Line.min_x" class="variable"><a href="#BaseShape.min_x">min_x</a></dd>
+                <dd id="Line.max_x" class="variable"><a href="#BaseShape.max_x">max_x</a></dd>
+                <dd id="Line.min_y" class="variable"><a href="#BaseShape.min_y">min_y</a></dd>
+                <dd id="Line.max_y" class="variable"><a href="#BaseShape.max_y">max_y</a></dd>
+                <dd id="Line.center" class="variable"><a href="#BaseShape.center">center</a></dd>
+                <dd id="Line.add_vertex" class="function"><a href="#BaseShape.add_vertex">add_vertex</a></dd>
+                <dd id="Line.transform" class="function"><a href="#BaseShape.transform">transform</a></dd>
+                <dd id="Line.rotate" class="function"><a href="#BaseShape.rotate">rotate</a></dd>
+                <dd id="Line.rotate_x" class="function"><a href="#BaseShape.rotate_x">rotate_x</a></dd>
+                <dd id="Line.rotate_y" class="function"><a href="#BaseShape.rotate_y">rotate_y</a></dd>
+                <dd id="Line.rotate_z" class="function"><a href="#BaseShape.rotate_z">rotate_z</a></dd>
+                <dd id="Line.scale" class="function"><a href="#BaseShape.scale">scale</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Circle">
+                                <div class="attr class">
+        <a class="headerlink" href="#Circle">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Circle</span><wbr>(<span class="base"><a href="#Ellipse">LineDream.Ellipse</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">Circle</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">Ellipse</span><span style="color: #89DDFF">):</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">percent</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_percent_y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is how to create an ellipse</p>
+</div>
+
+
+                            <div id="Circle.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Circle.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Circle</span><span class="signature">(x, y, radius, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is the init for creating an __init__
+:param x: x coord of center
+:param y: y coord of center
+:param radius_x: radius x
+:param radius_y: radius y
+:param kwargs: style kwargs</p>
+
+<p>.. todo:: THIS NEEDS WORK</p>
+</div>
+
+
+                            </div>
+                            <div id="Circle.scale" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Circle.scale">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">scale</span><span class="signature">(self, percent, _percent_y=0)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">percent</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_percent_y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#Ellipse">Ellipse</a></dt>
+                                <dd id="Circle.x" class="variable"><a href="#Ellipse.x">x</a></dd>
+                <dd id="Circle.add_vertex" class="function"><a href="#Ellipse.add_vertex">add_vertex</a></dd>
+                <dd id="Circle.transform" class="function"><a href="#Ellipse.transform">transform</a></dd>
+
+            </div>
+            <div><dt><a href="#BaseShape">BaseShape</a></dt>
+                                <dd id="Circle.fill_color" class="variable"><a href="#BaseShape.fill_color">fill_color</a></dd>
+                <dd id="Circle.fill_opacity" class="variable"><a href="#BaseShape.fill_opacity">fill_opacity</a></dd>
+                <dd id="Circle.close_path" class="variable"><a href="#BaseShape.close_path">close_path</a></dd>
+                <dd id="Circle.stroke_color" class="variable"><a href="#BaseShape.stroke_color">stroke_color</a></dd>
+                <dd id="Circle.stroke_width" class="variable"><a href="#BaseShape.stroke_width">stroke_width</a></dd>
+                <dd id="Circle.vertices" class="variable"><a href="#BaseShape.vertices">vertices</a></dd>
+                <dd id="Circle.first_vertex" class="variable"><a href="#BaseShape.first_vertex">first_vertex</a></dd>
+                <dd id="Circle.min_x" class="variable"><a href="#BaseShape.min_x">min_x</a></dd>
+                <dd id="Circle.max_x" class="variable"><a href="#BaseShape.max_x">max_x</a></dd>
+                <dd id="Circle.min_y" class="variable"><a href="#BaseShape.min_y">min_y</a></dd>
+                <dd id="Circle.max_y" class="variable"><a href="#BaseShape.max_y">max_y</a></dd>
+                <dd id="Circle.center" class="variable"><a href="#BaseShape.center">center</a></dd>
+                <dd id="Circle.rotate" class="function"><a href="#BaseShape.rotate">rotate</a></dd>
+                <dd id="Circle.rotate_x" class="function"><a href="#BaseShape.rotate_x">rotate_x</a></dd>
+                <dd id="Circle.rotate_y" class="function"><a href="#BaseShape.rotate_y">rotate_y</a></dd>
+                <dd id="Circle.rotate_z" class="function"><a href="#BaseShape.rotate_z">rotate_z</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Ellipse">
+                                <div class="attr class">
+        <a class="headerlink" href="#Ellipse">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Ellipse</span><wbr>(<span class="base"><a href="#BaseShape">LineDream.BaseShape</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">Ellipse</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">BaseShape</span><span style="color: #89DDFF">):</span>
+	<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;This is how to create an ellipse&#39;&#39;&#39;</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius_y</span><span style="color: #89DDFF">,</span>   <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;This is the init for creating an __init__</span>
+<span style="color: #546E7A; font-style: italic">		:param x: x coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param y: y coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_x: radius x</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_y: radius y</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs: style kwargs</span>
+
+
+<span style="color: #546E7A; font-style: italic">		.. todo:: THIS NEEDS WORK</span>
+<span style="color: #546E7A; font-style: italic">		&#39;&#39;&#39;</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot; x coord of center&quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">radius_x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">radius_y</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_circle</span><span style="color: #89DDFF">=True</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">add_vertex</span><span style="color: #89DDFF">(self,</span> <span style="color: #89DDFF">*</span><span style="color: #EEFFFF">coords</span><span style="color: #89DDFF">):</span>
+		<span style="color: #BB80B3">raise</span> <span style="color: #FFCB6B">Exception</span><span style="color: #89DDFF">(</span><span style="color: #C3E88D">&quot;Ellipses do not have vertexes&quot;</span><span style="color: #89DDFF">)</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">transform</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #546E7A; font-style: italic">		Send a message to a recipient</span>
+
+<span style="color: #546E7A; font-style: italic">		:param str sender: The person sending the message</span>
+<span style="color: #546E7A; font-style: italic">		:param str recipient: The recipient of the message</span>
+<span style="color: #546E7A; font-style: italic">		:param str message_body: The body of the message</span>
+<span style="color: #546E7A; font-style: italic">		:param priority: The priority of the message, can be a number 1-5</span>
+<span style="color: #546E7A; font-style: italic">		:type priority: integer or None</span>
+<span style="color: #546E7A; font-style: italic">		:return: the message id</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: int</span>
+<span style="color: #546E7A; font-style: italic">		:raises ValueError: if the message_body exceeds 160 characters</span>
+<span style="color: #546E7A; font-style: italic">		:raises TypeError: if the message_body is not a basestring</span>
+<span style="color: #546E7A; font-style: italic">		&quot;&quot;&quot;</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">y</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">percent_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">percent_y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent_x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent_y</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is how to create an ellipse</p>
+</div>
+
+
+                            <div id="Ellipse.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Ellipse.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Ellipse</span><span class="signature">(x, y, radius_x, radius_y, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius_y</span><span style="color: #89DDFF">,</span>   <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;This is the init for creating an __init__</span>
+<span style="color: #546E7A; font-style: italic">		:param x: x coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param y: y coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_x: radius x</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_y: radius y</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs: style kwargs</span>
+
+
+<span style="color: #546E7A; font-style: italic">		.. todo:: THIS NEEDS WORK</span>
+<span style="color: #546E7A; font-style: italic">		&#39;&#39;&#39;</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot; x coord of center&quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">radius_x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">radius_y</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_circle</span><span style="color: #89DDFF">=True</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is the init for creating an __init__
+:param x: x coord of center
+:param y: y coord of center
+:param radius_x: radius x
+:param radius_y: radius y
+:param kwargs: style kwargs</p>
+
+<p>.. todo:: THIS NEEDS WORK</p>
+</div>
+
+
+                            </div>
+                            <div id="Ellipse.x" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Ellipse.x">#&nbsp;&nbsp</a>
+
+        <span class="name">x</span>
+    </div>
+
+            <div class="docstring"><p>x coord of center</p>
+</div>
+
+
+                            </div>
+                            <div id="Ellipse.add_vertex" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Ellipse.add_vertex">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">add_vertex</span><span class="signature">(self, *coords)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">add_vertex</span><span style="color: #89DDFF">(self,</span> <span style="color: #89DDFF">*</span><span style="color: #EEFFFF">coords</span><span style="color: #89DDFF">):</span>
+		<span style="color: #BB80B3">raise</span> <span style="color: #FFCB6B">Exception</span><span style="color: #89DDFF">(</span><span style="color: #C3E88D">&quot;Ellipses do not have vertexes&quot;</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Append a set of vertexes to the primitive shape</p>
+</div>
+
+
+                            </div>
+                            <div id="Ellipse.transform" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Ellipse.transform">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">transform</span><span class="signature">(self, x=0, y=0, z=0)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">transform</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #546E7A; font-style: italic">		Send a message to a recipient</span>
+
+<span style="color: #546E7A; font-style: italic">		:param str sender: The person sending the message</span>
+<span style="color: #546E7A; font-style: italic">		:param str recipient: The recipient of the message</span>
+<span style="color: #546E7A; font-style: italic">		:param str message_body: The body of the message</span>
+<span style="color: #546E7A; font-style: italic">		:param priority: The priority of the message, can be a number 1-5</span>
+<span style="color: #546E7A; font-style: italic">		:type priority: integer or None</span>
+<span style="color: #546E7A; font-style: italic">		:return: the message id</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: int</span>
+<span style="color: #546E7A; font-style: italic">		:raises ValueError: if the message_body exceeds 160 characters</span>
+<span style="color: #546E7A; font-style: italic">		:raises TypeError: if the message_body is not a basestring</span>
+<span style="color: #546E7A; font-style: italic">		&quot;&quot;&quot;</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">y</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Send a message to a recipient</p>
+
+<p>:param str sender: The person sending the message
+:param str recipient: The recipient of the message
+:param str message_body: The body of the message
+:param priority: The priority of the message, can be a number 1-5
+:type priority: integer or None
+:return: the message id
+:rtype: int
+:raises ValueError: if the message_body exceeds 160 characters
+:raises TypeError: if the message_body is not a basestring</p>
+</div>
+
+
+                            </div>
+                            <div id="Ellipse.scale" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Ellipse.scale">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">scale</span><span class="signature">(self, percent_x, percent_y=1)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">percent_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">percent_y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent_x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius_y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">percent_y</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#BaseShape">BaseShape</a></dt>
+                                <dd id="Ellipse.fill_color" class="variable"><a href="#BaseShape.fill_color">fill_color</a></dd>
+                <dd id="Ellipse.fill_opacity" class="variable"><a href="#BaseShape.fill_opacity">fill_opacity</a></dd>
+                <dd id="Ellipse.close_path" class="variable"><a href="#BaseShape.close_path">close_path</a></dd>
+                <dd id="Ellipse.stroke_color" class="variable"><a href="#BaseShape.stroke_color">stroke_color</a></dd>
+                <dd id="Ellipse.stroke_width" class="variable"><a href="#BaseShape.stroke_width">stroke_width</a></dd>
+                <dd id="Ellipse.vertices" class="variable"><a href="#BaseShape.vertices">vertices</a></dd>
+                <dd id="Ellipse.first_vertex" class="variable"><a href="#BaseShape.first_vertex">first_vertex</a></dd>
+                <dd id="Ellipse.min_x" class="variable"><a href="#BaseShape.min_x">min_x</a></dd>
+                <dd id="Ellipse.max_x" class="variable"><a href="#BaseShape.max_x">max_x</a></dd>
+                <dd id="Ellipse.min_y" class="variable"><a href="#BaseShape.min_y">min_y</a></dd>
+                <dd id="Ellipse.max_y" class="variable"><a href="#BaseShape.max_y">max_y</a></dd>
+                <dd id="Ellipse.center" class="variable"><a href="#BaseShape.center">center</a></dd>
+                <dd id="Ellipse.rotate" class="function"><a href="#BaseShape.rotate">rotate</a></dd>
+                <dd id="Ellipse.rotate_x" class="function"><a href="#BaseShape.rotate_x">rotate_x</a></dd>
+                <dd id="Ellipse.rotate_y" class="function"><a href="#BaseShape.rotate_y">rotate_y</a></dd>
+                <dd id="Ellipse.rotate_z" class="function"><a href="#BaseShape.rotate_z">rotate_z</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Arc">
+                                <div class="attr class">
+        <a class="headerlink" href="#Arc">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Arc</span><wbr>(<span class="base"><a href="#BaseShape">LineDream.BaseShape</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">Arc</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">BaseShape</span><span style="color: #89DDFF">):</span>
+	<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;This is how to create an ellipse&#39;&#39;&#39;</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">start_angle</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">end_angle</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;This is the init for creating an __init__</span>
+<span style="color: #546E7A; font-style: italic">		:param x: x coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param y: y coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_x: radius x</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_y: radius y</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs: style kwargs</span>
+
+
+<span style="color: #546E7A; font-style: italic">		.. todo:: THIS NEEDS WORK</span>
+<span style="color: #546E7A; font-style: italic">		&#39;&#39;&#39;</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">radius</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">start_angle</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">start_angle</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">end_angle</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">end_angle</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_arc</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">True</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is how to create an ellipse</p>
+</div>
+
+
+                            <div id="Arc.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Arc.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Arc</span><span class="signature">(x, y, radius, start_angle, end_angle, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">radius</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">start_angle</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">end_angle</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;This is the init for creating an __init__</span>
+<span style="color: #546E7A; font-style: italic">		:param x: x coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param y: y coord of center</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_x: radius x</span>
+<span style="color: #546E7A; font-style: italic">		:param radius_y: radius y</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs: style kwargs</span>
+
+
+<span style="color: #546E7A; font-style: italic">		.. todo:: THIS NEEDS WORK</span>
+<span style="color: #546E7A; font-style: italic">		&#39;&#39;&#39;</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">radius</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">radius</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">start_angle</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">start_angle</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">end_angle</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">end_angle</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_arc</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">True</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is the init for creating an __init__
+:param x: x coord of center
+:param y: y coord of center
+:param radius_x: radius x
+:param radius_y: radius y
+:param kwargs: style kwargs</p>
+
+<p>.. todo:: THIS NEEDS WORK</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#BaseShape">BaseShape</a></dt>
+                                <dd id="Arc.fill_color" class="variable"><a href="#BaseShape.fill_color">fill_color</a></dd>
+                <dd id="Arc.fill_opacity" class="variable"><a href="#BaseShape.fill_opacity">fill_opacity</a></dd>
+                <dd id="Arc.close_path" class="variable"><a href="#BaseShape.close_path">close_path</a></dd>
+                <dd id="Arc.stroke_color" class="variable"><a href="#BaseShape.stroke_color">stroke_color</a></dd>
+                <dd id="Arc.stroke_width" class="variable"><a href="#BaseShape.stroke_width">stroke_width</a></dd>
+                <dd id="Arc.vertices" class="variable"><a href="#BaseShape.vertices">vertices</a></dd>
+                <dd id="Arc.first_vertex" class="variable"><a href="#BaseShape.first_vertex">first_vertex</a></dd>
+                <dd id="Arc.min_x" class="variable"><a href="#BaseShape.min_x">min_x</a></dd>
+                <dd id="Arc.max_x" class="variable"><a href="#BaseShape.max_x">max_x</a></dd>
+                <dd id="Arc.min_y" class="variable"><a href="#BaseShape.min_y">min_y</a></dd>
+                <dd id="Arc.max_y" class="variable"><a href="#BaseShape.max_y">max_y</a></dd>
+                <dd id="Arc.center" class="variable"><a href="#BaseShape.center">center</a></dd>
+                <dd id="Arc.add_vertex" class="function"><a href="#BaseShape.add_vertex">add_vertex</a></dd>
+                <dd id="Arc.transform" class="function"><a href="#BaseShape.transform">transform</a></dd>
+                <dd id="Arc.rotate" class="function"><a href="#BaseShape.rotate">rotate</a></dd>
+                <dd id="Arc.rotate_x" class="function"><a href="#BaseShape.rotate_x">rotate_x</a></dd>
+                <dd id="Arc.rotate_y" class="function"><a href="#BaseShape.rotate_y">rotate_y</a></dd>
+                <dd id="Arc.rotate_z" class="function"><a href="#BaseShape.rotate_z">rotate_z</a></dd>
+                <dd id="Arc.scale" class="function"><a href="#BaseShape.scale">scale</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Point">
+                                <div class="attr class">
+        <a class="headerlink" href="#Point">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Point</span><wbr>(<span class="base"><a href="#Circle">LineDream.Circle</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">Point</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">Circle</span><span style="color: #89DDFF">):</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">.5</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">percent_x</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_percent_y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">):</span>
+		<span style="color: #BB80B3">raise</span> <span style="color: #FFCB6B">Exception</span><span style="color: #89DDFF">(</span><span style="color: #C3E88D">&#39;Cannot scale a Point&#39;</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is how to create an ellipse</p>
+</div>
+
+
+                            <div id="Point.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Point.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Point</span><span class="signature">(x, y, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">.5</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>This is the init for creating an __init__
+:param x: x coord of center
+:param y: y coord of center
+:param radius_x: radius x
+:param radius_y: radius y
+:param kwargs: style kwargs</p>
+
+<p>.. todo:: THIS NEEDS WORK</p>
+</div>
+
+
+                            </div>
+                            <div id="Point.scale" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Point.scale">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">scale</span><span class="signature">(self, percent_x=1, _percent_y=1)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">percent_x</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_percent_y</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">):</span>
+		<span style="color: #BB80B3">raise</span> <span style="color: #FFCB6B">Exception</span><span style="color: #89DDFF">(</span><span style="color: #C3E88D">&#39;Cannot scale a Point&#39;</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#Ellipse">Ellipse</a></dt>
+                                <dd id="Point.x" class="variable"><a href="#Ellipse.x">x</a></dd>
+                <dd id="Point.add_vertex" class="function"><a href="#Ellipse.add_vertex">add_vertex</a></dd>
+                <dd id="Point.transform" class="function"><a href="#Ellipse.transform">transform</a></dd>
+
+            </div>
+            <div><dt><a href="#BaseShape">BaseShape</a></dt>
+                                <dd id="Point.fill_color" class="variable"><a href="#BaseShape.fill_color">fill_color</a></dd>
+                <dd id="Point.fill_opacity" class="variable"><a href="#BaseShape.fill_opacity">fill_opacity</a></dd>
+                <dd id="Point.close_path" class="variable"><a href="#BaseShape.close_path">close_path</a></dd>
+                <dd id="Point.stroke_color" class="variable"><a href="#BaseShape.stroke_color">stroke_color</a></dd>
+                <dd id="Point.stroke_width" class="variable"><a href="#BaseShape.stroke_width">stroke_width</a></dd>
+                <dd id="Point.vertices" class="variable"><a href="#BaseShape.vertices">vertices</a></dd>
+                <dd id="Point.first_vertex" class="variable"><a href="#BaseShape.first_vertex">first_vertex</a></dd>
+                <dd id="Point.min_x" class="variable"><a href="#BaseShape.min_x">min_x</a></dd>
+                <dd id="Point.max_x" class="variable"><a href="#BaseShape.max_x">max_x</a></dd>
+                <dd id="Point.min_y" class="variable"><a href="#BaseShape.min_y">min_y</a></dd>
+                <dd id="Point.max_y" class="variable"><a href="#BaseShape.max_y">max_y</a></dd>
+                <dd id="Point.center" class="variable"><a href="#BaseShape.center">center</a></dd>
+                <dd id="Point.rotate" class="function"><a href="#BaseShape.rotate">rotate</a></dd>
+                <dd id="Point.rotate_x" class="function"><a href="#BaseShape.rotate_x">rotate_x</a></dd>
+                <dd id="Point.rotate_y" class="function"><a href="#BaseShape.rotate_y">rotate_y</a></dd>
+                <dd id="Point.rotate_z" class="function"><a href="#BaseShape.rotate_z">rotate_z</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Rectangle">
+                                <div class="attr class">
+        <a class="headerlink" href="#Rectangle">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Rectangle</span><wbr>(<span class="base"><a href="#BaseShape">LineDream.BaseShape</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">Rectangle</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">BaseShape</span><span style="color: #89DDFF">):</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">c_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">c_y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">height</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;</span>
+<span style="color: #546E7A; font-style: italic">		Creates a Rectangle Primative</span>
+
+<span style="color: #546E7A; font-style: italic">		Parameters</span>
+<span style="color: #546E7A; font-style: italic">		----------</span>
+<span style="color: #546E7A; font-style: italic">		c_x : int</span>
+<span style="color: #546E7A; font-style: italic">			center of rectangle x coord</span>
+
+<span style="color: #546E7A; font-style: italic">		c_y: int</span>
+<span style="color: #546E7A; font-style: italic">			center of rectangle y coord</span>
+
+<span style="color: #546E7A; font-style: italic">		:param width:</span>
+<span style="color: #546E7A; font-style: italic">		:param height:</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs:</span>
+<span style="color: #546E7A; font-style: italic">		&#39;&#39;&#39;</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">width</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">width</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">height</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">height</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">close_path</span><span style="color: #89DDFF">=True</span>
+
+		<span style="color: #546E7A; font-style: italic"># top left</span>
+		<span style="color: #EEFFFF">t_l_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">t_l_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># top right</span>
+		<span style="color: #EEFFFF">t_r_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">t_r_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic">#bottom right</span>
+		<span style="color: #EEFFFF">b_r_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">b_r_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># bottom left</span>
+		<span style="color: #EEFFFF">b_l_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">b_l_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># this order is very important.</span>
+		<span style="color: #546E7A; font-style: italic"># It adds the vertex&#39;s in a clockwise rotation</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">t_l_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">t_l_y</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">t_r_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">t_r_y</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">b_r_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">b_r_y</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">b_l_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">b_l_y</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>All provided primatives inherit from this class. If a user wants to make thier own primative, its reccomended to
+inherit from this class so the new primative is added to the draw queue.</p>
+</div>
+
+
+                            <div id="Rectangle.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Rectangle.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Rectangle</span><span class="signature">(c_x, c_y, width, height, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">c_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">c_y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">height</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;</span>
+<span style="color: #546E7A; font-style: italic">		Creates a Rectangle Primative</span>
+
+<span style="color: #546E7A; font-style: italic">		Parameters</span>
+<span style="color: #546E7A; font-style: italic">		----------</span>
+<span style="color: #546E7A; font-style: italic">		c_x : int</span>
+<span style="color: #546E7A; font-style: italic">			center of rectangle x coord</span>
+
+<span style="color: #546E7A; font-style: italic">		c_y: int</span>
+<span style="color: #546E7A; font-style: italic">			center of rectangle y coord</span>
+
+<span style="color: #546E7A; font-style: italic">		:param width:</span>
+<span style="color: #546E7A; font-style: italic">		:param height:</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs:</span>
+<span style="color: #546E7A; font-style: italic">		&#39;&#39;&#39;</span>
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">width</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">width</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">height</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">height</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">close_path</span><span style="color: #89DDFF">=True</span>
+
+		<span style="color: #546E7A; font-style: italic"># top left</span>
+		<span style="color: #EEFFFF">t_l_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">t_l_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># top right</span>
+		<span style="color: #EEFFFF">t_r_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">t_r_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic">#bottom right</span>
+		<span style="color: #EEFFFF">b_r_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">b_r_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># bottom left</span>
+		<span style="color: #EEFFFF">b_l_x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_x</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">width</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">b_l_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">c_y</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">height</span><span style="color: #89DDFF">/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># this order is very important.</span>
+		<span style="color: #546E7A; font-style: italic"># It adds the vertex&#39;s in a clockwise rotation</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">t_l_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">t_l_y</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">t_r_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">t_r_y</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">b_r_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">b_r_y</span><span style="color: #89DDFF">)</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">add_vertex</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">b_l_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">b_l_y</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Creates a Rectangle Primative</p>
+
+<h2 id="parameters">Parameters</h2>
+
+<p>c_x : int
+        center of rectangle x coord</p>
+
+<p>c_y: int
+        center of rectangle y coord</p>
+
+<p>:param width:
+:param height:
+:param kwargs:</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#BaseShape">BaseShape</a></dt>
+                                <dd id="Rectangle.close_path" class="variable"><a href="#BaseShape.close_path">close_path</a></dd>
+                <dd id="Rectangle.fill_color" class="variable"><a href="#BaseShape.fill_color">fill_color</a></dd>
+                <dd id="Rectangle.fill_opacity" class="variable"><a href="#BaseShape.fill_opacity">fill_opacity</a></dd>
+                <dd id="Rectangle.stroke_color" class="variable"><a href="#BaseShape.stroke_color">stroke_color</a></dd>
+                <dd id="Rectangle.stroke_width" class="variable"><a href="#BaseShape.stroke_width">stroke_width</a></dd>
+                <dd id="Rectangle.vertices" class="variable"><a href="#BaseShape.vertices">vertices</a></dd>
+                <dd id="Rectangle.first_vertex" class="variable"><a href="#BaseShape.first_vertex">first_vertex</a></dd>
+                <dd id="Rectangle.min_x" class="variable"><a href="#BaseShape.min_x">min_x</a></dd>
+                <dd id="Rectangle.max_x" class="variable"><a href="#BaseShape.max_x">max_x</a></dd>
+                <dd id="Rectangle.min_y" class="variable"><a href="#BaseShape.min_y">min_y</a></dd>
+                <dd id="Rectangle.max_y" class="variable"><a href="#BaseShape.max_y">max_y</a></dd>
+                <dd id="Rectangle.center" class="variable"><a href="#BaseShape.center">center</a></dd>
+                <dd id="Rectangle.add_vertex" class="function"><a href="#BaseShape.add_vertex">add_vertex</a></dd>
+                <dd id="Rectangle.transform" class="function"><a href="#BaseShape.transform">transform</a></dd>
+                <dd id="Rectangle.rotate" class="function"><a href="#BaseShape.rotate">rotate</a></dd>
+                <dd id="Rectangle.rotate_x" class="function"><a href="#BaseShape.rotate_x">rotate_x</a></dd>
+                <dd id="Rectangle.rotate_y" class="function"><a href="#BaseShape.rotate_y">rotate_y</a></dd>
+                <dd id="Rectangle.rotate_z" class="function"><a href="#BaseShape.rotate_z">rotate_z</a></dd>
+                <dd id="Rectangle.scale" class="function"><a href="#BaseShape.scale">scale</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="Square">
+                                <div class="attr class">
+        <a class="headerlink" href="#Square">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Square</span><wbr>(<span class="base"><a href="#Rectangle">LineDream.Rectangle</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">Square</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">Rectangle</span><span style="color: #89DDFF">):</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">c_x</span><span style="color: #89DDFF">:</span><span style="color: #82AAFF">int</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">c_y</span><span style="color: #89DDFF">:</span><span style="color: #82AAFF">int</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #546E7A; font-style: italic">		Create a square primative</span>
+
+<span style="color: #546E7A; font-style: italic">		:param c_x: center of square x coordinate</span>
+<span style="color: #546E7A; font-style: italic">		:param c_y: center of square y coordinate</span>
+<span style="color: #546E7A; font-style: italic">		:param width: height/width of the square.</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs: style dict</span>
+<span style="color: #546E7A; font-style: italic">		&quot;&quot;&quot;</span>
+
+
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">c_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">c_y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>All provided primatives inherit from this class. If a user wants to make thier own primative, its reccomended to
+inherit from this class so the new primative is added to the draw queue.</p>
+</div>
+
+
+                            <div id="Square.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Square.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Square</span><span class="signature">(c_x: int, c_y: int, width, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">c_x</span><span style="color: #89DDFF">:</span><span style="color: #82AAFF">int</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">c_y</span><span style="color: #89DDFF">:</span><span style="color: #82AAFF">int</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #546E7A; font-style: italic">		Create a square primative</span>
+
+<span style="color: #546E7A; font-style: italic">		:param c_x: center of square x coordinate</span>
+<span style="color: #546E7A; font-style: italic">		:param c_y: center of square y coordinate</span>
+<span style="color: #546E7A; font-style: italic">		:param width: height/width of the square.</span>
+<span style="color: #546E7A; font-style: italic">		:param kwargs: style dict</span>
+<span style="color: #546E7A; font-style: italic">		&quot;&quot;&quot;</span>
+
+
+		<span style="color: #82AAFF">super</span><span style="color: #89DDFF">().</span><span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">c_x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">c_y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">width</span><span style="color: #89DDFF">,**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Create a square primative</p>
+
+<p>:param c_x: center of square x coordinate
+:param c_y: center of square y coordinate
+:param width: height/width of the square.
+:param kwargs: style dict</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#BaseShape">BaseShape</a></dt>
+                                <dd id="Square.close_path" class="variable"><a href="#BaseShape.close_path">close_path</a></dd>
+                <dd id="Square.fill_color" class="variable"><a href="#BaseShape.fill_color">fill_color</a></dd>
+                <dd id="Square.fill_opacity" class="variable"><a href="#BaseShape.fill_opacity">fill_opacity</a></dd>
+                <dd id="Square.stroke_color" class="variable"><a href="#BaseShape.stroke_color">stroke_color</a></dd>
+                <dd id="Square.stroke_width" class="variable"><a href="#BaseShape.stroke_width">stroke_width</a></dd>
+                <dd id="Square.vertices" class="variable"><a href="#BaseShape.vertices">vertices</a></dd>
+                <dd id="Square.first_vertex" class="variable"><a href="#BaseShape.first_vertex">first_vertex</a></dd>
+                <dd id="Square.min_x" class="variable"><a href="#BaseShape.min_x">min_x</a></dd>
+                <dd id="Square.max_x" class="variable"><a href="#BaseShape.max_x">max_x</a></dd>
+                <dd id="Square.min_y" class="variable"><a href="#BaseShape.min_y">min_y</a></dd>
+                <dd id="Square.max_y" class="variable"><a href="#BaseShape.max_y">max_y</a></dd>
+                <dd id="Square.center" class="variable"><a href="#BaseShape.center">center</a></dd>
+                <dd id="Square.add_vertex" class="function"><a href="#BaseShape.add_vertex">add_vertex</a></dd>
+                <dd id="Square.transform" class="function"><a href="#BaseShape.transform">transform</a></dd>
+                <dd id="Square.rotate" class="function"><a href="#BaseShape.rotate">rotate</a></dd>
+                <dd id="Square.rotate_x" class="function"><a href="#BaseShape.rotate_x">rotate_x</a></dd>
+                <dd id="Square.rotate_y" class="function"><a href="#BaseShape.rotate_y">rotate_y</a></dd>
+                <dd id="Square.rotate_z" class="function"><a href="#BaseShape.rotate_z">rotate_z</a></dd>
+                <dd id="Square.scale" class="function"><a href="#BaseShape.scale">scale</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="CircleMath">
+                                <div class="attr class">
+        <a class="headerlink" href="#CircleMath">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">CircleMath</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">CircleMath</span><span style="color: #89DDFF">:</span>
+	<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;</span>
+<span style="color: #546E7A; font-style: italic">	A class with helper methods for circles</span>
+<span style="color: #546E7A; font-style: italic">	&#39;&#39;&#39;</span>
+
+	<span style="color: #82AAFF">@staticmethod</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">distance_to_coords</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">distance</span><span style="color: #89DDFF">):</span>
+		<span style="color: #EEFFFF">angle_radians</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">degrees</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">pi</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">180</span>
+		<span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle_radians</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">distance</span>
+		<span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle_radians</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">distance</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span>
+
+	<span style="color: #82AAFF">@staticmethod</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">p</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">=(</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">),</span> <span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic"># https://stackoverflow.com/a/58781388/6775715</span>
+		<span style="color: #EEFFFF">angle</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">deg2rad</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">R</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([[</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">),</span> <span style="color: #89DDFF">-</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">)],</span>
+					  <span style="color: #89DDFF">[</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">),</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">)]])</span>
+		<span style="color: #EEFFFF">o</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">atleast_2d</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">p</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">atleast_2d</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">p</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">squeeze</span><span style="color: #89DDFF">((</span><span style="color: #EEFFFF">R</span> <span style="color: #89DDFF">@</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">p</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">o</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">o</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">).</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)</span>
+		<span style="color: #546E7A; font-style: italic">#todo: remove this once native numpy arrays are supported</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">rv</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+
+	<span style="color: #82AAFF">@staticmethod</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">degrees_to_radians</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">):</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">radians</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span> <span style="color: #89DDFF">/</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">pi</span><span style="color: #89DDFF">))</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>A class with helper methods for circles</p>
+</div>
+
+
+                            <div id="CircleMath.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#CircleMath.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">CircleMath</span><span class="signature">()</span>
+    </div>
+
+        
+    
+
+                            </div>
+                            <div id="CircleMath.distance_to_coords" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#CircleMath.distance_to_coords">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">distance_to_coords</span><span class="signature">(degrees, distance)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #82AAFF">@staticmethod</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">distance_to_coords</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">distance</span><span style="color: #89DDFF">):</span>
+		<span style="color: #EEFFFF">angle_radians</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">degrees</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">pi</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">180</span>
+		<span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle_radians</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">distance</span>
+		<span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle_radians</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">distance</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="CircleMath.rotate" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#CircleMath.rotate">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">rotate</span><span class="signature">(p, origin=(0, 0), degrees=0)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #82AAFF">@staticmethod</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">p</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">=(</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">),</span> <span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic"># https://stackoverflow.com/a/58781388/6775715</span>
+		<span style="color: #EEFFFF">angle</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">deg2rad</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">R</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([[</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">),</span> <span style="color: #89DDFF">-</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">)],</span>
+					  <span style="color: #89DDFF">[</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">),</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">angle</span><span style="color: #89DDFF">)]])</span>
+		<span style="color: #EEFFFF">o</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">atleast_2d</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">p</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">atleast_2d</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">p</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">squeeze</span><span style="color: #89DDFF">((</span><span style="color: #EEFFFF">R</span> <span style="color: #89DDFF">@</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">p</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">o</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">o</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">).</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)</span>
+		<span style="color: #546E7A; font-style: italic">#todo: remove this once native numpy arrays are supported</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">rv</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="CircleMath.degrees_to_radians" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#CircleMath.degrees_to_radians">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@staticmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">degrees_to_radians</span><span class="signature">(degrees)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #82AAFF">@staticmethod</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">degrees_to_radians</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span><span style="color: #89DDFF">):</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">radians</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">degrees</span> <span style="color: #89DDFF">/</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">pi</span><span style="color: #89DDFF">))</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="BaseShape">
+                                <div class="attr class">
+        <a class="headerlink" href="#BaseShape">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">BaseShape</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span><span style="color: #BB80B3">class</span> <span style="color: #FFCB6B">BaseShape</span><span style="color: #89DDFF">(</span><span style="color: #82AAFF">object</span><span style="color: #89DDFF">):</span>
+	<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;All provided primatives inherit from this class. If a user wants to make thier own primative, its reccomended to</span>
+<span style="color: #546E7A; font-style: italic">	inherit from this class so the new primative is added to the draw queue.&#39;&#39;&#39;</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([])</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_color</span><span style="color: #89DDFF">=</span><span style="color: #C3E88D">&#39;none&#39;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_color</span><span style="color: #89DDFF">=</span><span style="color: #C3E88D">&#39;black&#39;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_width</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_close_path</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">False</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_opacity</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1.0</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_circle</span><span style="color: #89DDFF">=False</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_arc</span><span style="color: #89DDFF">=False</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_multipath</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">False</span>
+
+		<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">k</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">v</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">items</span><span style="color: #89DDFF">():</span>
+			<span style="color: #BB80B3">if</span> <span style="color: #82AAFF">hasattr</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">k</span><span style="color: #89DDFF">):</span>
+				<span style="color: #82AAFF">setattr</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">k</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">v</span><span style="color: #89DDFF">)</span>
+			<span style="color: #BB80B3">else</span><span style="color: #89DDFF">:</span>
+				<span style="color: #EEFFFF">sys</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">stderr</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">write</span><span style="color: #89DDFF">(</span><span style="color: #BB80B3">f</span><span style="color: #C3E88D">&#39;attr &quot;</span><span style="color: #89DDFF">{</span><span style="color: #EEFFFF">k</span><span style="color: #89DDFF">}</span><span style="color: #C3E88D">&quot; does not exist.&#39;</span><span style="color: #89DDFF">)</span>
+				<span style="color: #546E7A; font-style: italic"># print(f&#39;attr &quot;{k}&quot; does not exist.&#39;)</span>
+
+		<span style="color: #EEFFFF">_Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">draw_queue</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">append</span><span style="color: #89DDFF">(self)</span>
+
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__str__</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #BB80B3">f</span><span style="color: #C3E88D">&#39;&lt;</span><span style="color: #89DDFF">{</span><span style="color: #82AAFF">__class__</span><span style="color: #89DDFF">}</span><span style="color: #C3E88D"> fill_color: </span><span style="color: #89DDFF">{self.</span><span style="color: #EEFFFF">fill_color</span><span style="color: #89DDFF">}</span><span style="color: #C3E88D">&gt;&#39;</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__repr__</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #BB80B3">f</span><span style="color: #C3E88D">&#39;&lt;</span><span style="color: #89DDFF">{</span><span style="color: #82AAFF">__class__</span><span style="color: #89DDFF">}</span><span style="color: #C3E88D"> fill_color: </span><span style="color: #89DDFF">{self.</span><span style="color: #EEFFFF">fill_color</span><span style="color: #89DDFF">}</span><span style="color: #C3E88D">&gt;&#39;</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">fill_color</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The fill color of the shape&#39;&#39;&#39;</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_color</span>
+
+	<span style="color: #82AAFF">@fill_color</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">setter</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">fill_color</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">v</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_color</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">v</span>
+
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">fill_opacity</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The fill opacity of the shape&#39;&#39;&#39;</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_opacity</span>
+
+	<span style="color: #82AAFF">@fill_opacity</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">setter</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">fill_opacity</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">v</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_opacity</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">v</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">close_path</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;Upon rendering the shape, the last vertex will connect to the first vertex&#39;&#39;&#39;</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_close_path</span>
+
+	<span style="color: #82AAFF">@close_path</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">setter</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">close_path</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">v</span><span style="color: #89DDFF">:</span><span style="color: #82AAFF">bool</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_close_path</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">v</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">stroke_color</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The stroke color of the shape&#39;&#39;&#39;</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_color</span>
+
+	<span style="color: #82AAFF">@stroke_color</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">setter</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">stroke_color</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">v</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_color</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">v</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">stroke_width</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The stroke width of the shape&#39;&#39;&#39;</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_width</span>
+
+	<span style="color: #82AAFF">@stroke_width</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">setter</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">stroke_width</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">v</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_width</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">v</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">vertices</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The list of vertices&#39;&#39;&#39;</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">first_vertex</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The first vertex of the shape&#39;&#39;&#39;</span>
+		<span style="color: #546E7A; font-style: italic"># or do you just raise an exception?</span>
+		<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">(None,</span> <span style="color: #89DDFF">None)</span>
+		<span style="color: #BB80B3">if</span>  <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">size</span> <span style="color: #89DDFF">&gt;</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">:</span>
+			<span style="color: #EEFFFF">_rv</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">vertices</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span>
+			<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">_rv</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">],</span> <span style="color: #EEFFFF">_rv</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">])</span>
+
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">rv</span>
+
+	<span style="color: #546E7A; font-style: italic"># Not sure why this was here, but it was not used so I&#39;m commenting out.</span>
+	<span style="color: #546E7A; font-style: italic"># @property</span>
+	<span style="color: #546E7A; font-style: italic"># def last_vertex(self):</span>
+	<span style="color: #546E7A; font-style: italic"># 	# or do you just raise an exception?</span>
+	<span style="color: #546E7A; font-style: italic"># 	rv = (None, None)</span>
+	<span style="color: #546E7A; font-style: italic"># 	if  self.vertices.size &gt; 0:</span>
+	<span style="color: #546E7A; font-style: italic"># 		_rv = self.vertices[-1]</span>
+	<span style="color: #546E7A; font-style: italic"># 		rv = (_rv[0], _rv[1])</span>
+	<span style="color: #546E7A; font-style: italic">#</span>
+	<span style="color: #546E7A; font-style: italic"># 	return rv</span>
+
+	<span style="color: #546E7A; font-style: italic"># @property</span>
+	<span style="color: #546E7A; font-style: italic"># def length(self):</span>
+	<span style="color: #546E7A; font-style: italic"># 	x = np.array(xcoordinates)</span>
+	<span style="color: #546E7A; font-style: italic"># 	y = np.array(ycoordinates)</span>
+	<span style="color: #546E7A; font-style: italic">#</span>
+	<span style="color: #546E7A; font-style: italic"># 	dist_array = (x[:-1] - x[1:]) ** 2 + (y[:-1] - y[1:]) ** 2</span>
+	<span style="color: #546E7A; font-style: italic">#</span>
+	<span style="color: #546E7A; font-style: italic"># 	np.sum(np.sqrt(dist_array))</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">min_x</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The smallest x value of all the vertices&#39;&#39;&#39;</span>
+		<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">first_vertex</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #EEFFFF">_v</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+
+		<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">_v</span><span style="color: #89DDFF">:</span>
+			<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">&lt;</span> <span style="color: #EEFFFF">rv</span><span style="color: #89DDFF">:</span>
+				<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">rv</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">max_x</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The largest x value of all the vertices&#39;&#39;&#39;</span>
+		<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">first_vertex</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #EEFFFF">_v</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+
+		<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">_v</span><span style="color: #89DDFF">:</span>
+			<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">&gt;</span> <span style="color: #EEFFFF">rv</span><span style="color: #89DDFF">:</span>
+				<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">rv</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">min_y</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The smallest y value of all the vertices&#39;&#39;&#39;</span>
+		<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">first_vertex</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #EEFFFF">_v</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+
+		<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">_v</span><span style="color: #89DDFF">:</span>
+			<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">&lt;</span> <span style="color: #EEFFFF">rv</span><span style="color: #89DDFF">:</span>
+				<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">rv</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">max_y</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The largest y value of all the vertices&#39;&#39;&#39;</span>
+		<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">first_vertex</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #EEFFFF">_v</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+
+		<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">_</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">_v</span><span style="color: #89DDFF">:</span>
+			<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">&gt;</span> <span style="color: #EEFFFF">rv</span><span style="color: #89DDFF">:</span>
+				<span style="color: #EEFFFF">rv</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #EEFFFF">rv</span>
+
+	<span style="color: #82AAFF">@property</span>
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">center</span><span style="color: #89DDFF">(self):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;The center of the shape based on the min/max x/y&#39;&#39;&#39;</span>
+		<span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">((self.</span><span style="color: #EEFFFF">max_x</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">min_x</span><span style="color: #89DDFF">)/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">min_x</span>
+		<span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">((self.</span><span style="color: #EEFFFF">max_y</span> <span style="color: #89DDFF">-</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">min_y</span><span style="color: #89DDFF">)/</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">)</span> <span style="color: #89DDFF">+</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">min_y</span>
+		<span style="color: #BB80B3">return</span> <span style="color: #89DDFF">(</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">)</span>
+
+	<span style="color: #546E7A; font-style: italic"># def rotate(self, degrees, origin=None):</span>
+	<span style="color: #546E7A; font-style: italic">#</span>
+	<span style="color: #546E7A; font-style: italic"># 	if not origin:</span>
+	<span style="color: #546E7A; font-style: italic"># 		x = [p[0] for p in self.vertices]</span>
+	<span style="color: #546E7A; font-style: italic"># 		y = [p[1] for p in self.vertices]</span>
+	<span style="color: #546E7A; font-style: italic"># 		origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2</span>
+	<span style="color: #546E7A; font-style: italic">#</span>
+	<span style="color: #546E7A; font-style: italic"># 	self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">add_vertex</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;Append a set of vertexes to the primitive shape&#39;&#39;&#39;</span>
+
+		<span style="color: #EEFFFF">l</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+		<span style="color: #EEFFFF">l</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">append</span><span style="color: #89DDFF">([</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">z</span><span style="color: #89DDFF">,</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">])</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">l</span><span style="color: #89DDFF">)</span>
+
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">transform</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;Transform the vertices based on x/y coords&#39;&#39;&#39;</span>
+
+		<span style="color: #546E7A; font-style: italic"># THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.</span>
+		<span style="color: #546E7A; font-style: italic"># This will work for shapes/objects that user vertex&#39;s.. but not for things like Circles</span>
+		<span style="color: #546E7A; font-style: italic">#</span>
+		<span style="color: #546E7A; font-style: italic"># for idx, (o_x,o_y) in enumerate(self._vertices):</span>
+		<span style="color: #546E7A; font-style: italic"># 	o_x = o_x + x</span>
+		<span style="color: #546E7A; font-style: italic"># 	o_y = o_y + y</span>
+		<span style="color: #546E7A; font-style: italic">#</span>
+		<span style="color: #546E7A; font-style: italic"># 	self._vertices[idx] = (o_x, o_y)</span>
+
+		<span style="color: #546E7A; font-style: italic"># tmat = matrix.translation_matrix(x, y, z)</span>
+
+		<span style="color: #EEFFFF">translate_matrix</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">identity</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">z</span>
+
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">dot</span><span style="color: #89DDFF">(self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)[:,</span> <span style="color: #89DDFF">:</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">]</span>
+
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">=None,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">])):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the display by the given angle along the given axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: The angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:param axis: The axis along which to rotate (defaults to the z-axis)</span>
+<span style="color: #546E7A; font-style: italic">		:type axis: np.ndarray or list</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">	   &quot;&quot;&quot;</span>
+
+		<span style="color: #546E7A; font-style: italic">#CONVERT DEGREES TO RADIANS</span>
+		<span style="color: #EEFFFF">theta</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">theta</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">pi</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">180</span>
+
+		<span style="color: #EEFFFF">axis</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[:])</span>
+
+		<span style="color: #546E7A; font-style: italic">#</span>
+
+		<span style="color: #546E7A; font-style: italic"># tmat = matrix.rotation_matrix(axis, theta)</span>
+
+		<span style="color: #546E7A; font-style: italic">#</span>
+
+		<span style="color: #546E7A; font-style: italic"># NOTE: THIS ALL MIGHT NEED TO BE RADIANS</span>
+		<span style="color: #546E7A; font-style: italic"># This might be the wrong interpretatino...</span>
+		<span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span>
+		<span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span>
+		<span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #546E7A; font-style: italic"># x, y, z = _normalize(axis)</span>
+
+		<span style="color: #EEFFFF">s</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">c</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">c</span>
+
+		<span style="color: #EEFFFF">rotation</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">identity</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">c</span>
+
+		<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">origin</span> <span style="color: #89DDFF">==</span> <span style="color: #89DDFF">None:</span>
+			<span style="color: #EEFFFF">x_c</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y_c</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">center</span>
+		<span style="color: #BB80B3">else</span><span style="color: #89DDFF">:</span>
+			<span style="color: #EEFFFF">x_c</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span>
+			<span style="color: #EEFFFF">y_c</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">transform</span><span style="color: #89DDFF">(-</span><span style="color: #EEFFFF">x_c</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #EEFFFF">y_c</span><span style="color: #89DDFF">)</span>
+
+
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x_c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y_c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">dot</span><span style="color: #89DDFF">(self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)[:,</span> <span style="color: #89DDFF">:</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #546E7A; font-style: italic"># self.transform(x_c, y_c)</span>
+		<span style="color: #546E7A; font-style: italic"># self._vertices = self._vertices.dot(rotation)</span>
+
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate_x</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the view along the x axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">		&quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]))</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate_y</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the view along the y axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">	   &quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]))</span>
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate_z</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the view along the z axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">	   &quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]))</span>
+
+
+	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">amt</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">amt_y</span><span style="color: #89DDFF">=None,</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">=None):</span>
+
+		<span style="color: #EEFFFF">sys</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">stderr</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">write</span><span style="color: #89DDFF">(</span><span style="color: #C3E88D">&quot;Scale is not fully implemented yet.</span><span style="color: #EEFFFF">\n</span><span style="color: #C3E88D">&quot;</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">amt_y</span><span style="color: #89DDFF">==None:</span>
+			<span style="color: #EEFFFF">amt_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">amt</span>
+
+		<span style="color: #EEFFFF">scale_matrix</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">identity</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">amt</span>
+		<span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">amt_y</span>
+		<span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1</span> <span style="color: #546E7A; font-style: italic"># default for z</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">dot</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># raise Exception(&#39;Inherited class should implement&#39;)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>All provided primatives inherit from this class. If a user wants to make thier own primative, its reccomended to
+inherit from this class so the new primative is added to the draw queue.</p>
+</div>
+
+
+                            <div id="BaseShape.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">BaseShape</span><span class="signature">(**kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">__init__</span><span style="color: #89DDFF">(self,</span> <span style="color: #89DDFF">**</span><span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">):</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([])</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_color</span><span style="color: #89DDFF">=</span><span style="color: #C3E88D">&#39;none&#39;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_color</span><span style="color: #89DDFF">=</span><span style="color: #C3E88D">&#39;black&#39;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_stroke_width</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">1</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_close_path</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">False</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_fill_opacity</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1.0</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_circle</span><span style="color: #89DDFF">=False</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_arc</span><span style="color: #89DDFF">=False</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">is_multipath</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">False</span>
+
+		<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">k</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">v</span> <span style="color: #89DDFF; font-style: italic">in</span> <span style="color: #EEFFFF">kwargs</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">items</span><span style="color: #89DDFF">():</span>
+			<span style="color: #BB80B3">if</span> <span style="color: #82AAFF">hasattr</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">k</span><span style="color: #89DDFF">):</span>
+				<span style="color: #82AAFF">setattr</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">k</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">v</span><span style="color: #89DDFF">)</span>
+			<span style="color: #BB80B3">else</span><span style="color: #89DDFF">:</span>
+				<span style="color: #EEFFFF">sys</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">stderr</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">write</span><span style="color: #89DDFF">(</span><span style="color: #BB80B3">f</span><span style="color: #C3E88D">&#39;attr &quot;</span><span style="color: #89DDFF">{</span><span style="color: #EEFFFF">k</span><span style="color: #89DDFF">}</span><span style="color: #C3E88D">&quot; does not exist.&#39;</span><span style="color: #89DDFF">)</span>
+				<span style="color: #546E7A; font-style: italic"># print(f&#39;attr &quot;{k}&quot; does not exist.&#39;)</span>
+
+		<span style="color: #EEFFFF">_Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">draw_queue</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">append</span><span style="color: #89DDFF">(self)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="BaseShape.fill_color" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.fill_color">#&nbsp;&nbsp</a>
+
+        <span class="name">fill_color</span>
+    </div>
+
+            <div class="docstring"><p>The fill color of the shape</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.fill_opacity" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.fill_opacity">#&nbsp;&nbsp</a>
+
+        <span class="name">fill_opacity</span>
+    </div>
+
+            <div class="docstring"><p>The fill opacity of the shape</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.close_path" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.close_path">#&nbsp;&nbsp</a>
+
+        <span class="name">close_path</span>
+    </div>
+
+            <div class="docstring"><p>Upon rendering the shape, the last vertex will connect to the first vertex</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.stroke_color" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.stroke_color">#&nbsp;&nbsp</a>
+
+        <span class="name">stroke_color</span>
+    </div>
+
+            <div class="docstring"><p>The stroke color of the shape</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.stroke_width" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.stroke_width">#&nbsp;&nbsp</a>
+
+        <span class="name">stroke_width</span>
+    </div>
+
+            <div class="docstring"><p>The stroke width of the shape</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.vertices" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.vertices">#&nbsp;&nbsp</a>
+
+        <span class="name">vertices</span>
+    </div>
+
+            <div class="docstring"><p>The list of vertices</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.first_vertex" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.first_vertex">#&nbsp;&nbsp</a>
+
+        <span class="name">first_vertex</span>
+    </div>
+
+            <div class="docstring"><p>The first vertex of the shape</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.min_x" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.min_x">#&nbsp;&nbsp</a>
+
+        <span class="name">min_x</span>
+    </div>
+
+            <div class="docstring"><p>The smallest x value of all the vertices</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.max_x" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.max_x">#&nbsp;&nbsp</a>
+
+        <span class="name">max_x</span>
+    </div>
+
+            <div class="docstring"><p>The largest x value of all the vertices</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.min_y" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.min_y">#&nbsp;&nbsp</a>
+
+        <span class="name">min_y</span>
+    </div>
+
+            <div class="docstring"><p>The smallest y value of all the vertices</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.max_y" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.max_y">#&nbsp;&nbsp</a>
+
+        <span class="name">max_y</span>
+    </div>
+
+            <div class="docstring"><p>The largest y value of all the vertices</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.center" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#BaseShape.center">#&nbsp;&nbsp</a>
+
+        <span class="name">center</span>
+    </div>
+
+            <div class="docstring"><p>The center of the shape based on the min/max x/y</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.add_vertex" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.add_vertex">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">add_vertex</span><span class="signature">(self, x, y, z=0)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">add_vertex</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;Append a set of vertexes to the primitive shape&#39;&#39;&#39;</span>
+
+		<span style="color: #EEFFFF">l</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">tolist</span><span style="color: #89DDFF">()</span>
+		<span style="color: #EEFFFF">l</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">append</span><span style="color: #89DDFF">([</span><span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">z</span><span style="color: #89DDFF">,</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">])</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">l</span><span style="color: #89DDFF">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Append a set of vertexes to the primitive shape</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.transform" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.transform">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">transform</span><span class="signature">(self, x, y, z=0)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">transform</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">x</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">y</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">z</span><span style="color: #89DDFF">=</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&#39;&#39;&#39;Transform the vertices based on x/y coords&#39;&#39;&#39;</span>
+
+		<span style="color: #546E7A; font-style: italic"># THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.</span>
+		<span style="color: #546E7A; font-style: italic"># This will work for shapes/objects that user vertex&#39;s.. but not for things like Circles</span>
+		<span style="color: #546E7A; font-style: italic">#</span>
+		<span style="color: #546E7A; font-style: italic"># for idx, (o_x,o_y) in enumerate(self._vertices):</span>
+		<span style="color: #546E7A; font-style: italic"># 	o_x = o_x + x</span>
+		<span style="color: #546E7A; font-style: italic"># 	o_y = o_y + y</span>
+		<span style="color: #546E7A; font-style: italic">#</span>
+		<span style="color: #546E7A; font-style: italic"># 	self._vertices[idx] = (o_x, o_y)</span>
+
+		<span style="color: #546E7A; font-style: italic"># tmat = matrix.translation_matrix(x, y, z)</span>
+
+		<span style="color: #EEFFFF">translate_matrix</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">identity</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span>
+		<span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span>
+		<span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">z</span>
+
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">dot</span><span style="color: #89DDFF">(self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">translate_matrix</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)[:,</span> <span style="color: #89DDFF">:</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">]</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Transform the vertices based on x/y coords</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.rotate" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.rotate">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">rotate</span><span class="signature">(self, theta, origin=None, axis=array([0, 0, 1]))</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">=None,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">])):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the display by the given angle along the given axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: The angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:param axis: The axis along which to rotate (defaults to the z-axis)</span>
+<span style="color: #546E7A; font-style: italic">		:type axis: np.ndarray or list</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">	   &quot;&quot;&quot;</span>
+
+		<span style="color: #546E7A; font-style: italic">#CONVERT DEGREES TO RADIANS</span>
+		<span style="color: #EEFFFF">theta</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">theta</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">math</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">pi</span> <span style="color: #89DDFF">/</span> <span style="color: #F78C6C">180</span>
+
+		<span style="color: #EEFFFF">axis</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[:])</span>
+
+		<span style="color: #546E7A; font-style: italic">#</span>
+
+		<span style="color: #546E7A; font-style: italic"># tmat = matrix.rotation_matrix(axis, theta)</span>
+
+		<span style="color: #546E7A; font-style: italic">#</span>
+
+		<span style="color: #546E7A; font-style: italic"># NOTE: THIS ALL MIGHT NEED TO BE RADIANS</span>
+		<span style="color: #546E7A; font-style: italic"># This might be the wrong interpretatino...</span>
+		<span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span>
+		<span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span>
+		<span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #546E7A; font-style: italic"># x, y, z = _normalize(axis)</span>
+
+		<span style="color: #EEFFFF">s</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">sin</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">c</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">cos</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">c</span>
+
+		<span style="color: #EEFFFF">rotation</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">identity</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">-</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">x</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">s</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">z</span> <span style="color: #89DDFF">*</span> <span style="color: #EEFFFF">c1</span> <span style="color: #89DDFF">+</span> <span style="color: #EEFFFF">c</span>
+
+		<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">origin</span> <span style="color: #89DDFF">==</span> <span style="color: #89DDFF">None:</span>
+			<span style="color: #EEFFFF">x_c</span><span style="color: #89DDFF">,</span><span style="color: #EEFFFF">y_c</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">center</span>
+		<span style="color: #BB80B3">else</span><span style="color: #89DDFF">:</span>
+			<span style="color: #EEFFFF">x_c</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span>
+			<span style="color: #EEFFFF">y_c</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">transform</span><span style="color: #89DDFF">(-</span><span style="color: #EEFFFF">x_c</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #EEFFFF">y_c</span><span style="color: #89DDFF">)</span>
+
+
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">x_c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">y_c</span>
+		<span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #89DDFF">-</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">dot</span><span style="color: #89DDFF">(self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">rotation</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">T</span><span style="color: #89DDFF">)[:,</span> <span style="color: #89DDFF">:</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">]</span>
+
+		<span style="color: #546E7A; font-style: italic"># self.transform(x_c, y_c)</span>
+		<span style="color: #546E7A; font-style: italic"># self._vertices = self._vertices.dot(rotation)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Rotate the display by the given angle along the given axis.</p>
+
+<p>:param theta: The angle by which to rotate (in radians)
+:type theta: float</p>
+
+<p>:param axis: The axis along which to rotate (defaults to the z-axis)
+:type axis: np.ndarray or list</p>
+
+<p>:returns: The rotation matrix used to apply the transformation.
+:rtype: np.ndarray</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.rotate_x" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.rotate_x">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">rotate_x</span><span class="signature">(self, theta)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate_x</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the view along the x axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">		&quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]))</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Rotate the view along the x axis.</p>
+
+<p>:param theta: angle by which to rotate (in radians)
+:type theta: float</p>
+
+<p>:returns: The rotation matrix used to apply the transformation.
+:rtype: np.ndarray</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.rotate_y" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.rotate_y">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">rotate_y</span><span class="signature">(self, theta)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate_y</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the view along the y axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">	   &quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]))</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Rotate the view along the y axis.</p>
+
+<p>:param theta: angle by which to rotate (in radians)
+:type theta: float</p>
+
+<p>:returns: The rotation matrix used to apply the transformation.
+:rtype: np.ndarray</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.rotate_z" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.rotate_z">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">rotate_z</span><span class="signature">(self, theta)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">rotate_z</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">):</span>
+		<span style="color: #546E7A; font-style: italic">&quot;&quot;&quot;Rotate the view along the z axis.</span>
+
+<span style="color: #546E7A; font-style: italic">		:param theta: angle by which to rotate (in radians)</span>
+<span style="color: #546E7A; font-style: italic">		:type theta: float</span>
+
+<span style="color: #546E7A; font-style: italic">		:returns: The rotation matrix used to apply the transformation.</span>
+<span style="color: #546E7A; font-style: italic">		:rtype: np.ndarray</span>
+
+<span style="color: #546E7A; font-style: italic">	   &quot;&quot;&quot;</span>
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">rotate</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">theta</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">axis</span><span style="color: #89DDFF">=</span><span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">array</span><span style="color: #89DDFF">([</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]))</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Rotate the view along the z axis.</p>
+
+<p>:param theta: angle by which to rotate (in radians)
+:type theta: float</p>
+
+<p>:returns: The rotation matrix used to apply the transformation.
+:rtype: np.ndarray</p>
+</div>
+
+
+                            </div>
+                            <div id="BaseShape.scale" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#BaseShape.scale">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">scale</span><span class="signature">(self, amt, amt_y=None, origin=None)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="highlight" style="background: #263238"><pre style="line-height: 125%;"><span></span>	<span style="color: #BB80B3">def</span> <span style="color: #82AAFF">scale</span><span style="color: #89DDFF">(self,</span> <span style="color: #EEFFFF">amt</span><span style="color: #89DDFF">,</span> <span style="color: #EEFFFF">amt_y</span><span style="color: #89DDFF">=None,</span> <span style="color: #EEFFFF">origin</span><span style="color: #89DDFF">=None):</span>
+
+		<span style="color: #EEFFFF">sys</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">stderr</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">write</span><span style="color: #89DDFF">(</span><span style="color: #C3E88D">&quot;Scale is not fully implemented yet.</span><span style="color: #EEFFFF">\n</span><span style="color: #C3E88D">&quot;</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #BB80B3">if</span> <span style="color: #EEFFFF">amt_y</span><span style="color: #89DDFF">==None:</span>
+			<span style="color: #EEFFFF">amt_y</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">amt</span>
+
+		<span style="color: #EEFFFF">scale_matrix</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">np</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">identity</span><span style="color: #89DDFF">(</span><span style="color: #F78C6C">4</span><span style="color: #89DDFF">)</span>
+		<span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">0</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">0</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">amt</span>
+		<span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">1</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">1</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #EEFFFF">amt_y</span>
+		<span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">[</span><span style="color: #F78C6C">2</span><span style="color: #89DDFF">,</span> <span style="color: #F78C6C">2</span><span style="color: #89DDFF">]</span> <span style="color: #89DDFF">=</span> <span style="color: #F78C6C">1</span> <span style="color: #546E7A; font-style: italic"># default for z</span>
+
+		<span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span> <span style="color: #89DDFF">=</span> <span style="color: #89DDFF">self.</span><span style="color: #EEFFFF">_vertices</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">dot</span><span style="color: #89DDFF">(</span><span style="color: #EEFFFF">scale_matrix</span><span style="color: #89DDFF">)</span>
+
+		<span style="color: #546E7A; font-style: italic"># raise Exception(&#39;Inherited class should implement&#39;)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                </section>
+                <section id="Canvas">
+                                <div class="attr variable"><a class="headerlink" href="#Canvas">#&nbsp;&nbsp</a>
+
+        <span class="name">Canvas</span><span class="default_value"> = &lt;<a href="#enviornment.Canvas.BaseCanvas">LineDream.enviornment.Canvas.BaseCanvas</a> object&gt;</span>
+    </div>
+
+            <div class="docstring"><p>Canvas Singleton Object. This controls the output 'canvas', and rendering of the draw loop.</p>
+
+<h1 id="attributes">Attributes</h1>
+
+<pre><code>    width
+    height
+</code></pre>
+</div>
+
+
+                </section>
+    </div>
