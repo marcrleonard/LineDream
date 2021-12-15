@@ -2,12 +2,11 @@ from .BaseShape import BaseShape
 
 from typing import Tuple
 class Line(BaseShape):
-	def __init__(self, verticies:[Tuple]=None, **kwargs):
+	'''This is how you create a line with two or more vertices'''
+	def __init__(self, vertices:[Tuple]=None, **kwargs):
 		super().__init__(**kwargs)
-
-		if verticies:
-
-			for (x,y) in verticies:
+		if vertices:
+			for (x,y) in vertices:
 				self.add_vertex(x,y,0)
 
 
