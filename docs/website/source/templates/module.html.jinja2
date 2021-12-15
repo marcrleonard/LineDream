@@ -9,6 +9,34 @@
 {#    {% endif %}#}
 {#{% enddefaultmacro %}#}
 
+{#{% defaultmacro bases(cls) %}#}
+{#    {%- if cls.bases -%}#}
+{#        (#}
+{#        {%- for base in cls.bases -%}#}
+{#            {{ base[1] }}#}
+{#            {{ base[:2] | link(text=base[2]) }}#}
+{#            {%- if loop.nextitem %}, {% endif %}#}
+{#        {%- endfor -%})#}
+{#    {%- endif -%}#}
+{#{% enddefaultmacro %}#}
+{##}
+{#{% defaultmacro class(cls) %}#}
+{#    {% set full_class_string = 'class ' + cls.qualname + bases(cls) + ':' %}#}
+{#    <div class="attr class">#}
+{#        {{ headerlink(cls) }}#}
+{#        {{ decorators(cls) }}#}
+{#        <span class="def">class</span>#}
+{#        <span class="">{{ cls.qualname }}{{- bases(cls) -}}:</span>#}
+{##}
+{#    </div>#}
+{#    <div>{{- bases(cls) -}}</div>#}
+{#    <div>{{ cls.__dict__ }}</div>#}
+{#    <div>{{ full_class_string }}</div>#}
+{#    <div>{{ full_class_string | highlight }}</div>#}
+{##}
+{#    <div>{{ cls.source }}</div>#}
+{#{% enddefaultmacro %}#}
+
 {% block title %}
 {% endblock %}
 {% block attribution %}

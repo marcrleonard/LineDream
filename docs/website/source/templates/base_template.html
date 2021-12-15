@@ -29,15 +29,46 @@ href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.0/themes/prism.min.css"
         .pdoc .name {
     }
     .pdoc pre {
-        background: unset;
+        /*background: unset;*/
         border:none;
-        padding: 1rem 1rem 1rem 1rem;
-        tab-size: 4;
+
     }
 
     .pdoc div:target > .attr, .pdoc section:target > .attr, .pdoc dd:target > a {
     background-color: #FFCB6B;
-}
+    }
+
+    /*.pdoc .attr {*/
+    /*    background-color: #0f3a42;*/
+    /*}*/
+
+    /*.pdoc .class {*/
+    /*    color: #EEFFFF;*/
+    /*}*/
+
+    /*.pdoc .name {*/
+    /*    color: #FFCB6B;*/
+
+    /*}*/
+
+    /*.pdoc .def {*/
+    /*    color: #BB80B3*/
+    /*}*/
+
+    /*.pdoc .base a {*/
+    /*    color: #EEFFFF;*/
+    /*}*/
+
+    /*.pdoc .signature {*/
+    /*    color: #EEFFFF;*/
+    /*}*/
+
+    /*.pdoc .decorator {*/
+    /*    color: #82AAFF;*/
+    /*}*/
+    /*attr class*/
+    /*attr functoin*/
+    /*attr variable*/
 
     </style>
 
@@ -46,12 +77,150 @@ href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.0/themes/prism.min.css"
              font-family: 'Comfortaa', cursive;
         }
 
-        .highlight {
-            border-radius: 10px;
-            /*padding:5px;*/
-            /*border: solid #5B6DCD 10px;*/
+        .btn {
+            text-decoration: none;
+        }
+        .btn-warning {
+            /*background-color: #F78C6C;*/
+            /*border-color: #F78C6C;*/
+            filter: drop-shadow(2px 2px 0px #263238);
+
         }
 
+        .btn-outline-dark {
+            /*color: #F78C6C;*/
+            box-shadow: 2px 2px 0px #FFCB6B;
+        }
+
+
+
+        .attr{
+            border-radius: 10px;
+        }
+
+        .pdoc .inherited dd:not(:last-child)::after {
+            content: "\A";
+        }
+
+        a {
+            color: #263238;
+            text-decoration: underline;
+        }
+
+        .poc a {
+            color: unset;
+            /*text-decoration: underline;*/
+        }
+
+        .heading-brand a {
+            color: #263238;
+            text-decoration: none;
+        }
+
+        .top-nav {
+            font-size: 1.0em;
+            /*filter: drop-shadow(1px 1px 0px #FFCB6B);*/
+            text-decoration: none;
+            padding-left: 12px;
+        }
+
+        .gs-col img {
+            max-width: 100%;
+        }
+
+
+
+    </style>
+
+    <style>
+        /*pygments style*/
+        .highlight pre {
+            line-height: 125%;
+            background-color: #263238;
+            border-radius: 10px;
+            padding: 1rem 1rem 1rem 1rem;
+            tab-size: 4;
+        }
+td.linenos .normal { color: #37474F; background-color: #263238; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #37474F; background-color: #263238; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #607A86; background-color: #263238; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #607A86; background-color: #263238; padding-left: 5px; padding-right: 5px; }
+.hll { background-color: #2C3B41 }
+.c { color: #546E7A; font-style: italic } /* Comment */
+.err { color: #FF5370 } /* Error */
+.esc { color: #89DDFF } /* Escape */
+.g { color: #EEFFFF } /* Generic */
+.k { color: #BB80B3 } /* Keyword */
+.l { color: #C3E88D } /* Literal */
+.n { color: #EEFFFF } /* Name */
+.o { color: #89DDFF } /* Operator */
+.p { color: #89DDFF } /* Punctuation */
+.ch { color: #546E7A; font-style: italic } /* Comment.Hashbang */
+.cm { color: #546E7A; font-style: italic } /* Comment.Multiline */
+.cp { color: #546E7A; font-style: italic } /* Comment.Preproc */
+.cpf { color: #546E7A; font-style: italic } /* Comment.PreprocFile */
+.c1 { color: #546E7A; font-style: italic } /* Comment.Single */
+.cs { color: #546E7A; font-style: italic } /* Comment.Special */
+.gd { color: #FF5370 } /* Generic.Deleted */
+.ge { color: #89DDFF } /* Generic.Emph */
+.gr { color: #FF5370 } /* Generic.Error */
+.gh { color: #C3E88D } /* Generic.Heading */
+.gi { color: #C3E88D } /* Generic.Inserted */
+.go { color: #546E7A } /* Generic.Output */
+.gp { color: #FFCB6B } /* Generic.Prompt */
+.gs { color: #FF5370 } /* Generic.Strong */
+.gu { color: #89DDFF } /* Generic.Subheading */
+.gt { color: #FF5370 } /* Generic.Traceback */
+.kc { color: #89DDFF } /* Keyword.Constant */
+.kd { color: #BB80B3 } /* Keyword.Declaration */
+.kn { color: #89DDFF; font-style: italic } /* Keyword.Namespace */
+.kp { color: #89DDFF } /* Keyword.Pseudo */
+.kr { color: #BB80B3 } /* Keyword.Reserved */
+.kt { color: #BB80B3 } /* Keyword.Type */
+.ld { color: #C3E88D } /* Literal.Date */
+.m { color: #F78C6C } /* Literal.Number */
+.s { color: #C3E88D } /* Literal.String */
+.na { color: #BB80B3 } /* Name.Attribute */
+.nb { color: #82AAFF } /* Name.Builtin */
+.nc { color: #FFCB6B } /* Name.Class */
+.no { color: #EEFFFF } /* Name.Constant */
+.nd { color: #82AAFF } /* Name.Decorator */
+.ni { color: #89DDFF } /* Name.Entity */
+.ne { color: #FFCB6B } /* Name.Exception */
+.nf { color: #82AAFF } /* Name.Function */
+.nl { color: #82AAFF } /* Name.Label */
+.nn { color: #FFCB6B } /* Name.Namespace */
+.nx { color: #EEFFFF } /* Name.Other */
+.py { color: #FFCB6B } /* Name.Property */
+.nt { color: #FF5370 } /* Name.Tag */
+.nv { color: #89DDFF } /* Name.Variable */
+.ow { color: #89DDFF; font-style: italic } /* Operator.Word */
+.w { color: #EEFFFF } /* Text.Whitespace */
+.mb { color: #F78C6C } /* Literal.Number.Bin */
+.mf { color: #F78C6C } /* Literal.Number.Float */
+.mh { color: #F78C6C } /* Literal.Number.Hex */
+.mi { color: #F78C6C } /* Literal.Number.Integer */
+.mo { color: #F78C6C } /* Literal.Number.Oct */
+.sa { color: #BB80B3 } /* Literal.String.Affix */
+.sb { color: #C3E88D } /* Literal.String.Backtick */
+.sc { color: #C3E88D } /* Literal.String.Char */
+.dl { color: #EEFFFF } /* Literal.String.Delimiter */
+.sd { color: #546E7A; font-style: italic } /* Literal.String.Doc */
+.s2 { color: #C3E88D } /* Literal.String.Double */
+.se { color: #EEFFFF } /* Literal.String.Escape */
+.sh { color: #C3E88D } /* Literal.String.Heredoc */
+.si { color: #89DDFF } /* Literal.String.Interpol */
+.sx { color: #C3E88D } /* Literal.String.Other */
+.sr { color: #89DDFF } /* Literal.String.Regex */
+.s1 { color: #C3E88D } /* Literal.String.Single */
+.ss { color: #89DDFF } /* Literal.String.Symbol */
+.bp { color: #89DDFF } /* Name.Builtin.Pseudo */
+.fm { color: #82AAFF } /* Name.Function.Magic */
+.vc { color: #89DDFF } /* Name.Variable.Class */
+.vg { color: #89DDFF } /* Name.Variable.Global */
+.vi { color: #89DDFF } /* Name.Variable.Instance */
+.vm { color: #82AAFF } /* Name.Variable.Magic */
+.il { color: #F78C6C } /* Literal.Number.Integer.Long */
     </style>
 
 </head>
@@ -63,9 +232,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.0/themes/prism.min.css"
             <div class="col-12 d-flex flex-row align-items-center justify-content-between">
                 <div class="heading-brand "><a href="/LineDream/docs/website/build" >LineDream</a></div>
                 <div class="me-auto">
-                    <a href="" class="btn btn-outline-dark" target="_blank">About</a>
-                    <a href="" class="btn btn-outline-dark" target="_blank">Documentation</a>
-                    <a href="" class="btn btn-outline-dark" target="_blank">Tutorials</a>
+                    <a href="{{url_root}}/getting-started" class="top-nav" target="">Getting Started</span></a>
+<!--                    <a href="{{url_root}}/getting-started" class="btn btn-outline-dark" target="">Getting Started</a>-->
+                    <a href="{{url_root}}/documentation" class="top-nav" target="">Documentation</a>
+                    <a href="{{url_root}}/about" class="top-nav" target="">About</a>
                 </div>
 
             </div>

@@ -7,6 +7,10 @@ import shutil
 from pygments import highlight as pyg_highlight
 from pygments.lexers import python as python_lexer
 from pygments.formatters import html
+from bs4 import BeautifulSoup, Tag
+
+BUILD_FOLDER = 'website/build'
+SOURCE_FOLDER = 'website/source'
 
 import os
 
@@ -25,27 +29,31 @@ def get_tags(s, tag, replace_tag=None):
 
 	return s
 
-t_p = pathlib.Path('website/source/templates')
+t_p = pathlib.Path(f'{SOURCE_FOLDER}/templates')
 
 # pdoc.render_helpers.lexer = python.Python3Lexer()
-# pdoc.render_helpers.formatter = html.HtmlFormatter(cssstyles='material', noclasses=True)
+pdoc.render_helpers.formatter = html.HtmlFormatter(style='material')
 
 from markupsafe import Markup
 
+formatter = html.HtmlFormatter(style='material')
+# print(formatter.get_style_defs())
+
 def _highlight(src):
 	lexer = python_lexer.Python3Lexer()
-	formatter = html.HtmlFormatter(style='material', noclasses=True)
+	formatter = html.HtmlFormatter(cssclass='highlight', style='material')
 	output = pyg_highlight(src, lexer, formatter)
-	return Markup(output)
+	return output
+	# return Markup(output)
 
-pdoc.render.env.filters['highlight'] = _highlight
+# pdoc.render.env.filters['highlight'] = _highlight
+
 pdoc.render.configure(template_directory=t_p)
 p  = pdoc.pdoc('LineDream')
 
 root = None
 if not root:
-	root = os.getenv('linedream_site', None) or 'http://localhost:63342/LineDream/docs/website/build/'
-
+	root = os.getenv('linedream_site', None) or f'http://localhost:63342/LineDream/docs/{BUILD_FOLDER}/'
 
 
 nav = get_tags(p, 'nav', 'div')
@@ -56,7 +64,7 @@ for template_name, html_str in [
 	('doc_nav.html', nav),
 	('doc_main.html', docs),
 ]:
-	with open(f'website/source/templates/{template_name}', 'w') as f:
+	with open(f'{SOURCE_FOLDER}/templates/{template_name}', 'w') as f:
 		f.write(html_str)
 
 
@@ -69,11 +77,13 @@ env = Environment(
 
 
 
-os.makedirs('website/build', exist_ok=True)
+os.makedirs(BUILD_FOLDER, exist_ok=True)
 
 pages = [
 	('', 'index.html'), # landing page
 	('documentation', 'documentation.html'),
+	('about', 'about.html'),
+	('tutorials', 'getting_started.html'),
 ]
 
 for path, template in pages:
@@ -83,9 +93,9 @@ for path, template in pages:
 	f_name = 'index.html'
 	if path:
 		f_name = f'{path}/{f_name}'
-		os.makedirs(f'website/build/{path}', exist_ok=True)
+		os.makedirs(f'{BUILD_FOLDER}/{path}', exist_ok=True)
 
-	with open(f'website/build/{f_name}', 'w') as f:
+	with open(f'{BUILD_FOLDER}/{f_name}', 'w') as f:
 		f.write(template_obj.render({
 			'url_root':root
 		}))
@@ -93,9 +103,9 @@ for path, template in pages:
 # move css into the folder
 
 folders_to_copy = [
-	('website/source/css/', 'website/build/css/'),
-	('website/source/static/', 'website/build/static/'),
-	('website/build/css/', 'website/build/documentation/css/')	# TEMP COPY FOR EASE OF DEVELOPMENT
+	(f'{SOURCE_FOLDER}/css/', f'{BUILD_FOLDER}/css/'),
+	(f'{SOURCE_FOLDER}/static/', f'{BUILD_FOLDER}/static/'),
+	# ('website/build/css/', 'website/build/documentation/css/')	# TEMP COPY FOR EASE OF DEVELOPMENT
 
 ]
 
@@ -116,17 +126,111 @@ for source_dir, target_dir in folders_to_copy:
 		else:
 			os.makedirs(new_path, exist_ok=True)
 
+def isolated_exec(code_str):
+	exec(code_str)
+	try:
+		Canvas.flush()
+	except Exception as e:
+		print(e)
 
-
-tut_page = 'Tutorial'
 links = []
 
-s = 'website/source/tutorial'
+s = f'{SOURCE_FOLDER}/getting-started'
 file_names = os.listdir(s)
 	# os.makedirs(target_dir, exist_ok=True)
 
-for file_name in file_names:
-	rst_stuff = pathlib.Path(s, file_name).read_text()
+file_order = [file_name for file_name in file_names]
+file_order.sort()
+
+contents_order = []
+
+for file in file_order:
+
+	article_name = pathlib.Path(file).stem
+
+	n = 0
+	if '_' in article_name:
+		n, article_name = article_name.split('_')
+
+	rst_stuff = pathlib.Path(s, file).read_text()
 	o = pdoc.markdown2.markdown(rst_stuff)
 
-	os.makedirs(target_dir, exist_ok=True)
+	soup = BeautifulSoup(o, parser='html.parser')
+	pres = soup.find_all('pre')
+
+	for c in pres:
+		code = c.text
+
+		made_output=False
+
+		if str(code).endswith('#show_output\n'):
+			code = code.replace('#show_output\n', '')
+
+			lines = code.splitlines()
+
+			print_line = None
+
+			for idx, line in enumerate(lines):
+				if 'Canvas.save(' in line:
+					print_line = idx
+					break
+
+			if print_line:
+
+				old_line = lines[print_line]
+
+				if 'Canvas.save(f' in old_line:
+					raise Exception("Please do not use f strings in the documentation examples, as it will confuse the build.")
+
+				old_filename = old_line.replace('Canvas.save(', '').replace("'", '').replace('"', '').replace(')','')
+
+
+				lines[print_line] = f'Canvas.save("{BUILD_FOLDER}/static/{old_filename}")'
+				_code = '\n'.join(lines)
+				isolated_exec(_code)
+				made_output = True
+
+		h = _highlight(code)
+		_c = BeautifulSoup(h)
+		c.replaceWith(_c)  # Put it where the A element is
+
+		if made_output:
+			new_tag = soup.new_tag("img")
+			new_tag.append("some text here")
+			# this means an image was rendered... Stick it into the parent
+			# c.append(new_tag)
+
+
+		# p.insert(0, c)  # put the A element inside the P (between <p> and </p>)
+
+	# This will attempt to find a title in the three options.
+	_titles = soup.find_all('h1')
+	_titles.extend(soup.find_all('h2'))
+	_titles.extend(soup.find_all('h3'))
+	if _titles:
+		article_name = _titles[0].text
+
+	article_tag = article_name.replace(' ', '_')
+
+	o = str(soup)
+
+	contents_order.append((f'<li><a href="#{article_tag}">{article_name.title()}</a></li>', f'<div id={article_tag}>{o}</div>'))
+
+article_names = [name for name, _ in contents_order]
+articles = [content for _, content in contents_order]
+
+os.makedirs(f'{BUILD_FOLDER}/getting-started', exist_ok=True)
+with open(f'{BUILD_FOLDER}/getting-started/index.html', 'w') as f:
+
+	template_obj = env.get_template('getting_started.html')
+
+
+
+	f.write(template_obj.render({
+		'url_root': root,
+		'tut_articles': articles,
+		'tut_contents': article_names
+	}))
+
+
+	# os.makedirs(target_dir, exist_ok=True)

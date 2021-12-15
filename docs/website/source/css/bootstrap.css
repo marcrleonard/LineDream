@@ -1886,9 +1886,6 @@ fieldset:disabled a.btn {
   background-color: transparent;
   background-image: none;
   border-color: black;
-
-  box-shadow: 2px 2px 0px #f6c343;
-  /*filter: drop-shadow(2px 2px 0px #f6c343);*/
 }
   .btn-outline-dark:hover {
     color: #ffffff;

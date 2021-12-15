@@ -1,0 +1,38 @@
+{% extends "base_template.html" %}
+{% block secondary_content %}
+
+
+<section class="mt-4" style="background: white">
+    <div class="container">
+        <h1>Getting Started</h1>
+        <div>
+                <p>Follow these guides below to learn how to use LineDream!</p>
+            </div>
+        <div class="row">
+
+
+            <div class="col-md-3 pl-0" style="border-right: 1px solid #ccc;">
+                <ul>
+                    {% for c in tut_contents %}
+                        {{ c | safe }}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-9 gs-col">
+                {% for article in tut_articles %}
+                        {{ article | safe }}
+                    {% endfor %}
+
+            </div>
+
+
+<!--            <div class="col-md-4">NAV</div>-->
+<!--            <div class="col-md-8">DOCS</div>-->
+
+        </div>
+
+
+    </div>
+</section>
+
+{% endblock %}
