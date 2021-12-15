@@ -11,9 +11,9 @@ Canvas = _Canvas
 """
 Canvas Singleton Object. This controls the output 'canvas', and rendering of the draw loop.
 
-# Attributes
-	width
-	height
+### Attributes
+- width
+- height
 """
 # Note, I had to do this Canvas=_Canvas thing so these ^ doc strings would work.
 

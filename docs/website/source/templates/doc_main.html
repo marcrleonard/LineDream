@@ -19,9 +19,9 @@ LineDream    </h1>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Canvas Singleton Object. This controls the output &#39;canvas&#39;, and rendering of the draw loop.</span>
 
-<span class="sd"># Attributes</span>
-<span class="sd">	width</span>
-<span class="sd">	height</span>
+<span class="sd">### Attributes</span>
+<span class="sd">- width</span>
+<span class="sd">- height</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1"># Note, I had to do this Canvas=_Canvas thing so these ^ doc strings would work.</span>
 
@@ -56,11 +56,8 @@ LineDream    </h1>
             <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Line</span><span class="p">(</span><span class="n">BaseShape</span><span class="p">):</span>
 	<span class="sd">&#39;&#39;&#39;This is how you create a line with two or more vertices&#39;&#39;&#39;</span>
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:[</span><span class="n">Tuple</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
 		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
 		<span class="k">if</span> <span class="n">vertices</span><span class="p">:</span>
-
 			<span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
@@ -81,11 +78,8 @@ LineDream    </h1>
                 <details>
             <summary>View Source</summary>
             <div class="highlight"><pre><span></span>	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:[</span><span class="n">Tuple</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
 		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
 		<span class="k">if</span> <span class="n">vertices</span><span class="p">:</span>
-
 			<span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
@@ -802,17 +796,17 @@ inherit from this class so the new primative is added to the draw queue.</p>
 
             <div class="docstring"><p>Creates a Rectangle Primative</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>c_x : int
-        center of rectangle x coord</p>
-
-<p>c_y: int
-        center of rectangle y coord</p>
-
-<p>:param width:
-:param height:
-:param kwargs:</p>
+<ul>
+<li><strong>c_x</strong> (int):
+center of rectangle x coord</li>
+<li><strong>c_y</strong> (int):
+center of rectangle y coord</li>
+<li><strong>:param width:</strong></li>
+<li><strong>:param height:</strong></li>
+<li><strong>:param kwargs:</strong></li>
+</ul>
 </div>
 
 
@@ -1899,11 +1893,12 @@ inherit from this class so the new primative is added to the draw queue.</p>
 
             <div class="docstring"><p>Canvas Singleton Object. This controls the output 'canvas', and rendering of the draw loop.</p>
 
-<h1 id="attributes">Attributes</h1>
+<h3 id="attributes">Attributes</h3>
 
-<pre><code>    width
-    height
-</code></pre>
+<ul>
+<li>width</li>
+<li>height</li>
+</ul>
 </div>
 
 

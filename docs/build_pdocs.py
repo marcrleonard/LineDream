@@ -48,7 +48,7 @@ def _highlight(src):
 
 # pdoc.render.env.filters['highlight'] = _highlight
 
-pdoc.render.configure(template_directory=t_p)
+pdoc.render.configure(template_directory=t_p, docformat='numpy')
 p  = pdoc.pdoc('LineDream')
 
 root = None
@@ -128,10 +128,7 @@ for source_dir, target_dir in folders_to_copy:
 
 def isolated_exec(code_str):
 	exec(code_str)
-	try:
-		Canvas.flush()
-	except Exception as e:
-		print(e)
+
 
 links = []
 
