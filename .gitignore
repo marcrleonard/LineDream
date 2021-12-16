@@ -143,3 +143,5 @@ dmypy.json
 cython_debug/
 
 tests/coverage_html
+
+docs/website/build
