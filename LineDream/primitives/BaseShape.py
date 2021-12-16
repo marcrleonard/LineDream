@@ -226,9 +226,6 @@ class BaseShape(object):
 		:param axis: The axis along which to rotate (defaults to the z-axis)
 		:type axis: np.ndarray or list
 
-		:returns: The rotation matrix used to apply the transformation.
-		:rtype: np.ndarray
-
 	   """
 
 		#CONVERT DEGREES TO RADIANS
