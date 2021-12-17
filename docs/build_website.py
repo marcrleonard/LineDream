@@ -33,6 +33,7 @@ def _highlight(src):
 pdoc.render.configure(template_directory=t_p, docformat='numpy')
 p  = pdoc.pdoc('LineDream', )
 
+# root = 'https://linedream.marcrleonard.com/'
 root = None
 if not root:
 	root = os.getenv('linedream_site', None) or f'http://localhost:63342/LineDream/docs/{BUILD_FOLDER}/'

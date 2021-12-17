@@ -17,9 +17,10 @@
 
 __title__ = 'LineDream'
 __description__ = 'A creative coding library...'
-__url__ = 'https://github.com/marcrleonard/LineDream'
-__version__ = '0.1.11'
+__url__ = 'https://linedream.marcrleonard.com/'
+# __url__ = 'https://github.com/marcrleonard/LineDream'
+__version__ = '0.1.12'
 __author__ = 'Marc Leonard'
 __author_email__ = 'marc.r.leonard@gmail.com'
 __license__ = 'GNU GPLv3'
-__copyright__ = 'Copyright (C) 2020- Marc Leonard'
+__copyright__ = 'Copyright (C) 2021 - Marc Leonard'
