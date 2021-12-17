@@ -32,3 +32,21 @@ When you create art, it will typically go something like this:
     #show_output    
 
 ![](../static/amazing_art.svg)
+
+##Canvas Coordinates
+
+When specifying a coordinate on the canvas, viewable locations are positive numbers. The (0, 0) position is in the upper left.
+
+    from LineDream import Canvas, Circle
+
+    Canvas.width = 300
+    Canvas.height = 100
+    Canvas.background_color = 'black'
+    
+    # create a circle at the (0,0) position of the canvas. The radius is 40
+    Circle(0, 0, 40, stroke_color='blue', stroke_width=10)
+    Canvas.save("show_0_position.svg")
+
+    #show_output
+
+![](../static/show_0_position.svg)

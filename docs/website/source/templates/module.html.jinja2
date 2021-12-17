@@ -1,43 +1,21 @@
 {% extends "default/module.html.jinja2" %}
 
-{#{% defaultmacro view_source(doc) %}#}
-{#    {% if show_source and doc.source %}#}
-{#        <details>#}
-{#            <summary>View Source</summary>#}
-{#            {{ doc.source | highlight_2 }}#}
-{#        </details>#}
-{#    {% endif %}#}
-{#{% enddefaultmacro %}#}
 
-{#{% defaultmacro bases(cls) %}#}
-{#    {%- if cls.bases -%}#}
-{#        (#}
-{#        {%- for base in cls.bases -%}#}
-{#            {{ base[1] }}#}
-{#            {{ base[:2] | link(text=base[2]) }}#}
-{#            {%- if loop.nextitem %}, {% endif %}#}
-{#        {%- endfor -%})#}
-{#    {%- endif -%}#}
-{#{% enddefaultmacro %}#}
-{##}
-{#{% defaultmacro class(cls) %}#}
-{#    {% set full_class_string = 'class ' + cls.qualname + bases(cls) + ':' %}#}
-{#    <div class="attr class">#}
-{#        {{ headerlink(cls) }}#}
-{#        {{ decorators(cls) }}#}
-{#        <span class="def">class</span>#}
-{#        <span class="">{{ cls.qualname }}{{- bases(cls) -}}:</span>#}
-{##}
-{#    </div>#}
-{#    <div>{{- bases(cls) -}}</div>#}
-{#    <div>{{ cls.__dict__ }}</div>#}
-{#    <div>{{ full_class_string }}</div>#}
-{#    <div>{{ full_class_string | highlight }}</div>#}
-{##}
-{#    <div>{{ cls.source }}</div>#}
-{#{% enddefaultmacro %}#}
+{% defaultmacro headerlink(doc) -%}
+    <a class="headerlink" href="#{{ doc.qualname }}">#</a>
+{% enddefaultmacro %}
 
-{% block title %}
+
+{% block nav_title %}
+{#    <img src="https://github.com/marcrleonard/LineDream/blob/master/icons/LineDream_Icon.png?raw=true" class="logo" alt="project logo">#}
 {% endblock %}
+
+
 {% block attribution %}
+{#    <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev">#}
+{#        built with <span class="visually-hidden">pdoc</span><img#}
+{#            alt="pdoc logo"#}
+{#            src="data:image/svg+xml,#}
+{#                    {%- filter urlencode %}{% include "pdoc-logo.svg" %}{% endfilter %}"/>#}
+{#    </a>#}
 {% endblock %}

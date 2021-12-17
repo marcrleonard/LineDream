@@ -26,7 +26,7 @@ Color of the inside of the shape
 
 ###stroke_color
 
-Color of the outer stoke of the object
+Color of the outer stroke of the object
 
 
     c.stroke_color='red'

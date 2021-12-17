@@ -9,9 +9,8 @@
                 <p>This is the API documentation of LineDream. This documentation was generated from version __version__ 1.3</p>
             </div>
 
-            <div class="col-md-3 pl-0" style="border-right: 1px solid #ccc;">{% include 'doc_nav.html' %}</div>
-            <div class="col-md-9">{% include 'doc_main.html' %}</div>
-
+            <div class="col-md-3 pl-0" style="border-right: 1px solid #ccc;">{{ doc_nav | safe }}</div>
+            <div class="col-md-9 pl-4 pr-0">{{ doc_main | safe }} </div>
 
 <!--            <div class="col-md-4">NAV</div>-->
 <!--            <div class="col-md-8">DOCS</div>-->

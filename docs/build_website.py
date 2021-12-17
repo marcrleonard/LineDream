@@ -16,28 +16,12 @@ import os
 
 # theme from https://www.designbombs.com/freebie/prism/
 
-def get_tags(s, tag, replace_tag=None):
-	s_tag = f'<{tag} '
-	e_tag = f'</{tag}>'
-	_, s = s.split(s_tag)
-	s, _ = s.split(e_tag)
-
-	if not replace_tag:
-		replace_tag = tag
-
-	s = f'{s_tag.replace(tag, replace_tag)}{s}{e_tag.replace(tag, replace_tag)}'
-
-	return s
-
-t_p = pathlib.Path(f'{SOURCE_FOLDER}/templates')
+t_p = pathlib.Path(f'website/source/templates')
 
 # pdoc.render_helpers.lexer = python.Python3Lexer()
 pdoc.render_helpers.formatter = html.HtmlFormatter(style='material')
 
-from markupsafe import Markup
-
 formatter = html.HtmlFormatter(style='material')
-# print(formatter.get_style_defs())
 
 def _highlight(src):
 	lexer = python_lexer.Python3Lexer()
@@ -46,26 +30,28 @@ def _highlight(src):
 	return output
 	# return Markup(output)
 
-# pdoc.render.env.filters['highlight'] = _highlight
-
 pdoc.render.configure(template_directory=t_p, docformat='numpy')
-p  = pdoc.pdoc('LineDream')
+p  = pdoc.pdoc('LineDream', )
 
 root = None
 if not root:
 	root = os.getenv('linedream_site', None) or f'http://localhost:63342/LineDream/docs/{BUILD_FOLDER}/'
 
 
-nav = get_tags(p, 'nav', 'div')
-nav = nav.replace('<h2>API Documentation</h2>', '<h3>Table of Contents</h3>')
-docs = get_tags(p, 'main', 'div')
+# Use BS to swizzle the names and tags
+_docs_soup = BeautifulSoup(p)
 
-for template_name, html_str in [
-	('doc_nav.html', nav),
-	('doc_main.html', docs),
-]:
-	with open(f'{SOURCE_FOLDER}/templates/{template_name}', 'w') as f:
-		f.write(html_str)
+_title = _docs_soup.find('h2', text='API Documentation')
+_title.name = 'h3'
+_title.string.replace_with('Table of Contents')
+
+nav = _docs_soup.find('nav')
+nav.name = 'div'
+
+docs = _docs_soup.find('main')
+docs.name = 'div'
+
+#######
 
 
 from jinja2 import Environment, PackageLoader, FileSystemLoader, select_autoescape
@@ -74,8 +60,6 @@ env = Environment(
     # loader = FileSystemLoader(t_path),
     autoescape=select_autoescape()
 )
-
-
 
 os.makedirs(BUILD_FOLDER, exist_ok=True)
 
@@ -97,7 +81,9 @@ for path, template in pages:
 
 	with open(f'{BUILD_FOLDER}/{f_name}', 'w') as f:
 		f.write(template_obj.render({
-			'url_root':root
+			'url_root':root,
+			'doc_nav': str(nav),
+			'doc_main': str(docs)
 		}))
 
 # move css into the folder
