@@ -12,7 +12,7 @@ Installation
 
 Documentation
 -------------
-https://linedream.readthedocs.io/en/latest/
+https://linedream.marcrleonard.com/documentation/
 
 Example
 -------
