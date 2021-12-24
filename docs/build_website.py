@@ -16,7 +16,7 @@ import os
 
 # theme from https://www.designbombs.com/freebie/prism/
 
-t_p = pathlib.Path(f'website/source/templates')
+t_p = pathlib.Path('website/source/templates')
 
 # pdoc.render_helpers.lexer = python.Python3Lexer()
 pdoc.render_helpers.formatter = html.HtmlFormatter(style='material')
