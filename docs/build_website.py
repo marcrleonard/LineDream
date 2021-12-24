@@ -9,8 +9,8 @@ from pygments.lexers import python as python_lexer
 from pygments.formatters import html
 from bs4 import BeautifulSoup, Tag
 
-BUILD_FOLDER = 'website/build'
-SOURCE_FOLDER = 'website/source'
+BUILD_FOLDER = 'docs/website/build'
+SOURCE_FOLDER = 'docs/website/source'
 
 import os
 
