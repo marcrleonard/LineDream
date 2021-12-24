@@ -13,7 +13,6 @@ Jinja2 = "==3.0.3"
 drawSvg = "~=1.8.3"
 numpy = "~=1.21.4"
 lxml = "~=4.6.4"
-numpy = "~=1.21.4"
 
 #numpy = "*"
 #requests = {git = "https://github.com/requests/requests.git", editable = true}
