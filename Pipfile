@@ -17,6 +17,7 @@ coverage = "~=6.2" # dev here and below
 pytest = "~=6.2.5"
 pdoc = "==8.0.1"
 Jinja2 = "==3.0.3"
+beautifulsoup4 = "~=4.10.0"
 
 #numpy = "*"
 #requests = {git = "https://github.com/requests/requests.git", editable = true}
