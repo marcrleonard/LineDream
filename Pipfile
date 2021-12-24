@@ -13,6 +13,10 @@ Jinja2 = "==3.0.3"
 drawSvg = "~=1.8.3"
 numpy = "~=1.21.4"
 lxml = "~=4.6.4"
+coverage = "~=6.2" # dev here and below
+pytest = "~=6.2.5"
+pdoc = "==8.0.1"
+Jinja2 = "==3.0.3"
 
 #numpy = "*"
 #requests = {git = "https://github.com/requests/requests.git", editable = true}
