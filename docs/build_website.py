@@ -224,3 +224,7 @@ with open(f'{BUILD_FOLDER}/getting-started/index.html', 'w') as f:
 
 
 	# os.makedirs(target_dir, exist_ok=True)
+print("run complete.")
+print('run from', os.getcwd())
+print('source dir', SOURCE_FOLDER)
+print('dst dir', BUILD_FOLDER)
