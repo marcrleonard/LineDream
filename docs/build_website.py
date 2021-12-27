@@ -9,35 +9,41 @@ from pygments.lexers import python as python_lexer
 from pygments.formatters import html
 from bs4 import BeautifulSoup, Tag
 
-BUILD_FOLDER = 'docs/website/build'
-SOURCE_FOLDER = 'docs/website/source'
+build_folder = 'build'
+bf = pathlib.Path(build_folder)
+sf = pathlib.Path(pathlib.Path(__file__).parent, 'source')
 
-import os
+BUILD_FOLDER = str(bf)
+SOURCE_FOLDER = str(sf)
 
 # theme from https://www.designbombs.com/freebie/prism/
 
-t_p = pathlib.Path('website/source/templates')
-
-# pdoc.render_helpers.lexer = python.Python3Lexer()
+t_p = pathlib.Path(SOURCE_FOLDER, 'templates')
 pdoc.render_helpers.formatter = html.HtmlFormatter(style='material')
 
 formatter = html.HtmlFormatter(style='material')
 
 def _highlight(src):
+	'''Custom code highlighter'''
 	lexer = python_lexer.Python3Lexer()
 	formatter = html.HtmlFormatter(cssclass='highlight', style='material')
 	output = pyg_highlight(src, lexer, formatter)
 	return output
-	# return Markup(output)
 
 pdoc.render.configure(template_directory=t_p, docformat='numpy')
-p  = pdoc.pdoc('LineDream', )
+p = pdoc.pdoc('LineDream')
+
+build_url = f'http://localhost:63342/LineDream/docs/{BUILD_FOLDER}/'
+current_running_dir = pathlib.Path(os.getcwd())
+if current_running_dir.parts[-1] != 'docs':
+	build_url = f'http://localhost:63342/LineDream/{BUILD_FOLDER}/'
 
 # root = 'https://linedream.marcrleonard.com/'
 root = None
 if not root:
-	root = os.getenv('linedream_site', None) or f'http://localhost:63342/LineDream/docs/{BUILD_FOLDER}/'
+	root = os.getenv('linedream_site', None) or build_url
 
+print(f'URL Root: {root}')
 
 # Use BS to swizzle the names and tags
 _docs_soup = BeautifulSoup(p)
@@ -57,7 +63,7 @@ docs.name = 'div'
 
 from jinja2 import Environment, PackageLoader, FileSystemLoader, select_autoescape
 env = Environment(
-    loader = PackageLoader('website', 'source/templates'),
+    loader = PackageLoader('source', 'templates'),
     # loader = FileSystemLoader(t_path),
     autoescape=select_autoescape()
 )
