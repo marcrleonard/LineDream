@@ -226,9 +226,12 @@ with open(f'{BUILD_FOLDER}/getting-started/index.html', 'w') as f:
 
 	# os.makedirs(target_dir, exist_ok=True)
 cwd = os.getcwd()
+env_vars = os.environ
 
 print("run complete.")
 print('run from', cwd, pathlib.Path(cwd).absolute())
 print('source dir', SOURCE_FOLDER, pathlib.Path(SOURCE_FOLDER).absolute())
 print('dst dir', BUILD_FOLDER, pathlib.Path(BUILD_FOLDER).absolute())
-print('env vars:', json.dumps(os.environ, indent=4))
+print('env vars:', env_vars)
+for k,v in env_vars.items():
+	print(k, v)
