@@ -63,4 +63,4 @@ class Square(Rectangle):
 		"""
 
 
-		super().__init__(c_x, c_y, width, width,**kwargs)
+		super().__init__(c_x, c_y, width, width, **kwargs)
