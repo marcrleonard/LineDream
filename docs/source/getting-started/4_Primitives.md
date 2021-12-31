@@ -49,7 +49,7 @@ A line, simply put, is multiple sets of coordinates which when rendered create l
 
     # Create a square with it's center at (40,50)
     # It's width and height are 10
-    Rectangle(40, 50, 10)
+    Square(40, 50, 10)
 
 
 ###Rectangle
