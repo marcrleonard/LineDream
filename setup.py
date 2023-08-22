@@ -20,7 +20,7 @@ REQUIRES_PYTHON = '>=3.7.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'drawSvg',
+    'drawsvg',
     'numpy',
     'lxml'
 ]

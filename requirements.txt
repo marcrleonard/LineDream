@@ -1,6 +1,6 @@
-drawSvg~=1.8.3
-numpy ~= 1.21.4
-lxml ~= 4.6.4
+drawsvg~=2.0
+numpy ~= 1.25.2
+lxml ~= 4.9.3
 
 coverage ~= 6.2
 pytest ~= 6.2.5

@@ -66,6 +66,7 @@ def test_all():
 
 	assert Canvas.frame_index == 0
 
+	master_file = 'tests/test_master_output.svg'
 	with open(output_file_name, 'r') as t:
 		with open('tests/test_master_output.svg', 'r') as m:
 
@@ -80,9 +81,10 @@ def test_all():
 				master_line = master_line.lstrip().rstrip()
 
 				if not (test_line == master_line):
-					print(f"{idx} Line Failed:")
+					print(f"Line {idx+1} Failed:")
 					print(f"   Master Line: {master_line}")
 					print(f"   Test Line:   {test_line}")
+					print(f"'Master Line' comes from {master_file}")
 
 					assert test_line == master_line
 				# assert t.read() == m.read()

@@ -1,4 +1,4 @@
-import drawSvg
+import drawsvg
 
 
 '''
@@ -41,7 +41,7 @@ class BaseCanvas(object):
 	# 		print(d)
 
 	def save(self, filename, open_viewer=False, flush=True):
-		svg_canvas = drawSvg.Drawing(self.width, self.height, origin=(0, 0), displayInline=False)
+		svg_canvas = drawsvg.Drawing(self.width, self.height, origin=(0, 0))
 
 		# There may be a better way to do this through the init above, but I found it confusing.
 		# it was much easier to just hardcode it.
@@ -53,7 +53,7 @@ class BaseCanvas(object):
 
 		if self.background_color:
 			svg_canvas.append(
-				drawSvg.Rectangle(x=0, y=0, width='100%', height='100%', fill=self.background_color)
+				drawsvg.Rectangle(x=0, y=0, width='100%', height='100%', fill=self.background_color)
 			)
 
 		# reversed is in here to show/write the objects in order they were added to the queue.
@@ -61,11 +61,11 @@ class BaseCanvas(object):
 		for shape in self.draw_queue:
 
 			#todo: add arc...
-			# drawSvg.Arc()
+			# drawsvg.Arc()
 
 			if shape.is_arc:
-				svg_obj = drawSvg.Arc(cx=shape.x, cy=shape.y * -1, r=shape.radius, cw=True,
-									  startDeg=shape.start_angle, endDeg=shape.end_angle,
+				svg_obj = drawsvg.Arc(cx=shape.x, cy=shape.y * -1, r=shape.radius, cw=True,
+									  start_deg=shape.start_angle, end_deg=shape.end_angle,
 										  fill=shape.fill_color, stroke=shape.stroke_color,
 										  stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity,
 									  close=shape.close_path
@@ -74,13 +74,11 @@ class BaseCanvas(object):
 
 			elif shape.is_circle:
 
-				# the lib wants to always make Y coods negative. This is likely because of the assumption
-				# the moving physically down on the Y axis puts an object in the correct region.
-				# Basically, negative Y is 'viewable' where as in P5, positive Y is viewable.
-
-				svg_obj = drawSvg.Ellipse(shape.x, shape.y*-1, shape.radius_x, shape.radius_y,
+				svg_obj = drawsvg.Ellipse(shape.x, shape.y, shape.radius_x, shape.radius_y,
 							fill=shape.fill_color, stroke=shape.stroke_color,
 							stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity)
+
+				# print(svg_obj)
 
 
 			elif len(shape.vertices) > 0:
@@ -97,24 +95,19 @@ class BaseCanvas(object):
 
 				start_l = verts.pop(0)
 				start_x = start_l[0]
-
-				# the lib wants to always make Y coods negative. This is likely because of the assumption
-				# the moving physically down on the Y axis puts an object in the correct region.
-				# Basically, negative Y is 'viewable' where as in P5, positive Y is viewable.
-				start_y = -start_l[1]
+				start_y = start_l[1]
 
 				other_verts = []
 				for o_v in verts:
 					x = o_v[0]
 
-					# See note above about negative Y values.
-					y = -o_v[1]
+					y = o_v[1]
 
 					# z = o_v[2]
 					other_verts.append(x)
 					other_verts.append(y)
 
-				svg_obj = drawSvg.Lines(start_x, start_y, *other_verts, fill=shape.fill_color, stroke=shape.stroke_color,
+				svg_obj = drawsvg.Lines(start_x, start_y, *other_verts, fill=shape.fill_color, stroke=shape.stroke_color,
 										stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity, close=shape.close_path)
 
 			else:
@@ -123,7 +116,7 @@ class BaseCanvas(object):
 
 			svg_canvas.append(svg_obj)
 
-		svg_canvas.saveSvg(filename)
+		svg_canvas.save_svg(filename)
 
 		if open_viewer:
 			import webbrowser
