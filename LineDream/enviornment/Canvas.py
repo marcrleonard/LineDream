@@ -40,7 +40,7 @@ class BaseCanvas(object):
 	# 	for d in self.draw_queue:
 	# 		print(d)
 
-	def save(self, filename, open_viewer=False, flush=True):
+	def save(self, filename, open_viewer=False, flush=True, as_string=False):
 		svg_canvas = drawsvg.Drawing(self.width, self.height, origin=(0, 0))
 
 		# There may be a better way to do this through the init above, but I found it confusing.
@@ -116,7 +116,12 @@ class BaseCanvas(object):
 
 			svg_canvas.append(svg_obj)
 
-		svg_canvas.save_svg(filename)
+		if as_string:
+			return svg_canvas.as_svg(header='')
+
+		else:
+
+			svg_canvas.save_svg(filename)
 
 		if open_viewer:
 			import webbrowser
