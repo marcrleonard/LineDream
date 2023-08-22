@@ -84,3 +84,10 @@ Todos:
 - Add .scale() (partially implemented in some classes)
 - Add 'tag' notion
 - Add PathGroup()
+
+Internal
+--------
+To push to PyPI run:
+```
+python setup.py sdist bdist_wheel
+```
