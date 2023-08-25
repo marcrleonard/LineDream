@@ -1,4 +1,6 @@
 import drawsvg
+from PIL import Image
+import io
 
 
 '''
@@ -124,8 +126,15 @@ class BaseCanvas(object):
 			svg_canvas.save_svg(filename)
 
 		if open_viewer:
-			import webbrowser
-			webbrowser.open('http://example.com')  # Go to example.com
+			c = svg_canvas.rasterize()
+			image_stream = io.BytesIO(c.png_data)
+			# Open the image using PIL from the BytesIO object
+			im = Image.open(image_stream)
+
+			# Display the image
+			im.show()
+
+			return True
 
 		if flush:
 			self.flush()

@@ -10,9 +10,10 @@ pdoc = "==8.0.1"
 Jinja2 = "==3.0.3"
 
 [packages]
-drawSvg = "~=2.0"
+drawSvg = {version = "~=2.0", extras = ["all"]}
 numpy = "~=1.25.2"
 lxml = "~=4.9.3"
+pillow = "~=10.0.0"
 
 coverage = "~=6.2" # dev here and below
 pytest = "~=6.2.5"
