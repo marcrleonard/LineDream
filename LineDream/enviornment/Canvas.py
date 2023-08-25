@@ -118,13 +118,6 @@ class BaseCanvas(object):
 
 			svg_canvas.append(svg_obj)
 
-		if as_string:
-			return svg_canvas.as_svg(header='')
-
-		else:
-
-			svg_canvas.save_svg(filename)
-
 		if open_viewer:
 			c = svg_canvas.rasterize()
 			image_stream = io.BytesIO(c.png_data)
@@ -135,6 +128,13 @@ class BaseCanvas(object):
 			im.show()
 
 			return True
+
+		if as_string:
+			return svg_canvas.as_svg(header='')
+
+		else:
+
+			svg_canvas.save_svg(filename)
 
 		if flush:
 			self.flush()
