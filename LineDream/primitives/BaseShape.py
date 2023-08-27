@@ -9,7 +9,7 @@ from ..helpers.CircleMath import CircleMath
 import sys
 
 class BaseShape(object):
-	'''All provided primatives inherit from this class. If a user wants to make thier own primative, its reccomended to
+	'''All provided primitives inherit from this class. If a user wants to make their own primitive, its recommended to
 	inherit from this class so the new primative is added to the draw queue.'''
 	def __init__(self, **kwargs):
 		self._vertices = np.array([])
@@ -218,9 +218,9 @@ class BaseShape(object):
 
 
 	def rotate(self, theta, origin=None, axis=np.array([0, 0, 1])):
-		"""Rotate the display by the given angle along the given axis.
+		"""Rotate the shape by the given angle along the given axis.
 
-		:param theta: The angle by which to rotate (in radians)
+		:param theta: The angle by which to rotate (in degrees)
 		:type theta: float
 
 		:param axis: The axis along which to rotate (defaults to the z-axis)
@@ -283,9 +283,9 @@ class BaseShape(object):
 
 
 	def rotate_x(self, theta):
-		"""Rotate the view along the x axis.
+		"""This is a convenience function to rotate the shape along the x axis.
 
-		:param theta: angle by which to rotate (in radians)
+		:param theta: The angle by which to rotate (in degrees)
 		:type theta: float
 
 		:returns: The rotation matrix used to apply the transformation.
@@ -295,9 +295,9 @@ class BaseShape(object):
 		self.rotate(theta, axis=np.array([1, 0, 0]))
 
 	def rotate_y(self, theta):
-		"""Rotate the view along the y axis.
+		"""This is a convenience function to rotate the shape along the y axis.
 
-		:param theta: angle by which to rotate (in radians)
+		:param theta: The angle by which to rotate (in degrees)
 		:type theta: float
 
 		:returns: The rotation matrix used to apply the transformation.
@@ -307,9 +307,9 @@ class BaseShape(object):
 		self.rotate(theta, axis=np.array([0, 1, 0]))
 
 	def rotate_z(self, theta):
-		"""Rotate the view along the z axis.
+		"""This is a convenience function to rotate the shape along the z axis.
 
-		:param theta: angle by which to rotate (in radians)
+		:param theta:The angle by which to rotate (in degrees)
 		:type theta: float
 
 		:returns: The rotation matrix used to apply the transformation.
