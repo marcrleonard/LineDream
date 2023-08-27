@@ -77,17 +77,15 @@ Canvas.save(f'example.svg')
 
 Todos:
 -----
-- Test/document colors/opacity
-- Document Canvas
+- Better document colors/opacity/styles for the SVG
 - Integrate TextPath with Hershey (initial implementation complete)
-- Convert all vertexes to Numpy arrays
 - Add .scale() (partially implemented in some classes)
-- Add 'tag' notion
-- Add PathGroup()
+- Add 'tag' notion for lines
+- Add PathGroup() or something similar. A way to create groups/layers. This would be analogous to how inkscape does it. It would provide the options for a user to, say, have different layers for different colored pens while plotting.
 
 Internal
 --------
 To push to PyPI run:
 ```
-python setup.py sdist bdist_wheel
+python setup.py update
 ```
