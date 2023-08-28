@@ -44,17 +44,17 @@ class Ellipse(BaseShape):
 		self.x = self.x + x
 		self.y = self.y + y
 
-	def scale(self, percent_x, percent_y=1):
-		self.radius_x = self.radius_x * percent_x
-		self.radius_y = self.radius_y * percent_y
+	def scale(self, percent_x, percent_y=100):
+		self.radius_x = self.radius_x * (percent_x/100)
+		self.radius_y = self.radius_y * (percent_y/100)
 
 class Circle(Ellipse):
 	def __init__(self,x,y, radius, **kwargs):
 		super().__init__(x,y, radius, radius, **kwargs)
 
 	def scale(self, percent, _percent_y=0):
-		self.radius_x = self.radius_x * percent
-		self.radius_y = self.radius_y * percent
+		self.radius_x = self.radius_x * (percent/100)
+		self.radius_y = self.radius_y * (percent/100)
 
 class Point(Circle):
 	def __init__(self,x,y, **kwargs):
