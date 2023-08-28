@@ -1,5 +1,8 @@
+import pathlib
+from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Group
 
-from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point
+GOLDEN_TEST_FILE = pathlib.Path(__file__).parent / 'test_master_output.svg'
+GENERATED_TEST_FILE = pathlib.Path(__file__).parent / 'test_output.svg'
 
 def test_all():
 
@@ -45,7 +48,6 @@ def test_all():
 	s2.fill_color='red'
 	s2.transform(20,5)
 
-
 	assert s2.center == (40.0, 175.0)
 	Point(*s2.center)
 
@@ -57,18 +59,21 @@ def test_all():
 	e = Ellipse(5, 100, 20, 20, fill_color='red', stroke_color='white')
 	e.stroke_width=10
 
+	g = Group(id='test-id', label='inkscape-label')
+	g.add_item(Rectangle(180,180,15,15, stroke_color='black'))
+
 	e2 = Ellipse(120, 30, 5, 8)
 	e2.fill_color='orange'
 	e2.transform(20,5)
+	e2.scale(200)
 
-	output_file_name = 'tests/test_output.svg'
-	Canvas.save(output_file_name)
+
+	Canvas.save(GENERATED_TEST_FILE)
 
 	assert Canvas.frame_index == 0
 
-	master_file = 'tests/test_master_output.svg'
-	with open(output_file_name, 'r') as t:
-		with open('tests/test_master_output.svg', 'r') as m:
+	with open(GENERATED_TEST_FILE, 'r') as t:
+		with open(GOLDEN_TEST_FILE, 'r') as m:
 
 			t_l = t.readlines()
 			t_m = m.readlines()
@@ -84,7 +89,7 @@ def test_all():
 					print(f"Line {idx+1} Failed:")
 					print(f"   Master Line: {master_line}")
 					print(f"   Test Line:   {test_line}")
-					print(f"'Master Line' comes from {master_file}")
+					print(f"'Master Line' comes from {GOLDEN_TEST_FILE}")
 
 					assert test_line == master_line
 				# assert t.read() == m.read()
