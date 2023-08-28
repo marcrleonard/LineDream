@@ -1,6 +1,7 @@
 # this should mirror what is available in an svg
 import math
 import sys
+import uuid
 
 import numpy as np
 
@@ -11,7 +12,7 @@ import sys
 class BaseShape(object):
 	'''All provided primitives inherit from this class. If a user wants to make their own primitive, its recommended to
 	inherit from this class so the new primative is added to the draw queue.'''
-	def __init__(self, **kwargs):
+	def __init__(self,**kwargs):
 		self._vertices = np.array([])
 		self._fill_color='none'
 		self._stroke_color='black'
@@ -21,7 +22,9 @@ class BaseShape(object):
 
 		self.is_circle=False
 		self.is_arc=False
-		self.is_multipath = False
+		self.is_group = False
+
+		self.id = str(uuid.uuid4())
 
 		for k,v in kwargs.items():
 			if hasattr(self, k):
@@ -33,11 +36,11 @@ class BaseShape(object):
 		_Canvas.draw_queue.append(self)
 
 
-	def __str__(self):
-		return f'<{__class__} fill_color: {self.fill_color}>'
-
-	def __repr__(self):
-		return f'<{__class__} fill_color: {self.fill_color}>'
+	# def __str__(self):
+	# 	return f'<{__class__} fill_color: {self.fill_color}>'
+	#
+	# def __repr__(self):
+	# 	return f'<{__class__} fill_color: {self.fill_color}>'
 
 	@property
 	def fill_color(self):

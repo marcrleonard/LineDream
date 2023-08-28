@@ -2,6 +2,8 @@ from .primitives.Line import Line
 from .primitives.BaseShape import BaseShape
 from .primitives.Ellipse import Circle, Ellipse, Point, Arc
 from .primitives.Rectangle import Rectangle, Square
+from .primitives.Rectangle import Rectangle, Square
+from .primitives.Group import Group
 from .enviornment.Canvas import _Canvas
 from .helpers.CircleMath import CircleMath
 # from .primitives.TextLine import TextLine
@@ -28,6 +30,7 @@ __all__ = [
 	'CircleMath',
 	'BaseShape',
 	'Canvas',
+	'Group'
 ]
 
 
