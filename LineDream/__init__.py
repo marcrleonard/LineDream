@@ -27,10 +27,10 @@ __all__ = [
 	'Point',
 	'Rectangle',
 	'Square',
+	'Group',
 	'CircleMath',
 	'BaseShape',
 	'Canvas',
-	'Group'
 ]
 
 
