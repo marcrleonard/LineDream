@@ -3,7 +3,10 @@ from ..enviornment.Canvas import _Canvas
 import uuid
 
 class Group(BaseShape):
-    '''This is how to create an ellipse'''
+    '''This will create a group. It also adds inkscape/axidraw compatible attributes
+    :param label: The label of the group
+    :param id: The id of the group
+    '''
     def __init__(self,label=None,id=None, **kwargs):
 
         super().__init__(**kwargs)
@@ -25,6 +28,7 @@ class Group(BaseShape):
         return f'inkscape:label="{self.label}"'
 
     def add_item(self, item):
+        '''Add a shape to the group'''
         self.items.append(item)
         _Canvas.remove_by_id(item.id)
 
