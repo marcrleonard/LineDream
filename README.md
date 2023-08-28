@@ -81,7 +81,7 @@ Todos:
 - Integrate TextPath with Hershey (initial implementation complete)
 - Add .scale() (partially implemented in some classes)
 - Add 'tag' notion for lines
-- Add PathGroup() or something similar. A way to create groups/layers. This would be analogous to how inkscape does it. It would provide the options for a user to, say, have different layers for different colored pens while plotting.
+- Add `Group` to the example
 
 Internal
 --------
