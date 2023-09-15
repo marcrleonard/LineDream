@@ -1,5 +1,5 @@
 import pathlib
-from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Group
+from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Group, Text
 
 GOLDEN_TEST_FILE = pathlib.Path(__file__).parent / 'test_master_output.svg'
 GENERATED_TEST_FILE = pathlib.Path(__file__).parent / 'test_output.svg'
@@ -66,6 +66,8 @@ def test_all():
 	e2.fill_color='orange'
 	e2.transform(20,5)
 	e2.scale(200)
+
+	Text("Hello", 30, 80)
 
 
 	Canvas.save(GENERATED_TEST_FILE)

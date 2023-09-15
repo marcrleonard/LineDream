@@ -82,22 +82,19 @@ class BaseCanvas(object):
 		return self._frame_index
 
 
-
-	# def draw(self):
-	# 	'''
-	# 	Force a draw of teh canvas...
-	# 	This is not implemented
-	# 	:return:
-	# 	'''
-	#
-	# 	for d in self.draw_queue:
-	# 		print(d)
-
 	def save(self, filename, open_viewer=False, flush=True, as_string=False):
+
+		bg = {}
+		if self.background_color:
+			bg = {
+				"style": f'background-color:{self.background_color}'
+			}
+
 		svg_canvas = drawsvg.Drawing(
 			self.width,
 			self.height,
 			origin=(0, 0),
+			**bg,
 			xmlns__inkscape = "http://www.inkscape.org/namespaces/inkscape"
 		)
 
@@ -109,17 +106,39 @@ class BaseCanvas(object):
 			svg_canvas.width = f'{self.width}{self.units}'
 			svg_canvas.height = f'{self.height}{self.units}'
 
-		if self.background_color:
-			svg_canvas.append(
-				drawsvg.Rectangle(x=0, y=0, width='100%', height='100%', fill=self.background_color)
-			)
-
-		# reversed is in here to show/write the objects in order they were added to the queue.
-		# This should better reflect the serial way objects were created.
 		for shape in self.draw_queue:
 
-			#todo: add arc...
-			# drawsvg.Arc()
+			if shape.is_text:
+
+				for line in shape.text_lines:
+
+					if len(line) <= 1:
+						continue
+
+					if len(line) == 2:
+						svg_obj = drawsvg.Line(line[0].real, line[0].imag, line[1].real, line[1].imag, fill=shape.fill_color, stroke=shape.stroke_color,
+											   stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity)
+					else:
+
+						start_x = line[0].real
+						start_y = line[0].imag
+
+						addl_points = []
+						for c in line[1:]:
+							addl_points.append(c.real)
+							addl_points.append(c.imag)
+						#*(c.real, c.imag) for c in line[1:]
+
+						svg_obj = drawsvg.Lines(start_x, start_y, *addl_points,
+						fill=shape.fill_color, stroke=shape.stroke_color,
+						stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity
+						)
+					# else:
+					# 	path = drawsvg.Lines((c.real, c.imag) for c in line)
+
+					svg_canvas.append(svg_obj)
+
+
 			if shape.is_group:
 				g = drawsvg.Group(
 					id=shape.id,

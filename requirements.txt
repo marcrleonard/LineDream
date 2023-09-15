@@ -2,6 +2,7 @@ drawsvg[all]~=2.0
 numpy ~= 1.25.2
 lxml ~= 4.9.3
 pillow ~= 10.0.0
+vpype ~= 1.13
 
 coverage ~= 6.2
 pytest ~= 6.2.5

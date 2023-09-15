@@ -23,6 +23,7 @@ class BaseShape(object):
 		self.is_circle=False
 		self.is_arc=False
 		self.is_group = False
+		self.is_text = False
 
 		self.id = str(uuid.uuid4())
 

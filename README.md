@@ -82,6 +82,7 @@ Todos:
 - Add .scale() (partially implemented in some classes)
 - Add 'tag' notion for lines
 - Add `Group` to the example
+- Refactor Canvas loop so each primitive created it's own SVG object rather than creating them in the canvas. I think that will make life easier.
 
 Internal
 --------
