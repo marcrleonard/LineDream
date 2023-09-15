@@ -22,7 +22,8 @@ REQUIRES_PYTHON = '>=3.7.0'
 REQUIRED = [
     'drawsvg',
     'numpy',
-    'lxml'
+    'lxml',
+    'vpype'
 ]
 
 # What packages are optional?
