@@ -1,4 +1,5 @@
 from .BaseShape import BaseShape
+from ..helpers.CircleMath import CircleMath
 
 
 class Ellipse(BaseShape):
@@ -80,3 +81,15 @@ class Arc(BaseShape):
 		self.end_angle = end_angle
 
 		self.is_arc = True
+
+	@property
+	def start_coords(self):
+		'''For the give arc, get the x,y coordinates of the start of the arc'''
+		d_x, d_y = CircleMath.distance_to_coords(self.start_angle, self.radius)
+		return self.x + d_x, self.y +d_y
+
+	@property
+	def end_coords(self):
+		'''For the give arc, get the x,y coordinates of the end start of the arc'''
+		d_x, d_y = CircleMath.distance_to_coords(self.end_angle, self.radius)
+		return self.x + d_x, self.y + d_y

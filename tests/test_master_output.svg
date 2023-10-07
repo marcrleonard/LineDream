@@ -26,5 +26,7 @@
     <path d="M54.75,73.25 L54.75,85.0625" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
     <path d="M59.25,73.25 L59.25,85.0625" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
     <path d="M66.0,77.1875 L64.875,77.75 L63.75,78.875 L63.1875,80.5625 L63.1875,81.6875 L63.75,83.375 L64.875,84.5 L66.0,85.0625 L67.6875,85.0625 L68.8125,84.5 L69.9375,83.375 L70.5,81.6875 L70.5,80.5625 L69.9375,78.875 L68.8125,77.75 L67.6875,77.1875 L66.0,77.1875" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
-    <path d="M120.0,85.0 A10,10,0,0,1,120.0,65.0" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+    <path d="M110.0,89.0 A10,10,0,0,1,110.0,69.0" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+    <ellipse cx="110.0" cy="89.0" rx="1" ry="1" fill="none" stroke="red" stroke-width="1" fill-opacity="1.0" />
+    <ellipse cx="110.0" cy="69.0" rx="1" ry="1" fill="none" stroke="blue" stroke-width="1" fill-opacity="1.0" />
 </svg>
