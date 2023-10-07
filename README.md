@@ -88,5 +88,5 @@ Internal
 --------
 To push to PyPI run:
 ```
-python setup.py update
+python setup.py upload
 ```
