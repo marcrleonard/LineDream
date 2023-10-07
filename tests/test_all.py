@@ -1,5 +1,5 @@
 import pathlib
-from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Group, Text
+from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Group, Text, Arc
 
 GOLDEN_TEST_FILE = pathlib.Path(__file__).parent / 'test_master_output.svg'
 GENERATED_TEST_FILE = pathlib.Path(__file__).parent / 'test_output.svg'
@@ -69,6 +69,8 @@ def test_all():
 
 	Text("Hello", 30, 80)
 
+
+	Arc(120, 75, 10, 90, 270)
 
 	Canvas.save(GENERATED_TEST_FILE)
 

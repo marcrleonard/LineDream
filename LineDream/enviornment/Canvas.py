@@ -18,11 +18,11 @@ def create_svg_object(shape:'BaseShape'):
 
 
 	if shape.is_arc:
-			svg_obj = drawsvg.Arc(cx=shape.x, cy=shape.y * -1, r=shape.radius, cw=True,
+			svg_obj = drawsvg.Arc(cx=shape.x, cy=shape.y, r=shape.radius, cw=True,
 								  start_deg=shape.start_angle, end_deg=shape.end_angle,
 								  fill=shape.fill_color, stroke=shape.stroke_color,
 								  stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity,
-								  close=shape.close_path
+								  # close=shape.close_path
 								  )
 
 
