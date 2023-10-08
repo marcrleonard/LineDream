@@ -69,8 +69,15 @@ def test_all():
 
 	Text("Hello", 30, 80)
 
+	# This will ensure that the arc starts in the middle of the square. Then, that the computed field start_cords
+	# matches the start/end the constructed the class.
+	s = Square(50,150,10, stroke_color='purple')
+	sa = Arc(s.c_x, s.c_y, 10, 0, 75, x_y_start_coords=True)
+	assert sa.start_coords == (s.c_x, s.c_y)
+	# This arc will start where the other one ends
+	sa = Arc(*sa.end_coords, 40, 0, 30, x_y_start_coords=True)
 
-	d=  Arc(110, 79, 10, 90, 270)
+	d =  Arc(100, 85, 10, 45, 210)
 	Circle(*d.start_coords, 1, stroke_color='red')
 	Circle(*d.end_coords, 1, stroke_color='blue')
 

@@ -62,18 +62,26 @@ class Point(Circle):
 class Arc(BaseShape):
 	'''This is how to create an ellipse'''
 
-	def __init__(self, x, y, radius, start_angle, end_angle, **kwargs):
+	def __init__(self, x, y, radius, start_angle, end_angle, x_y_start_coords=False, **kwargs):
 		'''This is the init for creating an __init__
 		:param x: x coord of center
 		:param y: y coord of center
 		:param radius_x: radius x
 		:param radius_y: radius y
+		:param x_y_start_coords: If true, this will use the x,y params as where the 0 degree location is - not the center of the arc. For example:
+								If you specify Arc(10, 15, 3, 0, 270) the arc start will be at (10,15).
 		:param kwargs: style kwargs
 
 
 		.. todo:: THIS NEEDS WORK
 		'''
 		super().__init__(**kwargs)
+
+		if x_y_start_coords:
+			d_x, d_y = CircleMath.distance_to_coords(start_angle, radius)
+			x = x-d_x
+			y = y-d_y
+
 		self.x = x
 		self.y = y
 		self.radius = radius
