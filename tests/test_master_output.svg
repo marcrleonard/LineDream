@@ -26,7 +26,12 @@
     <path d="M54.75,73.25 L54.75,85.0625" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
     <path d="M59.25,73.25 L59.25,85.0625" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
     <path d="M66.0,77.1875 L64.875,77.75 L63.75,78.875 L63.1875,80.5625 L63.1875,81.6875 L63.75,83.375 L64.875,84.5 L66.0,85.0625 L67.6875,85.0625 L68.8125,84.5 L69.9375,83.375 L70.5,81.6875 L70.5,80.5625 L69.9375,78.875 L68.8125,77.75 L67.6875,77.1875 L66.0,77.1875" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
-    <path d="M110.0,89.0 A10,10,0,0,1,110.0,69.0" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
-    <ellipse cx="110.0" cy="89.0" rx="1" ry="1" fill="none" stroke="red" stroke-width="1" fill-opacity="1.0" />
-    <ellipse cx="110.0" cy="69.0" rx="1" ry="1" fill="none" stroke="blue" stroke-width="1" fill-opacity="1.0" />
+    <path d="M45.0,145.0 L55.0,145.0 L55.0,155.0 L45.0,155.0 Z" fill="none" stroke="purple" stroke-width="1" fill-opacity="1.0" />
+    <path d="M50.0,150.0 A10,10,0,0,1,42.588190451025206,159.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+    <path d="M42.588190451025206,159.6592582628907 A10,10,0,0,1,32.588190451025206,169.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+    <path d="M22.588190451025206,159.6592582628907 A10,10,0,0,1,32.588190451025206,149.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+    <path d="M20.588190451025206,159.6592582628907 A12.0,12.0,0,0,1,32.588190451025206,147.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+    <path d="M107.07106781186548,92.07106781186548 A10,10,0,0,1,91.33974596215562,80.0" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+    <ellipse cx="107.07106781186548" cy="92.07106781186548" rx="1" ry="1" fill="none" stroke="red" stroke-width="1" fill-opacity="1.0" />
+    <ellipse cx="91.33974596215562" cy="80.0" rx="1" ry="1" fill="none" stroke="blue" stroke-width="1" fill-opacity="1.0" />
 </svg>

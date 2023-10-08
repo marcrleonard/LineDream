@@ -38,10 +38,12 @@ class Ellipse(BaseShape):
 
 		self.x = self.x + x
 		self.y = self.y + y
+		return self
 
-	def scale(self, percent_x, percent_y=100):
+	def scale(self, percent_x, percent_y=100, **kwargs):
 		self.radius_x = self.radius_x * (percent_x/100)
 		self.radius_y = self.radius_y * (percent_y/100)
+		return self
 
 class Circle(Ellipse):
 	def __init__(self,x,y, radius, **kwargs):
@@ -50,6 +52,7 @@ class Circle(Ellipse):
 	def scale(self, percent, _percent_y=0):
 		self.radius_x = self.radius_x * (percent/100)
 		self.radius_y = self.radius_y * (percent/100)
+		return self
 
 class Point(Circle):
 	def __init__(self,x,y, **kwargs):
@@ -101,3 +104,13 @@ class Arc(BaseShape):
 		'''For the give arc, get the x,y coordinates of the end start of the arc'''
 		d_x, d_y = CircleMath.distance_to_coords(self.end_angle, self.radius)
 		return self.x + d_x, self.y + d_y
+
+	def scale(self, percent, _percent_y=0, origin=None):
+		self.radius = self.radius * (percent/100)
+		return self
+
+	def rotate(self, theta, origin=None, axis=None):
+		self.start_angle +=theta
+		self.end_angle += theta
+		return self
+

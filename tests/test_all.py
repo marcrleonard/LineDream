@@ -75,7 +75,10 @@ def test_all():
 	sa = Arc(s.c_x, s.c_y, 10, 0, 75, x_y_start_coords=True)
 	assert sa.start_coords == (s.c_x, s.c_y)
 	# This arc will start where the other one ends
-	sa = Arc(*sa.end_coords, 40, 0, 30, x_y_start_coords=True)
+	Arc(*sa.end_coords, 10, 0, 90, x_y_start_coords=True)
+	# This will mirror the previous (because of the rotate(180)
+	Arc(*sa.end_coords, 10, 0, 90, x_y_start_coords=True).rotate(180)
+	a = Arc(*sa.end_coords, 10, 0, 90, x_y_start_coords=True).rotate(180).scale(120)
 
 	d =  Arc(100, 85, 10, 45, 210)
 	Circle(*d.start_coords, 1, stroke_color='red')

@@ -197,6 +197,8 @@ class BaseShape(object):
 
 		self._vertices = np.array(l)
 
+		return self
+
 
 	def transform(self, x, y, z=0):
 		'''Transform the vertices based on x/y coords'''
@@ -219,6 +221,7 @@ class BaseShape(object):
 
 
 		self._vertices = np.dot(self._vertices, translate_matrix.T)[:, :4]
+		return self
 
 
 	def rotate(self, theta, origin=None, axis=np.array([0, 0, 1])):
@@ -284,6 +287,7 @@ class BaseShape(object):
 
 		# self.transform(x_c, y_c)
 		# self._vertices = self._vertices.dot(rotation)
+		return self
 
 
 	def rotate_x(self, theta):
@@ -297,6 +301,7 @@ class BaseShape(object):
 
 		"""
 		self.rotate(theta, axis=np.array([1, 0, 0]))
+		return self
 
 	def rotate_y(self, theta):
 		"""This is a convenience function to rotate the shape along the y axis.
@@ -309,6 +314,7 @@ class BaseShape(object):
 
 	   """
 		self.rotate(theta, axis=np.array([0, 1, 0]))
+		return self
 
 	def rotate_z(self, theta):
 		"""This is a convenience function to rotate the shape along the z axis.
@@ -321,6 +327,7 @@ class BaseShape(object):
 
 	   """
 		self.rotate(theta, axis=np.array([0, 0, 1]))
+		return self
 
 
 	def scale(self, amt, amt_y=None, origin=None):
@@ -338,3 +345,4 @@ class BaseShape(object):
 		self._vertices = self._vertices.dot(scale_matrix)
 
 		# raise Exception('Inherited class should implement')
+		return self
