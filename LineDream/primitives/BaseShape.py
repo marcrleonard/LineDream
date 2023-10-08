@@ -4,6 +4,7 @@ import sys
 import uuid
 
 import numpy as np
+import drawsvg
 
 from ..enviornment.Canvas import _Canvas
 from ..helpers.CircleMath import CircleMath
@@ -346,3 +347,38 @@ class BaseShape(object):
 
 		# raise Exception('Inherited class should implement')
 		return self
+
+
+	@property
+	def svg_object(self):
+
+		if len(self.vertices) > 0:
+
+			verts = self.vertices
+
+			verts = verts.tolist()
+
+			# # verts = vertices.tolist()
+			if len(verts)== 0 :
+				print(f'verts contains one item of {[[0.0, 0.0, 0.0]]} ... continuing.')
+				return None
+
+			start_l = verts.pop(0)
+			start_x = start_l[0]
+			start_y = start_l[1]
+
+			other_verts = []
+			for o_v in verts:
+				x = o_v[0]
+
+				y = o_v[1]
+
+				# z = o_v[2]
+				other_verts.append(x)
+				other_verts.append(y)
+
+			return drawsvg.Lines(start_x, start_y, *other_verts, fill=self.fill_color, stroke=self.stroke_color,
+								stroke_width=self.stroke_width, fill_opacity=self.fill_opacity, close=self.close_path)
+
+		else:
+			raise Exception("This does not have vertices or a custom svg_object, so it cannot be rendered.")

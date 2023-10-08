@@ -1,5 +1,6 @@
 from .BaseShape import BaseShape
 from ..helpers.CircleMath import CircleMath
+import drawsvg
 
 
 class Ellipse(BaseShape):
@@ -44,6 +45,13 @@ class Ellipse(BaseShape):
 		self.radius_x = self.radius_x * (percent_x/100)
 		self.radius_y = self.radius_y * (percent_y/100)
 		return self
+
+	@property
+	def svg_object(self):
+		return drawsvg.Ellipse(self.x, self.y, self.radius_x, self.radius_y,
+							   fill=self.fill_color, stroke=self.stroke_color,
+							   stroke_width=self.stroke_width, fill_opacity=self.fill_opacity)
+
 
 class Circle(Ellipse):
 	def __init__(self,x,y, radius, **kwargs):
@@ -114,3 +122,11 @@ class Arc(BaseShape):
 		self.end_angle += theta
 		return self
 
+	@property
+	def svg_object(self):
+		return drawsvg.Arc(cx=self.x, cy=self.y, r=self.radius, cw=True,
+							  start_deg=self.start_angle, end_deg=self.end_angle,
+							  fill=self.fill_color, stroke=self.stroke_color,
+							  stroke_width=self.stroke_width, fill_opacity=self.fill_opacity,
+							  # close=shape.close_path
+							  )

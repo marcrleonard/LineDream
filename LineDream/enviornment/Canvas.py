@@ -12,57 +12,6 @@ SHAPES TO ADD:
 
 '''
 
-def create_svg_object(shape:'BaseShape'):
-
-	svg_obj = None
-
-
-	if shape.is_arc:
-			svg_obj = drawsvg.Arc(cx=shape.x, cy=shape.y, r=shape.radius, cw=True,
-								  start_deg=shape.start_angle, end_deg=shape.end_angle,
-								  fill=shape.fill_color, stroke=shape.stroke_color,
-								  stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity,
-								  # close=shape.close_path
-								  )
-
-
-	elif shape.is_circle:
-
-		svg_obj = drawsvg.Ellipse(shape.x, shape.y, shape.radius_x, shape.radius_y,
-								  fill=shape.fill_color, stroke=shape.stroke_color,
-								  stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity)
-
-
-	elif len(shape.vertices) > 0:
-
-		verts = shape.vertices
-
-		verts = verts.tolist()
-
-		# # verts = vertices.tolist()
-		if len(verts)== 0 :
-			print(f'verts contains one item of {[[0.0, 0.0, 0.0]]} ... continuing.')
-			return None
-
-		start_l = verts.pop(0)
-		start_x = start_l[0]
-		start_y = start_l[1]
-
-		other_verts = []
-		for o_v in verts:
-			x = o_v[0]
-
-			y = o_v[1]
-
-			# z = o_v[2]
-			other_verts.append(x)
-			other_verts.append(y)
-
-		svg_obj = drawsvg.Lines(start_x, start_y, *other_verts, fill=shape.fill_color, stroke=shape.stroke_color,
-								stroke_width=shape.stroke_width, fill_opacity=shape.fill_opacity, close=shape.close_path)
-
-	return svg_obj
-
 class BaseCanvas(object):
 	'''The canvas object controls all the render controls.'''
 	def __init__(self, x=1200, y=800, units=None):
@@ -139,20 +88,20 @@ class BaseCanvas(object):
 					svg_canvas.append(svg_obj)
 
 
-			if shape.is_group:
+			elif shape.is_group:
 				g = drawsvg.Group(
 					id=shape.id,
 					inkscape__label=shape.label,
 					inkscape__groupmode="layer"
 				)
 				for shape in shape.items:
-					svg_obj = create_svg_object(shape)
+					svg_obj = shape.svg_object
 					if svg_obj:
 						g.append(svg_obj)
 				svg_canvas.append(g)
 
 			else:
-				svg_obj = create_svg_object(shape)
+				svg_obj = shape.svg_object
 				if svg_obj:
 					svg_canvas.append(svg_obj)
 
