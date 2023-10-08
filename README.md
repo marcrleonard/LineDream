@@ -74,15 +74,49 @@ tt.scale(1.4)
 
 Canvas.save(f'example.svg')
 ```
+# Custom LineDream Shapes
+
+```python
+import math
+from LineDream.primitives.BaseShape import BaseShape
+
+class Hexagon(BaseShape):
+
+    def __init__(self, c_x, c_y, radius, **kwargs):
+        super().__init__(_close_path=True, **kwargs)
+
+        num_points = 6
+
+        # Calculate the angle between each point
+        angle_step = 2 * math.pi / num_points
+
+        for i in range(num_points):
+            angle = i * angle_step
+            x = c_x + radius * math.cos(angle)
+            y = c_y + radius * math.sin(angle)
+            self.add_vertex(x, y)
+
+
+if __name__ == "__main__":
+    from LineDream import Canvas
+
+    Canvas.width=356
+    Canvas.height=276
+    Canvas.units = "mm"
+    Canvas.background_color = "beige"
+
+    # Add a Hexagon in the middle of canvas with a radius of 50
+    Hexagon(Canvas.width/2, Canvas.height/2, 50, )
+
+    Canvas.save('', open_viewer=True)
+
+```
 
 Todos:
 -----
 - Better document colors/opacity/styles for the SVG
-- Integrate TextPath with Hershey (initial implementation complete)
-- Add .scale() (partially implemented in some classes)
 - Add 'tag' notion for lines
 - Add `Group` to the example
-- Refactor Canvas loop so each primitive created it's own SVG object rather than creating them in the canvas. I think that will make life easier.
 
 Internal
 --------
