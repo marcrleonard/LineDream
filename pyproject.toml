@@ -1,7 +1,32 @@
-# pyproject.toml
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "LineDream"
+version = "v0.3.15"
+description = "A generative art library"
+authors = [{ name = "Marc Leonard", email = "marc.r.leonard@gmail.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "drawSvg[all] ~=2.4.0",
+    "numpy ~=1.16",
+    "lxml ~=4.9.3",
+    "pillow ~=10.0.0",
+    "vpype ~=1.13",
+    "beautifulsoup4 ~=4.10.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage ~=6.2",
+    "pytest ~=6.2.5",
+    "pdoc ==8.0.1",
+    "Jinja2 ==3.0.3"
+]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
-#addopts = "-ra -q"
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
