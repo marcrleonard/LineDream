@@ -1,5 +1,5 @@
 from .BaseShape import BaseShape
-from ..enviornment.Canvas import _Canvas
+from ..environment.Canvas import _Canvas
 import uuid
 
 class Group(BaseShape):

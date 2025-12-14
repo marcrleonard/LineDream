@@ -2,13 +2,12 @@ from .primitives.Line import Line
 from .primitives.BaseShape import BaseShape
 from .primitives.Ellipse import Circle, Ellipse, Point, Arc
 from .primitives.Rectangle import Rectangle, Square
-from .primitives.Rectangle import Rectangle, Square
 from .primitives.Group import Group
 from .primitives.Text import Text
-from .enviornment.Canvas import _Canvas
+from .environment.Canvas import _Canvas
 from .helpers.CircleMath import CircleMath
 # from .primitives.TextLine import TextLine
-# from .enviornment.Tweaks import Tweaks
+# from .environment.Tweaks import Tweaks
 
 Canvas = _Canvas
 """

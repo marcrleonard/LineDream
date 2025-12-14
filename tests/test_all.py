@@ -65,7 +65,7 @@ def test_all():
 	e2 = Ellipse(120, 30, 5, 8)
 	e2.fill_color='orange'
 	e2.transform(20,5)
-	e2.scale(200)
+	e2.scale(2.0)
 
 	Text("Hello", 30, 80)
 
@@ -78,7 +78,7 @@ def test_all():
 	Arc(*sa.end_coords, 10, 0, 90, x_y_start_coords=True)
 	# This will mirror the previous (because of the rotate(180)
 	Arc(*sa.end_coords, 10, 0, 90, x_y_start_coords=True).rotate(180)
-	a = Arc(*sa.end_coords, 10, 0, 90, x_y_start_coords=True).rotate(180).scale(120)
+	a = Arc(*sa.end_coords, 10, 0, 90, x_y_start_coords=True).rotate(180).scale(1.2)
 
 	d =  Arc(100, 85, 10, 45, 210)
 	Circle(*d.start_coords, 1, stroke_color='red')

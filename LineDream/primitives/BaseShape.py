@@ -6,9 +6,8 @@ import uuid
 import numpy as np
 import drawsvg
 
-from ..enviornment.Canvas import _Canvas
+from ..environment.Canvas import _Canvas
 from ..helpers.CircleMath import CircleMath
-import sys
 
 class BaseShape(object):
 	'''All provided primitives inherit from this class. If a user wants to make their own primitive, its recommended to
@@ -32,17 +31,9 @@ class BaseShape(object):
 			if hasattr(self, k):
 				setattr(self, k, v)
 			else:
-				sys.stderr.write(f'attr "{k}" does not exist.')
-				# print(f'attr "{k}" does not exist.')
+				raise AttributeError(f'Invalid parameter "{k}" for {self.__class__.__name__}. Attribute does not exist.')
 
 		_Canvas.draw_queue.append(self)
-
-
-	# def __str__(self):
-	# 	return f'<{__class__} fill_color: {self.fill_color}>'
-	#
-	# def __repr__(self):
-	# 	return f'<{__class__} fill_color: {self.fill_color}>'
 
 	@property
 	def fill_color(self):
@@ -98,33 +89,12 @@ class BaseShape(object):
 	@property
 	def first_vertex(self):
 		'''The first vertex of the shape'''
-		# or do you just raise an exception?
 		rv = (None, None)
 		if  self.vertices.size > 0:
 			_rv = self.vertices[0]
 			rv = (_rv[0], _rv[1])
 
 		return rv
-
-	# Not sure why this was here, but it was not used so I'm commenting out.
-	# @property
-	# def last_vertex(self):
-	# 	# or do you just raise an exception?
-	# 	rv = (None, None)
-	# 	if  self.vertices.size > 0:
-	# 		_rv = self.vertices[-1]
-	# 		rv = (_rv[0], _rv[1])
-	#
-	# 	return rv
-
-	# @property
-	# def length(self):
-	# 	x = np.array(xcoordinates)
-	# 	y = np.array(ycoordinates)
-	#
-	# 	dist_array = (x[:-1] - x[1:]) ** 2 + (y[:-1] - y[1:]) ** 2
-	#
-	# 	np.sum(np.sqrt(dist_array))
 
 	@property
 	def min_x(self):
@@ -133,7 +103,8 @@ class BaseShape(object):
 
 		_v = self.vertices.tolist()
 
-		for x,y, z, _ in _v:
+		for vertex in _v:
+			x = vertex[0]
 			if x < rv:
 				rv = x
 		return rv
@@ -145,7 +116,8 @@ class BaseShape(object):
 
 		_v = self.vertices.tolist()
 
-		for x,y, z, _ in _v:
+		for vertex in _v:
+			x = vertex[0]
 			if x > rv:
 				rv = x
 		return rv
@@ -157,7 +129,8 @@ class BaseShape(object):
 
 		_v = self.vertices.tolist()
 
-		for x,y, z, _ in _v:
+		for vertex in _v:
+			y = vertex[1]
 			if y < rv:
 				rv = y
 		return rv
@@ -169,7 +142,8 @@ class BaseShape(object):
 
 		_v = self.vertices.tolist()
 
-		for x,y, z, _ in _v:
+		for vertex in _v:
+			y = vertex[1]
 			if y > rv:
 				rv = y
 		return rv
@@ -180,15 +154,6 @@ class BaseShape(object):
 		x = ((self.max_x - self.min_x)/2) + self.min_x
 		y = ((self.max_y - self.min_y)/2) + self.min_y
 		return (x,y)
-
-	# def rotate(self, degrees, origin=None):
-	#
-	# 	if not origin:
-	# 		x = [p[0] for p in self.vertices]
-	# 		y = [p[1] for p in self.vertices]
-	# 		origin = (max(x) + min(x)) / 2, (max(y) + min(y)) / 2
-	#
-	# 	self._vertices = CircleMath.rotate(self.vertices, origin=origin, degrees=degrees)
 
 	def add_vertex(self, x, y, z=0):
 		'''Append a set of vertexes to the primitive shape'''
@@ -203,17 +168,6 @@ class BaseShape(object):
 
 	def transform(self, x, y, z=0):
 		'''Transform the vertices based on x/y coords'''
-
-		# THIS IS DEFAULT BEHAVIOR IF IT IS NOT OVERRIDEN IN THE DERIVED CLASS.
-		# This will work for shapes/objects that user vertex's.. but not for things like Circles
-		#
-		# for idx, (o_x,o_y) in enumerate(self._vertices):
-		# 	o_x = o_x + x
-		# 	o_y = o_y + y
-		#
-		# 	self._vertices[idx] = (o_x, o_y)
-
-		# tmat = matrix.translation_matrix(x, y, z)
 
 		translate_matrix = np.identity(4)
 		translate_matrix[0, -1] = x
@@ -236,24 +190,14 @@ class BaseShape(object):
 
 	   """
 
-		#CONVERT DEGREES TO RADIANS
+		# Convert degrees to radians
 		theta = theta * math.pi / 180
 
 		axis = np.array(axis[:])
 
-		#
-
-		# tmat = matrix.rotation_matrix(axis, theta)
-
-		#
-
-		# NOTE: THIS ALL MIGHT NEED TO BE RADIANS
-		# This might be the wrong interpretatino...
 		x = axis[0]
 		y = axis[1]
 		z = axis[2]
-
-		# x, y, z = _normalize(axis)
 
 		s = np.sin(theta)
 		c = np.cos(theta)
@@ -286,8 +230,6 @@ class BaseShape(object):
 
 		self._vertices = np.dot(self._vertices, rotation.T)[:, :4]
 
-		# self.transform(x_c, y_c)
-		# self._vertices = self._vertices.dot(rotation)
 		return self
 
 
@@ -332,20 +274,26 @@ class BaseShape(object):
 
 
 	def scale(self, amt, amt_y=None, origin=None):
+		"""Scale the shape by the given amount.
 
-		sys.stderr.write("Scale is not fully implemented yet.\n")
+		:param amt: Scale factor for x-axis (2.0 = twice as big)
+		:type amt: float
+		:param amt_y: Scale factor for y-axis (defaults to amt for uniform scaling)
+		:type amt_y: float
+		:param origin: Origin point for scaling (defaults to shape center)
+		:type origin: tuple
+		"""
 
-		if amt_y==None:
+		if amt_y == None:
 			amt_y = amt
 
 		scale_matrix = np.identity(4)
 		scale_matrix[0, 0] = amt
 		scale_matrix[1, 1] = amt_y
-		scale_matrix[2, 2] = 1 # default for z
+		scale_matrix[2, 2] = 1  # default for z
 
 		self._vertices = self._vertices.dot(scale_matrix)
 
-		# raise Exception('Inherited class should implement')
 		return self
 
 

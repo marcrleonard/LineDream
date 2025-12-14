@@ -41,9 +41,16 @@ class Ellipse(BaseShape):
 		self.y = self.y + y
 		return self
 
-	def scale(self, percent_x, percent_y=100, **kwargs):
-		self.radius_x = self.radius_x * (percent_x/100)
-		self.radius_y = self.radius_y * (percent_y/100)
+	def scale(self, amt_x, amt_y=None, **kwargs):
+		"""Scale the ellipse by the given amount.
+
+		:param amt_x: Scale factor for x-axis (2.0 = twice as big)
+		:param amt_y: Scale factor for y-axis (defaults to amt_x for uniform scaling)
+		"""
+		if amt_y is None:
+			amt_y = amt_x
+		self.radius_x = self.radius_x * amt_x
+		self.radius_y = self.radius_y * amt_y
 		return self
 
 	@property
@@ -57,17 +64,24 @@ class Circle(Ellipse):
 	def __init__(self,x,y, radius, **kwargs):
 		super().__init__(x,y, radius, radius, **kwargs)
 
-	def scale(self, percent, _percent_y=0):
-		self.radius_x = self.radius_x * (percent/100)
-		self.radius_y = self.radius_y * (percent/100)
+	def scale(self, amt, _amt_y=None):
+		"""Scale the circle by the given amount.
+
+		:param amt: Scale factor (2.0 = twice as big)
+		"""
+		self.radius_x = self.radius_x * amt
+		self.radius_y = self.radius_y * amt
 		return self
 
 class Point(Circle):
 	def __init__(self,x,y, **kwargs):
 		super().__init__(x,y, .5, **kwargs)
 
-	def scale(self, percent_x=1, _percent_y=1):
-		raise Exception('Cannot scale a Point')
+	def scale(self, amt=1, _amt_y=None):
+		"""Points cannot be scaled. This is a no-op that returns self for method chaining."""
+		import sys
+		sys.stderr.write("Warning: Points cannot be scaled. Operation ignored.\n")
+		return self
 
 
 class Arc(BaseShape):
@@ -113,8 +127,12 @@ class Arc(BaseShape):
 		d_x, d_y = CircleMath.distance_to_coords(self.end_angle, self.radius)
 		return self.x + d_x, self.y + d_y
 
-	def scale(self, percent, _percent_y=0, origin=None):
-		self.radius = self.radius * (percent/100)
+	def scale(self, amt, _amt_y=None, origin=None):
+		"""Scale the arc by the given amount.
+
+		:param amt: Scale factor (2.0 = twice as big)
+		"""
+		self.radius = self.radius * amt
 		return self
 
 	def rotate(self, theta, origin=None, axis=None):

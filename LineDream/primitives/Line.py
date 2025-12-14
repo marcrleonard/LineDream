@@ -9,9 +9,3 @@ class Line(BaseShape):
 		if vertices:
 			for (x,y) in vertices:
 				self.add_vertex(x,y,0)
-
-
-
-
-# if __name__ == '__main__':
-# 	p = Path([(1,2),(2,5) ])
