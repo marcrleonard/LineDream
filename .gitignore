@@ -143,5 +143,6 @@ dmypy.json
 cython_debug/
 
 tests/coverage_html
+tests/test_output.svg
 
 docs/website/build

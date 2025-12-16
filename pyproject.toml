@@ -1,31 +1,42 @@
 [build-system]
 requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["LineDream*"]
+exclude = ["tests*"]
+
 [project]
 name = "LineDream"
 version = "v0.3.15"
 description = "A generative art library"
 authors = [{ name = "Marc Leonard", email = "marc.r.leonard@gmail.com" }]
-license = { text = "MIT" }
+license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.9"
 
 dependencies = [
     "drawSvg[all] ~=2.4.0",
-    "numpy ~=1.16",
-    "lxml ~=4.9.3",
-    "pillow ~=10.0.0",
+    "numpy >=1.24.0",
+    "lxml >=4.9.3",
+    "pillow >=10.4.0",
     "vpype ~=1.13",
-    "beautifulsoup4 ~=4.10.0"
+    "beautifulsoup4 ~=4.12.0"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "coverage ~=6.2",
-    "pytest ~=6.2.5",
+    "coverage ~=7.0",
+    "pytest ~=7.4.0",
     "pdoc ==8.0.1",
     "Jinja2 ==3.0.3"
 ]
+
+[project.urls]
+Homepage = "https://linedream.marcrleonard.com"
+Documentation = "https://linedream.marcrleonard.com/documentation/"
+Repository = "https://github.com/marcrleonard/LineDream"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

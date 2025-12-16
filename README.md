@@ -118,9 +118,47 @@ Todos:
 - Add 'tag' notion for lines
 - Add `Group` to the example
 
-Internal
---------
-To push to PyPI run:
+---
+
+## Development
+
+### Installation for Development
+```bash
+# Clone the repository
+git clone https://github.com/marcrleonard/LineDream.git
+cd LineDream
+
+# Install in editable mode with dev dependencies
+pip install -e ".[dev]"
 ```
-python setup.py upload
+
+### Running Tests
+```bash
+# Run tests locally
+pytest
+
+# Run tests with verbose output
+pytest tests/ -v
+
+# Run tests across multiple Python versions (3.9, 3.10, 3.11, 3.12)
+tox
+
+# Run tests with coverage report
+tox -e coverage
 ```
+
+### Building and Publishing
+
+```bash
+# Build the package
+python -m build
+
+# Upload to PyPI (requires twine and PyPI credentials)
+twine upload dist/*
+
+# Or upload to TestPyPI first
+twine upload --repository testpypi dist/*
+```
+
+### Project Structure
+All package metadata and dependencies are defined in `pyproject.toml` following modern Python packaging standards (PEP 517/518).

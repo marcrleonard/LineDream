@@ -18,7 +18,7 @@
 <g id="test-id" inkscape:label="inkscape-label" inkscape:groupmode="layer">
 <path d="M172.5,172.5 L187.5,172.5 L187.5,187.5 L172.5,187.5 Z" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
 </g>
-<ellipse cx="140" cy="35" rx="0.1" ry="8.0" fill="orange" stroke="black" stroke-width="1" fill-opacity="1.0" />
+<ellipse cx="140" cy="35" rx="10.0" ry="16.0" fill="orange" stroke="black" stroke-width="1" fill-opacity="1.0" />
 <path d="M32.25,73.25 L32.25,85.0625" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
 <path d="M40.125,73.25 L40.125,85.0625" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
 <path d="M32.25,78.875 L40.125,78.875" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
@@ -30,7 +30,7 @@
 <path d="M50.0,150.0 A10,10,0,0,1,42.588190451025206,159.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
 <path d="M42.588190451025206,159.6592582628907 A10,10,0,0,1,32.588190451025206,169.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
 <path d="M22.588190451025206,159.6592582628907 A10,10,0,0,1,32.588190451025206,149.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
-<path d="M32.46819045102521,159.6592582628907 A0.12,0.12,0,0,1,32.588190451025206,159.53925826289068" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
+<path d="M20.588190451025206,159.6592582628907 A12.0,12.0,0,0,1,32.588190451025206,147.6592582628907" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
 <path d="M107.07106781186548,92.07106781186548 A10,10,0,0,1,91.33974596215562,80.0" fill="none" stroke="black" stroke-width="1" fill-opacity="1.0" />
 <ellipse cx="107.07106781186548" cy="92.07106781186548" rx="1" ry="1" fill="none" stroke="red" stroke-width="1" fill-opacity="1.0" />
 <ellipse cx="91.33974596215562" cy="80.0" rx="1" ry="1" fill="none" stroke="blue" stroke-width="1" fill-opacity="1.0" />

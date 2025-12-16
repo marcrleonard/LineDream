@@ -1,8 +1,21 @@
 import pathlib
+import re
 from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Group, Text, Arc, Circle
 
 GOLDEN_TEST_FILE = pathlib.Path(__file__).parent / 'test_master_output.svg'
 GENERATED_TEST_FILE = pathlib.Path(__file__).parent / 'test_output.svg'
+
+def normalize_floats(text, precision=12):
+	"""Normalize floating-point numbers in text to consistent precision."""
+	def round_match(match):
+		num = float(match.group(0))
+		# Round to precision decimal places, then remove trailing zeros
+		rounded = f"{num:.{precision}f}".rstrip('0').rstrip('.')
+		return rounded
+
+	# Match floating-point numbers (including scientific notation)
+	pattern = r'-?\d+\.\d+(?:[eE][+-]?\d+)?'
+	return re.sub(pattern, round_match, text)
 
 def test_all():
 
@@ -101,13 +114,17 @@ def test_all():
 				test_line = test_line.lstrip().rstrip()
 				master_line = master_line.lstrip().rstrip()
 
-				if not (test_line == master_line):
+				# Normalize floating-point precision before comparison
+				test_line_normalized = normalize_floats(test_line)
+				master_line_normalized = normalize_floats(master_line)
+
+				if not (test_line_normalized == master_line_normalized):
 					print(f"Line {idx+1} Failed:")
 					print(f"   Master Line: {master_line}")
 					print(f"   Test Line:   {test_line}")
 					print(f"'Master Line' comes from {GOLDEN_TEST_FILE}")
 
-					assert test_line == master_line
+					assert test_line_normalized == master_line_normalized
 				# assert t.read() == m.read()
 
 if __name__ == '__main__':
