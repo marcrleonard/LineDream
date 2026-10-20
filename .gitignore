@@ -146,3 +146,5 @@ tests/coverage_html
 tests/test_output.svg
 
 docs/website/build
+# Website build output (docs/build_website.py)
+public/

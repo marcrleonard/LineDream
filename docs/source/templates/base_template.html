@@ -1,350 +1,181 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>LineDream</title>
-    <meta name="description" content="LineDream is a creative coding library for Python"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}LineDream — a creative coding library for Python{% endblock %}</title>
+    <meta name="description" content="{% block description %}LineDream is a creative coding library for Python. Draw with code and export clean SVGs for the web, pen plotters and laser cutters.{% endblock %}">
+    <meta name="theme-color" content="#F6F1E6">
+    <meta property="og:title" content="LineDream — a creative coding library for Python">
+    <meta property="og:description" content="A creative coding library for Python. Draw with code, export clean SVGs for the web and pen plotters.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231C1B18'/%3E%3Cg fill='none' stroke='%23FFCB6B' stroke-width='1.6'%3E%3Crect x='9' y='9' width='14' height='14'/%3E%3Crect x='9' y='9' width='14' height='14' transform='rotate(30 16 16)'/%3E%3Crect x='9' y='9' width='14' height='14' transform='rotate(60 16 16)'/%3E%3C/g%3E%3C/svg%3E">
 
-    <!--Google font-->
-    <link href="https://fonts.googleapis.com/css?family=K2D:300,400,500,700,800" rel="stylesheet">
+    <script>document.documentElement.classList.add('js')</script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-
-    <!-- Bootstrap CSS / Color Scheme -->
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">-->
-    <link rel="stylesheet" href="{{ url_root }}css/bootstrap.css">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.0/themes/prism.min.css"/>
-
-    <style>/*! pdoc */:root{--pdoc-background:#fff;}.pdoc{--text:#212529;--muted:#6c757d;--link:#3660a5;--link-hover:#1659c5;--code:#f7f7f7;--active:#fff598;--accent:#eee;--accent2:#c1c1c1;--nav-hover:rgba(255, 255, 255, 0.5);--name:#0066BB;--def:#008800;--annotation:#007020;}body{background-color:var(--pdoc-background);}html, body{width:100%;height:100%;}@media (max-width:769px){ #navtoggle{cursor:pointer;position:absolute;width:50px;height:40px;top:1rem;right:1rem;border-color:var(--text);color:var(--text);display:flex;opacity:0.8;}#navtoggle:hover{opacity:1;}#togglestate + div{display:none;}#togglestate:checked + div{display:inherit;}main, header{padding:2rem 3vw;}.git-button{display:none !important;}nav input[type="search"]:valid ~ *{display:none !important;}}@media (min-width:770px){:root{--sidebar-width:clamp(12.5rem, 28vw, 22rem);}nav{position:fixed;overflow:auto;height:100vh;width:var(--sidebar-width);}main, header{padding:3rem 2rem 3rem calc(var(--sidebar-width) + 3rem);width:calc(54rem + var(--sidebar-width));max-width:100%;}#navtoggle{display:none;}}#togglestate{display:none;}nav.pdoc{--pad:1.75rem;--indent:1.5rem;background-color:var(--accent);border-right:1px solid var(--accent2);box-shadow:0 0 20px rgba(50, 50, 50, .2) inset;padding:0 0 0 var(--pad);overflow-wrap:anywhere;scrollbar-width:thin; scrollbar-color:var(--accent2) transparent }nav.pdoc::-webkit-scrollbar{width:.4rem; }nav.pdoc::-webkit-scrollbar-thumb{background-color:var(--accent2); }nav.pdoc > div{padding:var(--pad) 0;}nav.pdoc .module-list-button{display:inline-flex;align-items:center;color:var(--text);border-color:var(--muted);margin-bottom:1rem;}nav.pdoc .module-list-button:hover{border-color:var(--text);}nav.pdoc input[type=search]{display:block;outline-offset:0;width:calc(100% - var(--pad));}nav.pdoc .logo{max-width:calc(100% - var(--pad));max-height:35vh;display:block;margin:0 auto 1rem;transform:translate(calc(-.5 * var(--pad)), 0);}nav.pdoc ul{list-style:none;padding-left:0;}nav.pdoc li{display:block;margin:0;padding:.2rem 0 .2rem var(--indent);transition:all 100ms;}nav.pdoc > div > ul > li{padding-left:0;}nav.pdoc li:hover{background-color:var(--nav-hover);}nav.pdoc a, nav.pdoc a:hover{color:var(--text);}nav.pdoc a{display:block;}nav.pdoc > h2:first-of-type{margin-top:1.5rem;}nav.pdoc .class:before{content:"class ";color:var(--muted);}nav.pdoc .function:after{content:"()";color:var(--muted);}nav.pdoc footer:before{content:"";display:block;width:calc(100% - var(--pad));border-top:solid var(--accent2) 1px;margin-top:1.5rem;padding-top:.5rem;}nav.pdoc footer{font-size:small;}html, main{scroll-behavior:smooth;}.pdoc{color:var(--text);box-sizing:border-box;line-height:1.5;background:none;}.pdoc .pdoc-button{display:inline-block;border:solid black 1px;border-radius:2px;font-size:.75rem;padding:calc(0.5em - 1px) 1em;transition:100ms all;}.pdoc .visually-hidden{position:absolute !important;width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0, 0, 0, 0) !important;white-space:nowrap !important;border:0 !important;}.pdoc h1, .pdoc h2, .pdoc h3{font-weight:300;margin:.3em 0;padding:.2em 0;}.pdoc a{text-decoration:none;color:var(--link);}.pdoc a:hover{color:var(--link-hover);}.pdoc blockquote{margin-left:2rem;}.pdoc pre{background-color:var(--code);border-top:1px solid var(--accent2);border-bottom:1px solid var(--accent2);margin-bottom:1em;padding:.5rem 0 .5rem .5rem;overflow-x:auto;}.pdoc code{color:var(--text);padding:.2em .4em;margin:0;font-size:85%;background-color:var(--code);border-radius:6px;}.pdoc a > code{color:inherit;}.pdoc pre > code{display:inline-block;font-size:inherit;background:none;border:none;padding:0;}.pdoc .modulename{margin-top:0;font-weight:bold;}.pdoc .modulename a{color:var(--link);transition:100ms all;}.pdoc .git-button{float:right;border:solid var(--link) 1px;}.pdoc .git-button:hover{background-color:var(--link);color:var(--pdoc-background);}.pdoc details{--shift:-40px;text-align:right;margin-top:var(--shift);margin-bottom:calc(0px - var(--shift));clear:both;filter:opacity(1);}.pdoc details:not([open]){height:0;overflow:visible;}.pdoc details > summary{font-size:.75rem;cursor:pointer;color:var(--muted);border-width:0;padding:0 .7em;display:inline-block;display:inline list-item;user-select:none;}.pdoc details > summary:focus{outline:0;}.pdoc details > div{margin-top:calc(0px - var(--shift) / 2);text-align:left;}.pdoc .docstring{margin-bottom:1.5rem;}.pdoc > section:first-of-type > .docstring{margin-bottom:3rem;}.pdoc .docstring pre{margin-left:1em;margin-right:1em;}.pdoc h1:target,.pdoc h2:target,.pdoc h3:target,.pdoc h4:target,.pdoc h5:target,.pdoc h6:target{background-color:var(--active);box-shadow:-1rem 0 0 0 var(--active);}.pdoc div:target > .attr,.pdoc section:target > .attr,.pdoc dd:target > a{background-color:var(--active);}.pdoc .attr:hover{filter:contrast(0.95);}.pdoc .headerlink{position:absolute;width:0;margin-left:-1.5rem;line-height:1.4rem;font-size:1.5rem;font-weight:normal;transition:all 100ms ease-in-out;opacity:0;}.pdoc .attr > .headerlink{margin-left:-2.5rem;}.pdoc *:hover > .headerlink,.pdoc *:target > .attr > .headerlink{opacity:1;}.pdoc .attr{display:block;color:var(--text);margin:1rem 0 .5rem;padding:.4rem 5rem .4rem 1rem;background-color:var(--accent);}.pdoc .classattr{margin-left:2rem;}.pdoc .name{color:var(--name);font-weight:bold;}.pdoc .def{color:var(--def);font-weight:bold;}.pdoc .signature{white-space:pre-wrap;}.pdoc .annotation{color:var(--annotation);}.pdoc .inherited{margin-left:2rem;}.pdoc .inherited dt{font-weight:700;}.pdoc .inherited dt, .pdoc .inherited dd{display:inline;margin-left:0;margin-bottom:.5rem;}.pdoc .inherited dd:not(:last-child):after{content:", ";}.pdoc .inherited .class:before{content:"class ";}.pdoc .inherited .function a:after{content:"()";}.pdoc .search-result .docstring{overflow:auto;max-height:25vh;}.pdoc .search-result.focused > .attr{background-color:var(--active);}.pdoc .attribution{margin-top:2rem;display:block;opacity:0.5;transition:all 200ms;filter:grayscale(100%);}.pdoc .attribution:hover{opacity:1;filter:grayscale(0%);}.pdoc .attribution img{margin-left:5px;height:35px;vertical-align:middle;width:70px;transition:all 200ms;}</style>
-
-    <style>
-        .pdoc .name {
-    }
-    .pdoc pre {
-        /*background: unset;*/
-        border:none;
-
-    }
-
-    .pdoc div:target > .attr, .pdoc section:target > .attr, .pdoc dd:target > a {
-    background-color: #FFCB6B;
-    }
-
-    /*.pdoc .attr {*/
-    /*    background-color: #0f3a42;*/
-    /*}*/
-
-    /*.pdoc .class {*/
-    /*    color: #EEFFFF;*/
-    /*}*/
-
-    /*.pdoc .name {*/
-    /*    color: #FFCB6B;*/
-
-    /*}*/
-
-    /*.pdoc .def {*/
-    /*    color: #BB80B3*/
-    /*}*/
-
-    /*.pdoc .base a {*/
-    /*    color: #EEFFFF;*/
-    /*}*/
-
-    /*.pdoc .signature {*/
-    /*    color: #EEFFFF;*/
-    /*}*/
-
-    /*.pdoc .decorator {*/
-    /*    color: #82AAFF;*/
-    /*}*/
-    /*attr class*/
-    /*attr functoin*/
-    /*attr variable*/
-
-    </style>
-
-    <style>
-           :root {
-  --warning: #FFCB6B;
- }
-
-        body{
-             font-family: 'Comfortaa', cursive;
-        }
-
-        /* Bootstrap overrides */
-
-        .text-warning {
-  color: #000000 !important;
-  filter: drop-shadow(2px 2px 0px #f6c343);
-  /*color: #f6c343 !important;*/
-  /*filter: drop-shadow(2px 2px 0px #000000);*/
-
-}
-        .heading-brand {
-  font-weight: 800;
-  font-size: 1.85rem;
-    /*filter: drop-shadow(2px 2px 0px #f6c343);*/
-
-}
-        .btn {
-  box-shadow: unset
-        }
-  .btn:active, .btn:focus, .btn:focus {
-    box-shadow: unset;
-}
-
-
-
-
-  .btn-warning {
-  color: #212529;
-  background-color: #FFCB6B;
-  border-color: #FFCB6B; }
-
-  .bg-gradient {
-  background: linear-gradient(#f2fafd, #e5f1f5); }
-  /*background: linear-gradient(#fffbf1, #fcf5f1); }*/
-
-        .btn {
-            text-decoration: none;
-        }
-        .btn-warning {
-            /*background-color: #F78C6C;*/
-            /*border-color: #F78C6C;*/
-            filter: drop-shadow(2px 2px 0px #263238);
-
-        }
-
-        .btn-outline-dark {
-            /*color: #F78C6C;*/
-            box-shadow: 2px 2px 0px #FFCB6B;
-        }
-
-
-
-        .attr{
-            border-radius: 10px;
-        }
-
-        .pdoc .inherited dd:not(:last-child)::after {
-            /*content: "\A";*/
-        }
-
-        a {
-            color: #263238;
-            text-decoration: underline;
-        }
-
-
-
-
-
-        .pdoc a {
-            color: #263238;
-            text-decoration: underline;
-            /*color: unset;*/
-            /*text-decoration: underline;*/
-        }
-
-        .heading-brand a {
-            color: #263238;
-            text-decoration: none;
-        }
-
-        .top-nav {
-            font-size: 1.0em;
-            /*filter: drop-shadow(1px 1px 0px #FFCB6B);*/
-            text-decoration: none;
-            padding-left: 12px;
-        }
-
-        .gs-col img {
-            max-width: 100%;
-        }
-
-        .pdoc .headerlink {
-            text-decoration: none;
-            font-size: 1.2rem;
-        }
-
-        .pdoc .attr > .headerlink {
-            margin-left: -2.2rem;
-        }
-
-        /*this will disable the mobile menu*/
-        #navtoggle {
-            display: none;
-        }
-
-    .nav-items {
-      text-align: right;
-    }
-
-
-    </style>
-
-    <style>
-        /*pygments style*/
-        .highlight pre {
-            line-height: 125%;
-            background-color: #263238;
-            border-radius: 10px;
-            padding: 1rem 1rem 1rem 1rem;
-            tab-size: 4;
-        }
-        td.linenos .normal { color: #37474F; background-color: #263238; padding-left: 5px; padding-right: 5px; }
-        span.linenos { color: #37474F; background-color: #263238; padding-left: 5px; padding-right: 5px; }
-        td.linenos .special { color: #607A86; background-color: #263238; padding-left: 5px; padding-right: 5px; }
-        span.linenos.special { color: #607A86; background-color: #263238; padding-left: 5px; padding-right: 5px; }
-        .hll { background-color: #2C3B41 }
-        .c { color: #546E7A; font-style: italic } /* Comment */
-        .err { color: #FF5370 } /* Error */
-        .esc { color: #89DDFF } /* Escape */
-        .g { color: #EEFFFF } /* Generic */
-        .k { color: #BB80B3 } /* Keyword */
-        .l { color: #C3E88D } /* Literal */
-        .n { color: #EEFFFF } /* Name */
-        .o { color: #89DDFF } /* Operator */
-        .p { color: #89DDFF } /* Punctuation */
-        .ch { color: #546E7A; font-style: italic } /* Comment.Hashbang */
-        .cm { color: #546E7A; font-style: italic } /* Comment.Multiline */
-        .cp { color: #546E7A; font-style: italic } /* Comment.Preproc */
-        .cpf { color: #546E7A; font-style: italic } /* Comment.PreprocFile */
-        .c1 { color: #546E7A; font-style: italic } /* Comment.Single */
-        .cs { color: #546E7A; font-style: italic } /* Comment.Special */
-        .gd { color: #FF5370 } /* Generic.Deleted */
-        .ge { color: #89DDFF } /* Generic.Emph */
-        .gr { color: #FF5370 } /* Generic.Error */
-        .gh { color: #C3E88D } /* Generic.Heading */
-        .gi { color: #C3E88D } /* Generic.Inserted */
-        .go { color: #546E7A } /* Generic.Output */
-        .gp { color: #FFCB6B } /* Generic.Prompt */
-        .gs { color: #FF5370 } /* Generic.Strong */
-        .gu { color: #89DDFF } /* Generic.Subheading */
-        .gt { color: #FF5370 } /* Generic.Traceback */
-        .kc { color: #89DDFF } /* Keyword.Constant */
-        .kd { color: #BB80B3 } /* Keyword.Declaration */
-        .kn { color: #89DDFF; font-style: italic } /* Keyword.Namespace */
-        .kp { color: #89DDFF } /* Keyword.Pseudo */
-        .kr { color: #BB80B3 } /* Keyword.Reserved */
-        .kt { color: #BB80B3 } /* Keyword.Type */
-        .ld { color: #C3E88D } /* Literal.Date */
-        .m { color: #F78C6C } /* Literal.Number */
-        .s { color: #C3E88D } /* Literal.String */
-        .na { color: #BB80B3 } /* Name.Attribute */
-        .nb { color: #82AAFF } /* Name.Builtin */
-        .nc { color: #FFCB6B } /* Name.Class */
-        .no { color: #EEFFFF } /* Name.Constant */
-        .nd { color: #82AAFF } /* Name.Decorator */
-        .ni { color: #89DDFF } /* Name.Entity */
-        .ne { color: #FFCB6B } /* Name.Exception */
-        .nf { color: #82AAFF } /* Name.Function */
-        .nl { color: #82AAFF } /* Name.Label */
-        .nn { color: #FFCB6B } /* Name.Namespace */
-        .nx { color: #EEFFFF } /* Name.Other */
-        .py { color: #FFCB6B } /* Name.Property */
-        .nt { color: #FF5370 } /* Name.Tag */
-        .nv { color: #89DDFF } /* Name.Variable */
-        .ow { color: #89DDFF; font-style: italic } /* Operator.Word */
-        .w { color: #EEFFFF } /* Text.Whitespace */
-        .mb { color: #F78C6C } /* Literal.Number.Bin */
-        .mf { color: #F78C6C } /* Literal.Number.Float */
-        .mh { color: #F78C6C } /* Literal.Number.Hex */
-        .mi { color: #F78C6C } /* Literal.Number.Integer */
-        .mo { color: #F78C6C } /* Literal.Number.Oct */
-        .sa { color: #BB80B3 } /* Literal.String.Affix */
-        .sb { color: #C3E88D } /* Literal.String.Backtick */
-        .sc { color: #C3E88D } /* Literal.String.Char */
-        .dl { color: #EEFFFF } /* Literal.String.Delimiter */
-        .sd { color: #546E7A; font-style: italic } /* Literal.String.Doc */
-        .s2 { color: #C3E88D } /* Literal.String.Double */
-        .se { color: #EEFFFF } /* Literal.String.Escape */
-        .sh { color: #C3E88D } /* Literal.String.Heredoc */
-        .si { color: #89DDFF } /* Literal.String.Interpol */
-        .sx { color: #C3E88D } /* Literal.String.Other */
-        .sr { color: #89DDFF } /* Literal.String.Regex */
-        .s1 { color: #C3E88D } /* Literal.String.Single */
-        .ss { color: #89DDFF } /* Literal.String.Symbol */
-        .bp { color: #89DDFF } /* Name.Builtin.Pseudo */
-        .fm { color: #82AAFF } /* Name.Function.Magic */
-        .vc { color: #89DDFF } /* Name.Variable.Class */
-        .vg { color: #89DDFF } /* Name.Variable.Global */
-        .vi { color: #89DDFF } /* Name.Variable.Instance */
-        .vm { color: #82AAFF } /* Name.Variable.Magic */
-        .il { color: #F78C6C } /* Literal.Number.Integer.Long */
-
-    </style>
+    {% block head %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_root }}css/site.css">
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LBW6S98FBC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LBW6S98FBC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-LBW6S98FBC');
-</script>
-
+      gtag('config', 'G-LBW6S98FBC');
+    </script>
 </head>
 <body>
-<section class="bg-gradient pt-4 pb-4">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 d-flex flex-row align-items-center justify-content-between">
-                <div class="heading-brand "><a href="/" >LineDream</a></div>
-                <div class="me-auto nav-items">
-                    <a href="/getting-started" class="top-nav" target="">Getting Started</span></a>
-<!--                    <a href="{{url_root}}/getting-started" class="btn btn-outline-dark" target="">Getting Started</a>-->
-                    <a href="/documentation" class="top-nav" target="">Documentation</a>
-                    <a href="/about" class="top-nav" target="">About</a>
-                </div>
 
-            </div>
-        </div>
-
-        {% block content %}
-        {% endblock %}
-
+<header class="site-header">
+    <div class="wrap">
+        <a href="{{ url_root }}" class="brand" aria-label="LineDream home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+                <rect width="32" height="32" rx="8" fill="#1C1B18"/>
+                <rect x="9" y="9" width="14" height="14" fill="none" stroke="#FFCB6B" stroke-width="1.6"/>
+                <rect x="9" y="9" width="14" height="14" fill="none" stroke="#FFCB6B" stroke-width="1.6"/>
+                <rect x="9" y="9" width="14" height="14" fill="none" stroke="#FFCB6B" stroke-width="1.6"/>
+            </svg>
+            LineDream
+        </a>
+        <nav class="site-nav" aria-label="Main">
+            <a href="{{ url_root }}getting-started/" {% if active == 'guide' %}aria-current="page"{% endif %}><span class="nav-long">Getting Started</span><span class="nav-short">Guide</span></a>
+            <a href="{{ url_root }}documentation/" {% if active == 'api' %}aria-current="page"{% endif %}><span class="nav-long">Documentation</span><span class="nav-short">API</span></a>
+            <a href="{{ url_root }}about/" {% if active == 'about' %}aria-current="page"{% endif %}>About</a>
+            <a href="https://github.com/marcrleonard/LineDream" class="nav-github" aria-label="LineDream on GitHub">
+                {% include "icon_github.html" %}
+                <span>GitHub</span>
+            </a>
+        </nav>
     </div>
-</section>
+</header>
 
-
-{% block secondary_content %}
+<main>
+{% block content %}
 {% endblock %}
+</main>
 
-<!--footer-->
-<footer class="py-5 bg-light">
-    <div class="container">
-<!--        <div class="row">-->
-<!--            <div class="col-12 text-center">-->
-<!--                <ul class="list-inline">-->
-<!--                    <li class="list-inline-item"><a href="https://github.com/marcrleonard/LineDream">Test Drive</a></li>-->
-<!--                    <li class="list-inline-item"><a href="https://github.com/marcrleonard/LineDream">API Docs</a></li>-->
-<!--                    <li class="list-inline-item"><a href="https://github.com/marcrleonard/LineDream">Fork LineDream on GitHub</a></li>-->
-<!--                </ul>-->
-<!--            </div>-->
-<!--        </div>-->
-        <div class="row my-2">
-            <div class="col-md-4 mx-auto text-muted text-center small-xl">
-                &copy; 2021 LineDream - All Rights Reserved
-            </div>
+<footer class="site-footer">
+    <div class="wrap">
+        <div class="about-col">
+            <a href="{{ url_root }}" class="brand" aria-label="LineDream home">
+                <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+                    <rect width="32" height="32" rx="8" fill="#1C1B18"/>
+                    <rect x="9" y="9" width="14" height="14" fill="none" stroke="#FFCB6B" stroke-width="1.6" transform="rotate(0 16 16)"/>
+                    <rect x="9" y="9" width="14" height="14" fill="none" stroke="#FFCB6B" stroke-width="1.6" transform="rotate(30 16 16)"/>
+                    <rect x="9" y="9" width="14" height="14" fill="none" stroke="#FFCB6B" stroke-width="1.6" transform="rotate(60 16 16)"/>
+                </svg>
+                LineDream
+            </a>
+            <p>A creative coding library for Python, originally designed for pen plotters.</p>
+        </div>
+        <div>
+            <h4>Learn</h4>
+            <ul>
+                <li><a href="{{ url_root }}getting-started/">Getting Started</a></li>
+                <li><a href="{{ url_root }}documentation/">API Reference</a></li>
+                <li><a href="{{ url_root }}about/">About</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Project</h4>
+            <ul>
+                <li><a href="https://github.com/marcrleonard/LineDream">GitHub</a></li>
+                <li><a href="https://pypi.org/project/LineDream/">PyPI</a></li>
+                <li><a href="https://github.com/marcrleonard/LineDream/issues">Issues</a></li>
+            </ul>
+        </div>
+        <div class="legal">
+            <span>&copy; {{ year }} LineDream &middot; MIT License</span>
+            <span>Made by <a href="https://marcrleonard.com" target="_blank" rel="noopener">Marc Leonard</a></span>
         </div>
     </div>
 </footer>
 
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<!--<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.7.3/feather.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/plugins/line-numbers/prism-line-numbers.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-python.min.js"></script>-->
-<!--<script src="js/scripts.js"></script>-->
+{% block after_body %}{% endblock %}
+
+<script>
+(function () {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Header border once the page scrolls
+    var header = document.querySelector('.site-header');
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Copy-to-clipboard buttons
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+        var label = btn.querySelector('.label');
+        btn.addEventListener('click', function () {
+            navigator.clipboard.writeText(btn.getAttribute('data-copy')).then(function () {
+                btn.classList.add('is-copied');
+                if (label) label.textContent = 'Copied';
+                setTimeout(function () {
+                    btn.classList.remove('is-copied');
+                    if (label) label.textContent = 'Copy';
+                }, 1600);
+            });
+        });
+    });
+
+    // "Pen plotter" drawing animation for inline LineDream SVGs
+    function plot(svg, totalMs) {
+        var strokes = svg.querySelectorAll('path, line, polyline, circle, ellipse, rect:not([width="100%"])');
+        var n = strokes.length;
+        svg.classList.add('is-plotting');
+        strokes.forEach(function (el, i) {
+            if (!el.getTotalLength) return;
+            var len = el.getTotalLength();
+            if (el._plot) el._plot.cancel();
+            el.style.strokeDasharray = len;
+            el._plot = el.animate(
+                [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+                { duration: Math.min(1400, 500 + len * 2), delay: (i / n) * totalMs, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' }
+            );
+        });
+    }
+    var plots = document.querySelectorAll('[data-plot]');
+    if (!reduceMotion && 'IntersectionObserver' in window && plots.length) {
+        var plotObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                plot(entry.target, +entry.target.getAttribute('data-plot') || 2000);
+                plotObserver.unobserve(entry.target);
+            });
+        }, { threshold: 0.25 });
+        plots.forEach(function (svg) { plotObserver.observe(svg); });
+    } else {
+        plots.forEach(function (svg) { svg.classList.add('is-plotting'); });
+    }
+    document.querySelectorAll('[data-replay]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var svg = document.querySelector(btn.getAttribute('data-replay'));
+            plot(svg, +svg.getAttribute('data-plot') || 2000);
+        });
+    });
+
+    // Fade sections in as they scroll into view
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+        var revealObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('is-visible');
+                revealObserver.unobserve(entry.target);
+            });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        reveals.forEach(function (el) { revealObserver.observe(el); });
+    } else {
+        reveals.forEach(function (el) { el.classList.add('is-visible'); });
+    }
+})();
+</script>
+{% block scripts %}{% endblock %}
 </body>
 </html>
