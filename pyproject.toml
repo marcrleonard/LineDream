@@ -1,40 +1,47 @@
 [build-system]
-requires = ["setuptools>=77.0.0", "wheel"]
+requires = ["setuptools>=77.0.0"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["LineDream*"]
-exclude = ["tests*"]
 
 [project]
 name = "LineDream"
-version = "v0.3.15"
+version = "0.3.15"
 description = "A generative art library"
 authors = [{ name = "Marc Leonard", email = "marc.r.leonard@gmail.com" }]
 license = "MIT"
 readme = "README.md"
 requires-python = ">=3.9"
-
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Artistic Software",
+    "Topic :: Multimedia :: Graphics",
+]
 dependencies = [
-    "drawSvg[all] ~=2.4.0",
+    "drawsvg ~=2.4.0",
+    # [all] (cairosvg, imageio-ffmpeg, pwkit) only backs Canvas.save(open_viewer=True) and has no Pyodide wheels
+    "drawsvg[all] ~=2.4.0; sys_platform != 'emscripten'",
     "numpy >=1.24.0",
-    "lxml >=4.9.3",
+    "lxml >=4.9.3",  # only for the experimental, unexported TextLine (primitives/hershey)
     "pillow >=10.4.0",
-    "vpype ~=1.13",
-    "beautifulsoup4 ~=4.12.0"
 ]
 
 [project.optional-dependencies]
-dev = [
-    "coverage ~=7.0",
-    "pytest ~=7.4.0",
-    "pdoc ==8.0.1",
-    "Jinja2 ==3.0.3"
-]
+# kept as an extra (not a dependency group) because Cloudflare Pages installs it with pip: requirements.txt -> .[docs]
 docs = [
     "pdoc ==8.0.1",
-    "Jinja2 ==3.0.3"
+    "Jinja2 ==3.0.3",
+    "beautifulsoup4 >=4.12",
+]
+
+[dependency-groups]
+dev = [
+    "pytest >=8",
+    "coverage >=7",
 ]
 
 [project.urls]
@@ -42,6 +49,14 @@ Homepage = "https://linedream.marcrleonard.com"
 Documentation = "https://linedream.marcrleonard.com/documentation/"
 Repository = "https://github.com/marcrleonard/LineDream"
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["LineDream*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+LineDream = ["fonts/*.json", "fonts/LICENSE"]
+
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "8.0"
 testpaths = ["tests"]

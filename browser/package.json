@@ -1,0 +1,12 @@
+{
+  "name": "linedream-browser",
+  "private": true,
+  "description": "Runs LineDream under Pyodide (Node and the browser)",
+  "type": "module",
+  "scripts": {
+    "test": "node run_tests.mjs"
+  },
+  "dependencies": {
+    "pyodide": "314.0.7"
+  }
+}

@@ -148,3 +148,6 @@ tests/test_output.svg
 docs/website/build
 # Website build output (docs/build_website.py)
 public/
+
+# Pyodide test runner / demo (browser/)
+node_modules/
