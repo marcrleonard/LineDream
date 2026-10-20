@@ -1,4 +1,4 @@
-![](./example.svg)
+![](https://raw.githubusercontent.com/marcrleonard/LineDream/master/example.svg)
 
 LineDream is a generative art library for Python. It is heavily influenced by P5 and Processing. However, it takes a more object oriented approach, with less global state in regards to styling and transformations.
 
