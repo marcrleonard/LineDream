@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LineDream in the browser</title>
+<style>
+  :root { --bg: #f6f1e7; --fg: #1d1b18; --muted: #6b655c; --line: #d9d1c2; --accent: #1d1b18; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17161a; --fg: #ece8e1; --muted: #9a958c; --line: #34323a; --accent: #ece8e1; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: grid; gap: 16px; }
+  h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  #status { color: var(--muted); font-size: 13px; }
+  .panes { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  textarea { width: 100%; min-height: 420px; padding: 12px; border: 1px solid var(--line); border-radius: 6px;
+             background: transparent; color: inherit; font: 13px/1.45 ui-monospace, monospace; tab-size: 4; resize: vertical; }
+  #out { border: 1px solid var(--line); border-radius: 6px; min-height: 420px; display: grid; place-items: center; overflow: auto; }
+  #out svg { max-width: 100%; height: auto; }
+  pre.err { color: #c0392b; white-space: pre-wrap; padding: 12px; margin: 0; align-self: start; }
+  button { justify-self: start; padding: 8px 16px; border: 1px solid var(--accent); border-radius: 6px;
+           background: var(--accent); color: var(--bg); font: inherit; cursor: pointer; }
+  button:disabled { opacity: 0.4; cursor: default; }
+</style>
+</head>
+<body>
+<main>
+  <h1>LineDream in the browser</h1>
+  <div id="status">Loading Pyodide…</div>
+  <div class="panes">
+    <textarea id="code" spellcheck="false">import random
+from LineDream import Canvas, Circle, Line, Text, CircleMath
+
+random.seed(10)
+Canvas.flush()
+Canvas.width, Canvas.height = 900, 500
+Canvas.background_color = 'beige'
+
+cx, cy, r = Canvas.width / 2, Canvas.height, 150
+Circle(cx, cy, r)
+for angle in range(0, 360, 2):
+	d = r
+	for ring in range(1, 6):
+		dx, dy = CircleMath.distance_to_coords(angle, d)
+		x, y = cx + dx, cy + dy
+		step = random.randint(4, 24 * ring)
+		ex, ey = CircleMath.distance_to_coords(angle, step)
+		Line([(x, y), (x + ex, y + ey)])
+		Circle(x + ex, y + ey, 2, fill_color='beige')
+		d += step + 2 * ring
+
+Text('LineDream', 0, Canvas.height - 50, width=Canvas.width, align='center', font_size=32)
+
+# the last expression is what gets drawn
+Canvas.save('', as_string=True)
+</textarea>
+    <div id="out"></div>
+  </div>
+  <button id="run" disabled>Run</button>
+</main>
+<script type="module">
+  // Query parameters, all optional:
+  //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN, same version as package.json)
+  //   ?wheel=<url>    a LineDream wheel to install instead of the PyPI release, e.g. ../dist/linedream-0.3.15-py3-none-any.whl
+  //                   (PyPI releases up to 0.3.15 still import vpype and require drawsvg[all], so they don't run here)
+  import { CORE_PACKAGES } from "./packages.mjs";
+
+  const PYODIDE_VERSION = "314.0.7";
+  const params = new URLSearchParams(location.search);
+  const indexURL = new URL(params.get("pyodide") || `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`, location.href).href;
+  const wheel = params.get("wheel") ? new URL(params.get("wheel"), location.href).href : "linedream";
+
+  const status = document.getElementById("status");
+  const code = document.getElementById("code");
+  const out = document.getElementById("out");
+  const run = document.getElementById("run");
+
+  const { loadPyodide } = await import(new URL("pyodide.mjs", indexURL).href);
+  const py = await loadPyodide({ indexURL });
+  status.textContent = "Loading numpy, pillow, lxml…";
+  await py.loadPackage(CORE_PACKAGES);
+  status.textContent = "Installing LineDream…";
+  py.globals.set("WHEEL", wheel);
+  await py.runPythonAsync(`
+import micropip
+await micropip.install(WHEEL)
+`);
+  const version = py.runPython(`from importlib.metadata import version; version("linedream")`);
+  status.textContent = `LineDream ${version} on Pyodide ${py.version}`;
+
+  async function render() {
+    run.disabled = true;
+    try {
+      const svg = await py.runPythonAsync(code.value);
+      out.innerHTML = typeof svg === "string" ? svg : "";
+    } catch (e) {
+      out.innerHTML = "";
+      const pre = document.createElement("pre");
+      pre.className = "err";
+      pre.textContent = e.message;
+      out.append(pre);
+    } finally {
+      run.disabled = false;
+    }
+  }
+  run.addEventListener("click", render);
+  code.addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") render(); });
+  await render();
+</script>
+</body>
+</html>

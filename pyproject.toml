@@ -22,7 +22,9 @@ classifiers = [
     "Topic :: Multimedia :: Graphics",
 ]
 dependencies = [
-    "drawSvg[all] ~=2.4.0",
+    "drawsvg ~=2.4.0",
+    # [all] (cairosvg, imageio-ffmpeg, pwkit) only backs Canvas.save(open_viewer=True) and has no Pyodide wheels
+    "drawsvg[all] ~=2.4.0; sys_platform != 'emscripten'",
     "numpy >=1.24.0",
     "lxml >=4.9.3",  # only for the experimental, unexported TextLine (primitives/hershey)
     "pillow >=10.4.0",
