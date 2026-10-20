@@ -33,8 +33,20 @@ def _tile(z, x, y):
 	return rgb[..., 0] * 256.0 + rgb[..., 1] + rgb[..., 2] / 256.0 - 32768.0
 
 
-def fetch_dem(lat, lon, zoom=11, size=768):
-	'''Return a size x size elevation grid (meters) centered on lat/lon.'''
+class DemInfo:
+	'''Georeferencing for a fetched grid: lat/lon -> unit coords (u right, v down) and meters per pixel.'''
+	def __init__(self, x0, y0, zoom, size, lat):
+		self.x0, self.y0, self.zoom, self.size = x0, y0, zoom, size
+		self.mpp = 156543.03392 * math.cos(math.radians(lat)) / 2 ** zoom
+		self.width_m = self.mpp * size
+
+	def to_uv(self, lat, lon):
+		x, y = _global_px(lat, lon, self.zoom)
+		return (x - self.x0) / self.size, (y - self.y0) / self.size
+
+
+def fetch_dem(lat, lon, zoom=11, size=768, meta=False):
+	'''Return a size x size elevation grid (meters) centered on lat/lon (and a DemInfo if meta=True).'''
 	cx, cy = _global_px(lat, lon, zoom)
 	x0, y0 = int(cx - size / 2), int(cy - size / 2)
 	tx0, ty0 = x0 // 256, y0 // 256
@@ -46,4 +58,5 @@ def fetch_dem(lat, lon, zoom=11, size=768):
 			mosaic[(ty - ty0) * 256:(ty - ty0 + 1) * 256, (tx - tx0) * 256:(tx - tx0 + 1) * 256] = _tile(zoom, tx, ty)
 
 	ox, oy = x0 - tx0 * 256, y0 - ty0 * 256
-	return mosaic[oy:oy + size, ox:ox + size]
+	grid = mosaic[oy:oy + size, ox:ox + size]
+	return (grid, DemInfo(x0, y0, zoom, size, lat)) if meta else grid

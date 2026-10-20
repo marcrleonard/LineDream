@@ -2,3 +2,4 @@ cache/
 renders/*
 !renders/contact_sheet.png
 !renders/seed_sweep.png
+!renders/vista_sheet.png
