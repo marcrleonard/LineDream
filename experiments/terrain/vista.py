@@ -45,7 +45,12 @@ class Scene:
 	shadows: bool = True
 
 	# HATCH (tone)
-	tone: str = "screen"         # screen (etching: straight lines, even spacing) | rings (cross-sections) | both
+	tone: str = "screen"         # screen (etching) | flow (strokes follow the form) | rings (cross-sections) | both | none
+	flow_dir: float = 0.0        # flow hatch direction on the surface: 0 = along contours, 90 = down the fall line
+	flow_sep: float = 2.6        # canvas px between flow lines in the darkest tone ...
+	flow_sep_max: float = 14.0   # ... and in the lightest tone that still gets lines
+	flow_min_tone: float = 0.3   # lighter than this stays blank paper
+	flow_min_len: int = 6        # drop streamlines shorter than this (steps)
 	hatch_angle: float = 0.0     # screen hatch direction, degrees
 	hatch_spacing: float = 3.0   # canvas px between screen hatch lines
 	cross: float = 0.0           # darkness above which a second, crossing hatch appears (0 = never)
@@ -65,6 +70,9 @@ class Scene:
 
 	# LINEWORK
 	silhouettes: bool = True
+	lost_edges: float = 0.0      # drop silhouette where the rock is lit (darkness below this): lost & found edges
+	overshoot: float = 0.0       # extend silhouette ends by this many px, like a quick pen stroke
+	wobble: float = 0.0          # hand tremor amplitude (px), seeded per stroke
 	sil_min: int = 10
 	contours: tuple = ()         # ((elevation_m, "ink" | "accent"), ...)
 	contour_every: float = 0.0   # regular contours, meters (0 = off) ...
@@ -93,6 +101,7 @@ class Scene:
 	accent: str = "#cf4a1f"
 	stroke_width: float = 0.8
 	frame: bool = True
+	plotter: bool = False        # two pens only (ink + accent), uniform width; haze becomes dashes, not grey
 
 
 def place(scene, info, cam_latlon, target_latlon, halo_latlon=None, **kw):
@@ -331,6 +340,135 @@ class Vista:
 		self.g_tone[hit.reshape(gh, gw) != 1] = -1
 		self.g_depth = np.minimum((self.fade(P) * 4).astype(int), 3).reshape(gh, gw)
 		self.g_hit = hit.reshape(gh, gw)
+		self.g_P = P.reshape(gh, gw, 3)
+
+	def flow_field(self, angle):
+		"""Screen-space angle field of a surface direction (smoothed sign-free, via doubled angles)."""
+		gh, gw = self.g_hit.shape
+		P = self.g_P.reshape(-1, 3)
+		gx, gy = self.ground(P[:, 0], P[:, 1], self.dzdx), self.ground(P[:, 0], P[:, 1], self.dzdy)
+		T = np.column_stack([-gy, gx, np.zeros_like(gx)])                  # along contour
+		Fd = np.column_stack([-gx, -gy, -(gx * gx + gy * gy)])              # down the fall line
+		T /= np.linalg.norm(T, axis=1, keepdims=True) + 1e-12
+		Fd /= np.linalg.norm(Fd, axis=1, keepdims=True) + 1e-12
+		a = np.radians(angle)
+		Dw = np.cos(a) * T + np.sin(a) * Fd
+		S0, _ = self.project(P)
+		S1, _ = self.project(P + 0.5 * self.px * Dw)
+		v = S1 - S0
+		th = np.arctan2(v[:, 1], v[:, 0]).reshape(gh, gw)
+		m = self.g_hit == 1
+		c = ndimage.gaussian_filter(np.where(m, np.cos(2 * th), 0), 1.5)
+		sn = ndimage.gaussian_filter(np.where(m, np.sin(2 * th), 0), 1.5)
+		return 0.5 * np.arctan2(sn, c)
+
+	def flow_hatch(self, angle, gate=0.0):
+		"""Evenly spaced streamlines along a surface direction (Jobard-Lefer style seeding);
+		spacing tightens with darkness, so the strokes carry both form and tone."""
+		from collections import deque
+		s = self.s
+		gh, gw = self.g_hit.shape
+		TH = self.flow_field(angle)
+		P = self.g_P.reshape(-1, 3)
+		grad = np.hypot(self.ground(P[:, 0], P[:, 1], self.dzdx), self.ground(P[:, 0], P[:, 1], self.dzdy)).reshape(gh, gw)
+		flat = grad < np.percentile(grad[self.g_hit == 1], 8)
+		tone = ndimage.gaussian_filter(np.where(self.g_hit == 1, np.maximum(self.g_tone, 0), 0), 1.8)
+		tone[self.g_hit != 1] = -1
+		half = (s.canvas[0] * (1 - 2 * s.margin)) / 2
+		smin, smax = s.flow_sep / half, s.flow_sep_max / half
+		h = 1.2 * 2 / gw
+		cell = smin / 2.5
+		ow, oh = int(2 / cell) + 1, int(2 * self.aspect / cell) + 1
+		occ = -np.ones((oh, ow), dtype=np.int32)
+		disks = {}
+		lo = max(s.flow_min_tone, gate)
+
+		def sep(t):
+			return smin + (smax - smin) * (1 - (t - lo) / (1 - lo + 1e-9)) ** 2
+
+		def crowded(p, d, lid):
+			cx, cy = int((p[0] + 1) / cell), int((self.aspect - p[1]) / cell)
+			k = max(int(d / cell + 0.5), 1)
+			if k not in disks:
+				yy, xx = np.mgrid[-k:k + 1, -k:k + 1]
+				msk = xx * xx + yy * yy <= k * k
+				disks[k] = (yy[msk], xx[msk])
+			dy, dx = disks[k]
+			v = occ[np.clip(cy + dy, 0, oh - 1), np.clip(cx + dx, 0, ow - 1)]
+			return bool(np.any((v >= 0) & (v != lid)))
+
+		def mark(p, lid):
+			occ[min(int((self.aspect - p[1]) / cell), oh - 1), min(int((p[0] + 1) / cell), ow - 1)] = lid
+
+		def valid(p, floor=1.0):
+			if abs(p[0]) > 1 or abs(p[1]) > self.aspect:
+				return None
+			r = int((self.aspect - p[1]) / (2 * self.aspect) * (gh - 1) + 0.5)
+			c = int((p[0] + 1) / 2 * (gw - 1) + 0.5)
+			if self.g_hit[r, c] != 1 or flat[r, c] or tone[r, c] < lo * floor or not self.in_window(p[None])[0]:
+				return None
+			return r, c
+
+		def trace(seed, lid):
+			line = [seed]
+			for sign in (1, -1):
+				p, prev, pts = seed, None, []
+				for _ in range(3000):
+					rc = valid(p, 0.7)
+					if rc is None:
+						break
+					v = np.array([np.cos(TH[rc]), np.sin(TH[rc])])
+					if prev is None:
+						v = v * sign
+					else:
+						if v @ prev < 0:
+							v = -v
+						if v @ prev < 0.87:  # turning > 30 deg in one step: a vortex, stop
+							break
+					q = p + h * v
+					rq = valid(q, 0.7)
+					if rq is None or crowded(q, 0.55 * sep(max(tone[rq], lo)), lid):
+						break
+					pts.append(q)
+					p, prev = q, v
+				line = (pts[::-1] + line) if sign == -1 else (line + pts)
+			return np.array(line)
+
+		order = np.flatnonzero((self.g_hit.ravel() == 1) & (tone.ravel() >= lo))
+		self.rng.shuffle(order)
+		randoms = iter(order)
+		queue = deque()
+		lid = 0
+		while True:
+			if queue:
+				seed = queue.popleft()
+			else:
+				nxt = next(randoms, None)
+				if nxt is None:
+					break
+				r, c = divmod(int(nxt), gw)
+				seed = np.array([c / (gw - 1) * 2 - 1, self.aspect - r / (gh - 1) * 2 * self.aspect])
+			rc = valid(seed)
+			if rc is None or crowded(seed, sep(tone[rc]), -2):
+				continue
+			line = trace(seed, lid)
+			if len(line) < s.flow_min_len:
+				continue
+			for p in line:
+				mark(p, lid)
+			# seeds one spacing to either side, so neighbours grow parallel
+			for i in range(0, len(line) - 1, 3):
+				d = line[min(i + 1, len(line) - 1)] - line[max(i - 1, 0)]
+				nrm = np.array([-d[1], d[0]]) / (np.hypot(*d) + 1e-12)
+				rc = valid(line[i])
+				if rc is not None:
+					dd = sep(tone[rc])
+					queue.append(line[i] + nrm * dd)
+					queue.append(line[i] - nrm * dd)
+			depth = self._gsample(self.g_depth, line).astype(int)
+			for a0, b0, dep in _runs(depth):
+				self.strokes.append(("hatch", int(dep), line[a0:b0]))
+			lid += 1
 
 	def _gsample(self, F, S, order=0):
 		gh, gw = F.shape
@@ -375,6 +513,9 @@ class Vista:
 			keep = np.ones(len(P), dtype=bool)
 			if s.mist is not None:
 				keep &= self.ground(P[:, 0], P[:, 1], self.E) > s.mist
+			if s.lost_edges:
+				dk = ndimage.uniform_filter1d(self.ground(P[:, 0], P[:, 1], self.dark), 7)
+				keep &= dk >= s.lost_edges
 			self.emit(P, keep, "sil")
 
 	def contours(self):
@@ -482,6 +623,11 @@ class Vista:
 			self.screen_hatch(s.hatch_angle)
 			if s.cross:
 				self.screen_hatch(s.hatch_angle + s.cross_angle, gate=s.cross)
+		if s.tone == "flow":
+			self.gbuffer()
+			self.flow_hatch(s.flow_dir)
+			if s.cross:
+				self.flow_hatch(s.flow_dir + 90, gate=s.cross)
 		if s.tone in ("rings", "both"):
 			self.hatch()
 		if self.s.silhouettes:
@@ -505,8 +651,34 @@ class Vista:
 		self.strokes.append(("accent", 0, S))
 
 	def render(self, filename):
+		return self.draw(self.build(), filename)
+
+	def _handmade(self, xy, role):
 		s = self.s
-		strokes = self.build()
+		if s.overshoot and role == "sil" and len(xy) > 2:
+			a, b = xy[1] - xy[0], xy[-1] - xy[-2]
+			a, b = a / (np.hypot(*a) + 1e-9), b / (np.hypot(*b) + 1e-9)
+			xy = np.vstack([xy[0] - a * s.overshoot, xy, xy[-1] + b * s.overshoot])
+		if s.wobble and len(xy) > 2:
+			d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(xy, axis=0).T))])
+			fr, ph = self.rng.uniform(0.01, 0.05, 3), self.rng.uniform(0, 6.3, 3)
+			off = sum(np.sin(d * f + p) for f, p in zip(fr, ph)) / 3 * s.wobble
+			t = np.gradient(xy, axis=0)
+			nrm = np.column_stack([-t[:, 1], t[:, 0]]) / (np.hypot(t[:, 0], t[:, 1])[:, None] + 1e-9)
+			xy = xy + nrm * off[:, None]
+		return xy
+
+	def _dashes(self, xy, depth):
+		# plotter haze: distant lines break into dashes instead of turning grey
+		if depth == 0 or len(xy) < 2:
+			return [xy]
+		d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(xy, axis=0).T))])
+		period, duty = 9.0, 1 - 0.22 * depth
+		on = (d % period) < period * duty
+		return [xy[a:b] for a, b, _ in _runs(np.where(on, 0, -1))]
+
+	def draw(self, strokes, filename):
+		s = self.s
 		W, H = s.canvas
 		m = s.margin * W
 		half = (W - 2 * m) / 2
@@ -522,21 +694,31 @@ class Vista:
 		layers = {}
 		for role, depth, S in strokes:
 			xy = np.column_stack([W / 2 + S[:, 0] * half, H / 2 - S[:, 1] * half])
-			xy = measure.approximate_polygon(xy, tolerance=0.3)
-			if len(xy) < 2:
-				continue
-			wm, col = styles[role]
-			if role not in ("sun", "accent"):
-				col = _mix(col, s.paper, depth / 4 * 0.85)
-			ln = Line(stroke_color=col, stroke_width=s.stroke_width * wm * (1 - depth * 0.12))
-			# bulk-set vertices; add_vertex() is O(n^2)
-			ln._vertices = np.column_stack([xy, np.zeros(len(xy)), np.ones(len(xy))])
-			layers.setdefault(f"{role}-{depth}", []).append(ln)
+			xy = self._handmade(xy, role)
+			accent = role in ("sun", "accent")
+			if s.plotter:
+				col, width = (s.accent if accent else s.ink), s.stroke_width
+				parts = self._dashes(xy, depth) if role in ("sil", "contour") else [xy]
+				label = "2-accent" if accent else "1-ink"
+			else:
+				wm, col = styles[role]
+				if not accent:
+					col = _mix(col, s.paper, depth / 4 * 0.85)
+				width = s.stroke_width * wm * (1 - depth * 0.12)
+				parts, label = [xy], f"{role}-{depth}"
+			for part in parts:
+				part = measure.approximate_polygon(part, tolerance=0.3)
+				if len(part) < 2:
+					continue
+				ln = Line(stroke_color=col, stroke_width=width)
+				# bulk-set vertices; add_vertex() is O(n^2)
+				ln._vertices = np.column_stack([part, np.zeros(len(part)), np.ones(len(part))])
+				layers.setdefault(label, []).append(ln)
 
 		if s.frame:
 			Line([(m, m), (W - m, m), (W - m, H - m), (m, H - m), (m, m)], stroke_color=s.ink, stroke_width=s.stroke_width)
 
-		# one inkscape layer per role/depth = one pen per layer on a plotter
+		# one inkscape layer per label = one pen per layer on a plotter
 		# (filled directly; Group.add_item's remove_by_id is O(n) per item)
 		grouped = set()
 		for label, lines in sorted(layers.items()):
@@ -546,3 +728,27 @@ class Vista:
 		Canvas.draw_queue = [q for q in Canvas.draw_queue if id(q) not in grouped]
 		Canvas.save(filename)
 		return len(strokes)
+
+
+def compose(dem, info, inside: Scene, outside: Scene, filename):
+	"""Two scenes, one camera: inside.window shows scene A, the rest of the frame shows scene B
+	(different sun, season, mist, tone style...). The window edge is drawn in accent."""
+	win = inside.window
+	a = Vista(dem, info, replace(inside, window=None))
+	b = Vista(dem, info, replace(outside, window=None))
+	sa, sb = a.build(), b.build()
+	a.s = replace(inside, window=win)   # in_window() below must see the real window
+	out = []
+	for strokes, want in ((sa, True), (sb, False)):
+		for role, depth, S in strokes:
+			if role == "sun":
+				if not want:
+					out.append((role, depth, S))
+				continue
+			m = a.in_window(S)
+			for i0, i1, _ in _runs(np.where(m == want, 0, -1)):
+				out.append((role, depth, S[i0:i1]))
+	a.s = replace(inside, window=win)
+	a.strokes = out
+	a.window_border()
+	return a.draw(a.strokes, filename)
