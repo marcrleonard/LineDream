@@ -13,10 +13,10 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/flow_field.svg" width="24%" alt="Flow field">
-  <img src="docs/images/topography.svg" width="24%" alt="Topography">
-  <img src="docs/images/spirograph.svg" width="24%" alt="Spirograph">
-  <img src="docs/images/schotter.svg" width="14.4%" alt="Schotter, after Georg Nees">
+  <img src="https://raw.githubusercontent.com/marcrleonard/LineDream/master/docs/images/flow_field.svg" width="24%" alt="Flow field">
+  <img src="https://raw.githubusercontent.com/marcrleonard/LineDream/master/docs/images/topography.svg" width="24%" alt="Topography">
+  <img src="https://raw.githubusercontent.com/marcrleonard/LineDream/master/docs/images/spirograph.svg" width="24%" alt="Spirograph">
+  <img src="https://raw.githubusercontent.com/marcrleonard/LineDream/master/docs/images/schotter.svg" width="14.4%" alt="Schotter, after Georg Nees">
 </p>
 
 <p align="center">
@@ -71,7 +71,7 @@ Text("LineDream", 24, 360, font_size=28, stroke_color="#1C1B18")
 Canvas.save("hello.svg")
 ```
 
-<p align="center"><img src="docs/images/quickstart.svg" width="600" alt="Output of the quickstart sketch"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/marcrleonard/LineDream/master/docs/images/quickstart.svg" width="600" alt="Output of the quickstart sketch"></p>
 
 `Canvas.save("hello.svg", open_viewer=True)` opens the result as soon as it is written, and
 `Canvas.save("", as_string=True)` returns the SVG instead of writing a file.
@@ -112,7 +112,7 @@ Canvas.save("hexagon.svg")
 ```
 
 More sketches, with their source, live in the [gallery](https://linedream.marcrleonard.com) and in
-[`docs/source/gallery`](docs/source/gallery).
+[`docs/source/gallery`](https://github.com/marcrleonard/LineDream/tree/master/docs/source/gallery).
 
 ## Using LineDream in your own web page
 
