@@ -1,0 +1,4 @@
+numba>=0.60
+scipy
+scikit-image
+cairosvg

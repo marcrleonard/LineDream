@@ -19,6 +19,8 @@ from skimage import measure
 
 from LineDream import Canvas, Line
 
+import fastpaths as fp
+
 
 @dataclass
 class Params:
@@ -187,31 +189,8 @@ def paths_flow(H, p, rng, step):
 		vx, vy = vx / mag, vy / mag
 
 	cells = max(int(1 / p.flow_sep), 8)
-	owner = -np.ones((cells, cells), dtype=np.int64)
-	h = 0.5 / n
-	out = []
-	for i, (x, y) in enumerate(rng.uniform(0.01, 0.99, (p.count, 2))):
-		cx, cy = int(x * cells), int(y * cells)
-		if owner[cy, cx] != -1:
-			continue
-		owner[cy, cx] = i
-		pts = [(x, y)]
-		for _ in range(p.flow_len):
-			gi, gj = min(int(y * n), n - 1), min(int(x * n), n - 1)
-			x, y = x + vx[gi, gj] * h * 2, y + vy[gi, gj] * h * 2
-			if not (0 <= x < 1 and 0 <= y < 1):
-				break
-			ncx, ncy = int(x * cells), int(y * cells)
-			if (ncx, ncy) != (cx, cy):
-				# stop on other lines, and on our own trail (we're circling in a pit)
-				if owner[ncy, ncx] != -1:
-					break
-				cx, cy = ncx, ncy
-				owner[cy, cx] = i
-			pts.append((x, y))
-		if len(pts) > 4:
-			out.append(np.array(pts))
-	return out
+	seeds = rng.uniform(0.01, 0.99, (p.count, 2))
+	return list(fp.flow_ortho(seeds, np.ascontiguousarray(vx), np.ascontiguousarray(vy), cells, p.flow_len))
 
 
 def paths_hatch(H, p, rng, step):
@@ -221,20 +200,32 @@ def paths_hatch(H, p, rng, step):
 	slope = np.hypot(gx, gy)
 	slope /= np.percentile(slope, 99) + 1e-12
 	a = np.radians(p.angle)
-	out = []
 	cell = 1.0 / p.count
-	for (x, y) in (np.stack(np.meshgrid(np.arange(p.count), np.arange(p.count)), -1).reshape(-1, 2) + rng.uniform(0, 1, (p.count ** 2, 2))) * cell:
-		gi, gj = min(int(y * n), n - 1), min(int(x * n), n - 1)
-		s = min(slope[gi, gj], 1.0)
-		if s < 0.05:
-			continue
-		dx, dy = -gy[gi, gj], gx[gi, gj]
-		m = np.hypot(dx, dy) + 1e-12
-		dx, dy = dx / m, dy / m
-		dx, dy = dx * np.cos(a) - dy * np.sin(a), dx * np.sin(a) + dy * np.cos(a)
-		L = cell * (0.3 + 1.6 * s)
-		out += _clip_square(_densify(np.array([[x - dx * L, y - dy * L], [x + dx * L, y + dy * L]]), step))
-	return out
+	xy = (np.stack(np.meshgrid(np.arange(p.count), np.arange(p.count)), -1).reshape(-1, 2) + rng.uniform(0, 1, (p.count ** 2, 2))) * cell
+	gi, gj = np.minimum((xy[:, 1] * n).astype(int), n - 1), np.minimum((xy[:, 0] * n).astype(int), n - 1)
+	s = np.minimum(slope[gi, gj], 1.0)
+	ok = s >= 0.05
+	xy, gi, gj, s = xy[ok], gi[ok], gj[ok], s[ok]
+	dx, dy = -gy[gi, gj], gx[gi, gj]
+	m = np.hypot(dx, dy) + 1e-12
+	dx, dy = dx / m, dy / m
+	dx, dy = dx * np.cos(a) - dy * np.sin(a), dx * np.sin(a) + dy * np.cos(a)
+	L = cell * (0.3 + 1.6 * s)
+	# densify exactly as _densify would (sample count depends on stroke length), batched per count
+	ks = np.maximum((2 * L / step).astype(int), 2)
+	out = [None] * len(ks)
+	for k in np.unique(ks):
+		idx = np.flatnonzero(ks == k)
+		t = np.linspace(-1, 1, k)
+		X = xy[idx, 0:1] + np.outer(dx[idx] * L[idx], t)
+		Y = xy[idx, 1:2] + np.outer(dy[idx] * L[idx], t)
+		inside = (X >= 0) & (X <= 1) & (Y >= 0) & (Y <= 1)
+		for j, i in enumerate(idx):
+			if inside[j].all():
+				out[i] = [np.column_stack([X[j], Y[j]])]
+			else:
+				out[i] = [np.column_stack([X[j, a0:b0], Y[j, a0:b0]]) for a0, b0 in _runs(inside[j], 2)]
+	return [poly for polys in out for poly in polys]
 
 
 PATHS = dict(scan=paths_scan, radial=paths_radial, spiral=paths_spiral, rings=paths_rings,
@@ -260,25 +251,7 @@ def _visible(H, P, p, to_cam):
 	dt = 1.5 / n / horiz
 	t_max = min(1.5 / horiz, p.relief * 1.05 / max(to_cam[2], 1e-3))
 	ts = np.arange(2 * dt, t_max, dt)
-	vis = np.ones(len(P), dtype=bool)
-	Hr = H * p.relief
-	for c0 in range(0, len(P), 20000):
-		Q = P[c0:c0 + 20000]
-		alive = np.ones(len(Q), dtype=bool)
-		for t in ts:
-			idx = np.flatnonzero(alive)
-			if not len(idx):
-				break
-			R = Q[idx] + t * to_cam
-			# world (X right, Y north) back to unit grid coords (x right, y down)
-			gx, gy = R[:, 0] + 0.5, 0.5 - R[:, 1]
-			inside = (gx >= 0) & (gx <= 1) & (gy >= 0) & (gy <= 1)
-			ground = ndimage.map_coordinates(Hr, [gy * (n - 1), gx * (n - 1)], order=1, mode="nearest")
-			blocked = inside & (ground > R[:, 2] + 0.25 / n)
-			alive[idx[blocked]] = False
-			alive[idx[~inside]] = False  # left the map: clear sky
-			vis[c0 + idx[blocked]] = False
-	return vis
+	return fp.visible_ortho(np.ascontiguousarray(P), np.ascontiguousarray(to_cam, dtype=np.float64), H * p.relief, ts, 0.25 / n)
 
 
 def _mask_field(H, p, rng):
@@ -348,7 +321,7 @@ def render(dem, p, filename):
 	Canvas.background_color = p.background
 	for poly in polys:
 		xy = poly * np.array([s, -s]) + off
-		xy = measure.approximate_polygon(xy, tolerance=0.25)
+		xy = fp.simplify(np.ascontiguousarray(xy, dtype=np.float64), 0.25)
 		if len(xy) < 2:
 			continue
 		Line.from_array(xy, stroke_color=p.stroke, stroke_width=p.stroke_width)

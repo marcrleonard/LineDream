@@ -23,6 +23,8 @@ from skimage import measure
 
 from LineDream import Canvas, Group, Line
 
+import fastpaths as fp
+
 
 @dataclass
 class Scene:
@@ -196,27 +198,7 @@ class Vista:
 
 	def visible(self, P):
 		'''Sphere-trace each point toward the eye; False where terrain blocks the ray.'''
-		D = self.C - P
-		dist = np.linalg.norm(D, axis=1)
-		Dn = D / dist[:, None]
-		hf = np.hypot(Dn[:, 0], Dn[:, 1]) + 1e-9
-		t = 2 * self.px / hf
-		vis = np.ones(len(P), dtype=bool)
-		alive = np.ones(len(P), dtype=bool)
-		bias = 0.35 * self.px
-		for _ in range(4 * self.n):
-			idx = np.flatnonzero(alive)
-			if not len(idx):
-				break
-			R = P[idx] + Dn[idx] * t[idx, None]
-			gap = R[:, 2] - self.ground(R[:, 0], R[:, 1])
-			out = (R[:, 0] < 0) | (R[:, 0] > 1) | (R[:, 1] < 0) | (R[:, 1] > 1)
-			done = (t[idx] >= dist[idx]) | (R[:, 2] > self.zmax) | out
-			blocked = (gap < -bias) & ~done
-			vis[idx[blocked]] = False
-			alive[idx[done | blocked]] = False
-			t[idx] += np.maximum(self.px, 0.8 * np.maximum(gap, 0) / self.slope) / hf[idx]
-		return vis
+		return fp.visible(np.ascontiguousarray(P, dtype=np.float64), self.C, self.Z, self.px, self.zmax, self.slope, 4 * self.n)
 
 	# ------------------------------------------------------------ light
 
@@ -241,22 +223,8 @@ class Vista:
 		m = min(self.n, 320)
 		Zc = ndimage.zoom(self.Z, m / self.n, order=1)
 		px = 1.0 / (m - 1)
-		vv, uu = np.mgrid[0:m, 0:m] * px
-		x, y, z0 = uu.ravel(), 1 - vv.ravel(), Zc.ravel()
 		hs = np.hypot(self.sun[0], self.sun[1])
-		dx, dy, rise = self.sun[0] / hs, self.sun[1] / hs, self.sun[2] / hs
-		shadow = np.zeros(len(x))
-		alive = np.ones(len(x), dtype=bool)
-		t = 1.5 * px
-		while alive.any():
-			idx = np.flatnonzero(alive)
-			X, Y, Rz = x[idx] + dx * t, y[idx] + dy * t, z0[idx] + rise * t
-			out = (X < 0) | (X > 1) | (Y < 0) | (Y > 1) | (Rz > self.zmax)
-			g = ndimage.map_coordinates(Zc, [(1 - Y) / px, X / px], order=1, mode="nearest")
-			blocked = (g > Rz + 0.3 * px) & ~out
-			shadow[idx[blocked]] = 1
-			alive[idx[out | blocked]] = False
-			t += px
+		shadow = fp.cast_shadow(np.ascontiguousarray(Zc), px, self.sun[0] / hs, self.sun[1] / hs, self.sun[2] / hs, self.zmax)
 		sh = ndimage.zoom(shadow.reshape(m, m), self.n / m, order=1)[:self.n, :self.n]
 		return np.clip(ndimage.gaussian_filter(sh, 1.5), 0, 1)
 
@@ -316,24 +284,8 @@ class Vista:
 		SX, SY = np.meshgrid(np.linspace(-1, 1, gw), np.linspace(self.aspect, -self.aspect, gh))
 		D = (self.f[None] + np.outer(SX.ravel() / self.focal, self.r) + np.outer((SY.ravel() - s.shift) / self.focal, self.up))
 		D /= np.linalg.norm(D, axis=1, keepdims=True)
-		hf = np.hypot(D[:, 0], D[:, 1]) + 1e-9
 		zm = -np.inf if s.mist is None else s.mist * self.k
-		hit = np.zeros(len(D), dtype=np.int8)   # 0 sky, 1 terrain, 2 mist
-		t = np.full(len(D), 2 * self.px)
-		alive = np.ones(len(D), dtype=bool)
-		for _ in range(4 * self.n):
-			idx = np.flatnonzero(alive)
-			if not len(idx):
-				break
-			R = self.C + D[idx] * t[idx, None]
-			gap = R[:, 2] - self.ground(R[:, 0], R[:, 1])
-			out = (R[:, 0] < 0) | (R[:, 0] > 1) | (R[:, 1] < 0) | (R[:, 1] > 1) | ((R[:, 2] > self.zmax) & (D[idx, 2] >= 0))
-			on_mist = (R[:, 2] < zm) & (gap > 0) & ~out
-			on_ground = (gap <= 0) & ~out
-			hit[idx[on_ground]] = 1
-			hit[idx[on_mist]] = 2
-			alive[idx[out | on_ground | on_mist]] = False
-			t[idx] += np.maximum(0.7 * self.px, 0.8 * np.maximum(gap, 0) / self.slope) / hf[idx]
+		t, hit = fp.gbuffer_march(self.C, np.ascontiguousarray(D), self.Z, self.px, self.zmax, self.slope, zm, 4 * self.n)
 		P = self.C + D * t[:, None]
 		tone = np.where(hit == 1, self.ground(P[:, 0], P[:, 1], self.dark) * (1 - self.fade(P)), -1.0)
 		self.g_tone = ndimage.gaussian_filter(tone.reshape(gh, gw), 0.7)
@@ -365,110 +317,35 @@ class Vista:
 	def flow_hatch(self, angle, gate=0.0):
 		"""Evenly spaced streamlines along a surface direction (Jobard-Lefer style seeding);
 		spacing tightens with darkness, so the strokes carry both form and tone."""
-		from collections import deque
 		s = self.s
 		gh, gw = self.g_hit.shape
 		TH = self.flow_field(angle)
 		P = self.g_P.reshape(-1, 3)
 		grad = np.hypot(self.ground(P[:, 0], P[:, 1], self.dzdx), self.ground(P[:, 0], P[:, 1], self.dzdy)).reshape(gh, gw)
-		flat = grad < np.percentile(grad[self.g_hit == 1], 8)
+		flat = np.ascontiguousarray(grad < np.percentile(grad[self.g_hit == 1], 8))
 		tone = ndimage.gaussian_filter(np.where(self.g_hit == 1, np.maximum(self.g_tone, 0), 0), 1.8)
 		tone[self.g_hit != 1] = -1
 		half = (s.canvas[0] * (1 - 2 * s.margin)) / 2
 		smin, smax = s.flow_sep / half, s.flow_sep_max / half
 		h = 1.2 * 2 / gw
 		cell = smin / 2.5
-		ow, oh = int(2 / cell) + 1, int(2 * self.aspect / cell) + 1
-		occ = -np.ones((oh, ow), dtype=np.int32)
-		disks = {}
+		A = self.aspect
+		occ = -np.ones((int(2 * A / cell) + 1, int(2 / cell) + 1), dtype=np.int32)
 		lo = max(s.flow_min_tone, gate)
+		w = s.window
+		win = np.zeros(5)
+		if w:
+			win[0] = 1 if w[0] == "circle" else 2
+			win[1:len(w)] = w[1:]
+		hit = np.ascontiguousarray(self.g_hit)
+		TH, tone = np.ascontiguousarray(TH), np.ascontiguousarray(tone)
 
-		def sep(t):
-			return smin + (smax - smin) * (1 - (t - lo) / (1 - lo + 1e-9)) ** 2
-
-		def crowded(p, d, lid):
-			cx, cy = int((p[0] + 1) / cell), int((self.aspect - p[1]) / cell)
-			k = max(int(d / cell + 0.5), 1)
-			if k not in disks:
-				yy, xx = np.mgrid[-k:k + 1, -k:k + 1]
-				msk = xx * xx + yy * yy <= k * k
-				disks[k] = (yy[msk], xx[msk])
-			dy, dx = disks[k]
-			v = occ[np.clip(cy + dy, 0, oh - 1), np.clip(cx + dx, 0, ow - 1)]
-			return bool(np.any((v >= 0) & (v != lid)))
-
-		def mark(p, lid):
-			occ[min(int((self.aspect - p[1]) / cell), oh - 1), min(int((p[0] + 1) / cell), ow - 1)] = lid
-
-		def valid(p, floor=1.0):
-			if abs(p[0]) > 1 or abs(p[1]) > self.aspect:
-				return None
-			r = int((self.aspect - p[1]) / (2 * self.aspect) * (gh - 1) + 0.5)
-			c = int((p[0] + 1) / 2 * (gw - 1) + 0.5)
-			if self.g_hit[r, c] != 1 or flat[r, c] or tone[r, c] < lo * floor or not self.in_window(p[None])[0]:
-				return None
-			return r, c
-
-		def trace(seed, lid):
-			line = [seed]
-			for sign in (1, -1):
-				p, prev, pts = seed, None, []
-				for _ in range(3000):
-					rc = valid(p, 0.7)
-					if rc is None:
-						break
-					v = np.array([np.cos(TH[rc]), np.sin(TH[rc])])
-					if prev is None:
-						v = v * sign
-					else:
-						if v @ prev < 0:
-							v = -v
-						if v @ prev < 0.87:  # turning > 30 deg in one step: a vortex, stop
-							break
-					q = p + h * v
-					rq = valid(q, 0.7)
-					if rq is None or crowded(q, 0.55 * sep(max(tone[rq], lo)), lid):
-						break
-					pts.append(q)
-					p, prev = q, v
-				line = (pts[::-1] + line) if sign == -1 else (line + pts)
-			return np.array(line)
-
-		order = np.flatnonzero((self.g_hit.ravel() == 1) & (tone.ravel() >= lo))
+		order = np.flatnonzero((hit.ravel() == 1) & (tone.ravel() >= lo))
 		self.rng.shuffle(order)
-		randoms = iter(order)
-		queue = deque()
-		lid = 0
-		while True:
-			if queue:
-				seed = queue.popleft()
-			else:
-				nxt = next(randoms, None)
-				if nxt is None:
-					break
-				r, c = divmod(int(nxt), gw)
-				seed = np.array([c / (gw - 1) * 2 - 1, self.aspect - r / (gh - 1) * 2 * self.aspect])
-			rc = valid(seed)
-			if rc is None or crowded(seed, sep(tone[rc]), -2):
-				continue
-			line = trace(seed, lid)
-			if len(line) < s.flow_min_len:
-				continue
-			for p in line:
-				mark(p, lid)
-			# seeds one spacing to either side, so neighbours grow parallel
-			for i in range(0, len(line) - 1, 3):
-				d = line[min(i + 1, len(line) - 1)] - line[max(i - 1, 0)]
-				nrm = np.array([-d[1], d[0]]) / (np.hypot(*d) + 1e-12)
-				rc = valid(line[i])
-				if rc is not None:
-					dd = sep(tone[rc])
-					queue.append(line[i] + nrm * dd)
-					queue.append(line[i] - nrm * dd)
+		for line in fp.flow_all(order, TH, tone, hit, flat, occ, win, h, lo, smin, smax, cell, A, s.flow_min_len, 3000):
 			depth = self._gsample(self.g_depth, line).astype(int)
 			for a0, b0, dep in _runs(depth):
 				self.strokes.append(("hatch", int(dep), line[a0:b0]))
-			lid += 1
 
 	def _gsample(self, F, S, order=0):
 		gh, gw = F.shape
@@ -707,7 +584,7 @@ class Vista:
 				width = s.stroke_width * wm * (1 - depth * 0.12)
 				parts, label = [xy], f"{role}-{depth}"
 			for part in parts:
-				part = measure.approximate_polygon(part, tolerance=0.3)
+				part = fp.simplify(np.ascontiguousarray(part, dtype=np.float64), 0.3)
 				if len(part) < 2:
 					continue
 				layers.setdefault(label, []).append(Line.from_array(part, stroke_color=col, stroke_width=width))
