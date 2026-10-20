@@ -710,22 +710,14 @@ class Vista:
 				part = measure.approximate_polygon(part, tolerance=0.3)
 				if len(part) < 2:
 					continue
-				ln = Line(stroke_color=col, stroke_width=width)
-				# bulk-set vertices; add_vertex() is O(n^2)
-				ln._vertices = np.column_stack([part, np.zeros(len(part)), np.ones(len(part))])
-				layers.setdefault(label, []).append(ln)
+				layers.setdefault(label, []).append(Line.from_array(part, stroke_color=col, stroke_width=width))
 
 		if s.frame:
 			Line([(m, m), (W - m, m), (W - m, H - m), (m, H - m), (m, m)], stroke_color=s.ink, stroke_width=s.stroke_width)
 
 		# one inkscape layer per label = one pen per layer on a plotter
-		# (filled directly; Group.add_item's remove_by_id is O(n) per item)
-		grouped = set()
 		for label, lines in sorted(layers.items()):
-			g = Group(label=label)
-			g.items = lines
-			grouped.update(id(l) for l in lines)
-		Canvas.draw_queue = [q for q in Canvas.draw_queue if id(q) not in grouped]
+			Group(label=label).extend(lines)
 		Canvas.save(filename)
 		return len(strokes)
 

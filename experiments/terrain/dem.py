@@ -44,6 +44,11 @@ class DemInfo:
 		x, y = _global_px(lat, lon, self.zoom)
 		return (x - self.x0) / self.size, (y - self.y0) / self.size
 
+	def to_latlon(self, u, v):
+		n = 2 ** self.zoom * 256
+		x, y = self.x0 + u * self.size, self.y0 + v * self.size
+		return math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * y / n)))), x / n * 360 - 180
+
 
 def fetch_dem(lat, lon, zoom=11, size=768, meta=False):
 	'''Return a size x size elevation grid (meters) centered on lat/lon (and a DemInfo if meta=True).'''

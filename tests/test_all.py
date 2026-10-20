@@ -129,3 +129,34 @@ def test_all():
 
 if __name__ == '__main__':
 	test_all()
+
+def test_line_from_array():
+	import numpy as np
+	Canvas.flush()
+	xy = np.array([[0, 0], [10, 5], [20, 0]])
+	a = Line.from_array(xy, stroke_color='red')
+	b = Line([(0, 0), (10, 5), (20, 0)])
+	assert np.array_equal(a.vertices, b.vertices)
+	assert a.stroke_color == 'red'
+	c = Line.from_array([[0, 0, 1], [1, 1, 2]])
+	assert c.vertices[:, 2].tolist() == [1, 2]
+	try:
+		Line.from_array([1, 2, 3])
+		assert False, 'expected ValueError'
+	except ValueError:
+		pass
+	Canvas.flush()
+
+
+def test_group_extend():
+	Canvas.flush()
+	lines = [Line.from_array([[i, 0], [i, 10]]) for i in range(5)]
+	keep = Line.from_array([[0, 0], [1, 1]])
+	g = Group(label='layer')
+	g.extend(lines)
+	assert g.items == lines
+	assert keep in Canvas.draw_queue and g in Canvas.draw_queue
+	assert not any(l in Canvas.draw_queue for l in lines)
+	svg = Canvas.save('', as_string=True)
+	assert svg.count('<path') == 6
+	Canvas.flush()

@@ -351,9 +351,7 @@ def render(dem, p, filename):
 		xy = measure.approximate_polygon(xy, tolerance=0.25)
 		if len(xy) < 2:
 			continue
-		ln = Line(stroke_color=p.stroke, stroke_width=p.stroke_width)
-		# set vertices in bulk; add_vertex() rebuilds the array per call which is O(n^2)
-		ln._vertices = np.column_stack([xy, np.zeros(len(xy)), np.ones(len(xy))])
+		Line.from_array(xy, stroke_color=p.stroke, stroke_width=p.stroke_width)
 	Canvas.save(filename)
 	return len(polys)
 
