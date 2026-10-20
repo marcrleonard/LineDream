@@ -1,11 +1,10 @@
 from .BaseShape import BaseShape
-
-from vpype.text import text_block
-
+from .hershey_text import text_block
 
 
 class Text(BaseShape):
-	'''This is how to create an ellipse'''
+	'''A block of single-stroke Hershey text, wrapped to `width`, with its top-left corner at (x, y).
+	See hershey_text.FONT_NAMES for the available fonts.'''
 	def __init__(self, text, x,y, width=200, font_size=18.0, align="left", line_spacing=1.0, font_name='futural',   **kwargs):
 		''''''
 		super().__init__(**kwargs)
@@ -16,13 +15,15 @@ class Text(BaseShape):
 
 		self.is_text=True
 
-		# This is a unique data structure to vpype. The canvas render has a different way to render them.
-		self.a = text_block(text, width, font_name, font_size, align, 1.0)
-		self.a.translate(x, y)
-		self.text_lines = self.a.lines
+		# a list of complex arrays (x + iy), one per pen stroke; the canvas renders these directly
+		self.text_lines = text_block(text, width, font_name, font_size, align, line_spacing)
+		self.transform(x, y)
 
 	def add_vertex(self, *coords):
 		raise Exception("Cannot accept additional vertexes")
 
-	def transform(self, *coords):
-		self.a.translate(*coords)
+	def transform(self, x, y, z=0):
+		c = complex(x, y)
+		for line in self.text_lines:
+			line += c
+		return self
