@@ -13,7 +13,7 @@ from pygments.lexers import python as python_lexer
 from pygments.formatters import html
 from bs4 import BeautifulSoup, Tag
 
-build_folder = 'build'
+build_folder = 'public'  # not 'build': pip install . leaves setuptools artifacts there
 bf = pathlib.Path(build_folder)
 sf = pathlib.Path(pathlib.Path(__file__).parent, 'source')
 
