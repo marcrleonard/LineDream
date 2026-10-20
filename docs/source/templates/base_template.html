@@ -46,6 +46,7 @@
         <nav class="site-nav" aria-label="Main">
             <a href="{{ url_root }}getting-started/" {% if active == 'guide' %}aria-current="page"{% endif %}><span class="nav-long">Getting Started</span><span class="nav-short">Guide</span></a>
             <a href="{{ url_root }}documentation/" {% if active == 'api' %}aria-current="page"{% endif %}><span class="nav-long">Documentation</span><span class="nav-short">API</span></a>
+            <a href="{{ url_root }}playground/"><span class="nav-long">Playground</span><span class="nav-short">Play</span></a>
             <a href="{{ url_root }}about/" {% if active == 'about' %}aria-current="page"{% endif %}>About</a>
             <a href="https://github.com/marcrleonard/LineDream" class="nav-github" aria-label="LineDream on GitHub">
                 {% include "icon_github.html" %}
@@ -79,6 +80,7 @@
             <ul>
                 <li><a href="{{ url_root }}getting-started/">Getting Started</a></li>
                 <li><a href="{{ url_root }}documentation/">API Reference</a></li>
+                <li><a href="{{ url_root }}playground/">Playground</a></li>
                 <li><a href="{{ url_root }}about/">About</a></li>
             </ul>
         </div>

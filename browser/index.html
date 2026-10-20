@@ -5,28 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LineDream Playground</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-  /* Layout: editor and plot sheet side by side, stacking on phones; the plot is a sheet of paper on a drafting table */
+  /* Layout: editor and plot sheet side by side, stacking on phones, on the main site's dotted plotter paper.
+     Colors and type follow docs/source/css/site.css, which is light only. */
   :root {
-    --table: #e9ecef; --sheet: #ffffff; --ink: #18212b; --muted: #5d6874; --rule: #cfd5db;
-    --pen: #2747c9; --pen-ink: #ffffff; --err: #b3261e; --code-bg: #f7f8f9;
-    --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
-    --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --paper: #F6F1E6; --paper-2: #EFE7D6; --card: #FBF8F1; --sheet: #ffffff;
+    --ink: #1C1B18; --faint: #7A7366; --rule: #E0D6C2; --amber-soft: #FFCB6B; --err: #b3261e;
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", system-ui, -apple-system, sans-serif;
     --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --table: #14181d; --sheet: #f4f5f6; --ink: #e6e9ec; --muted: #98a2ad; --rule: #2c333b;
-      --pen: #8ea2ff; --pen-ink: #0f1420; --err: #ff8a80; --code-bg: #1b2027; color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --table: #14181d; --sheet: #f4f5f6; --ink: #e6e9ec; --muted: #98a2ad; --rule: #2c333b;
-    --pen: #8ea2ff; --pen-ink: #0f1420; --err: #ff8a80; --code-bg: #1b2027; color-scheme: dark;
+    color-scheme: light;
   }
   *, *::before, *::after { box-sizing: border-box; }
-  body { margin: 0; background: var(--table); color: var(--ink); font: 15px/1.5 var(--body); }
+  body {
+    margin: 0; color: var(--ink); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased;
+    background: var(--paper) radial-gradient(circle at 1px 1px, rgba(28, 27, 24, .13) 1px, transparent 0) 0 0 / 24px 24px;
+  }
+  ::selection { background: var(--amber-soft); color: var(--ink); }
   main {
     max-width: 1240px; margin: 0 auto; display: grid; gap: 18px;
     padding-block: 28px 40px;
@@ -34,43 +31,48 @@
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
   header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
-  h1 { margin: 0; font: 700 28px/1.1 var(--display); letter-spacing: -0.01em; text-wrap: balance; }
-  #status { color: var(--muted); font: 12.5px/1.4 var(--mono); }
+  h1 { margin: 0; font: 600 32px/1.1 var(--display); letter-spacing: -0.015em; text-wrap: balance; }
+  h1 a { color: inherit; text-decoration: none; }
+  #status { color: var(--faint); font: 12.5px/1.4 var(--mono); }
   #status.ready::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2e9d5b; margin-right: 8px; vertical-align: 1px; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  label.ex { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
+  label.ex { display: flex; gap: 8px; align-items: center; color: var(--faint); font-size: 13px; }
   select, button {
-    font: 500 14px/1 var(--body); border-radius: 6px; padding: 9px 14px; cursor: pointer;
-    border: 1px solid var(--rule); background: var(--code-bg); color: var(--ink);
+    font: 600 14px/1 var(--body); border-radius: 999px; padding: 10px 16px; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--card); color: var(--ink);
+    transition: background-color .15s ease, transform .15s ease;
   }
-  button.primary { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
+  button:hover:not(:disabled) { background: var(--paper-2); }
+  button.primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  button.primary:hover:not(:disabled) { background: var(--ink); transform: translateY(-1px); }
   button:disabled, select:disabled { opacity: 0.45; cursor: default; }
-  button:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
-  .hint { color: var(--muted); font-size: 12.5px; margin-left: auto; }
-  kbd { font: 11.5px var(--mono); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; }
+  button:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } button.primary:hover:not(:disabled) { transform: none; } }
+  .hint { color: var(--faint); font-size: 12.5px; margin-left: auto; }
+  kbd { font: 11.5px var(--mono); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; background: var(--card); }
   .panes { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
   @media (max-width: 860px) { .panes { grid-template-columns: minmax(0, 1fr); } .hint { display: none; } }
   textarea {
-    width: 100%; min-height: 560px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 8px;
-    background: var(--code-bg); color: var(--ink); font: 13px/1.55 var(--mono); tab-size: 4; resize: vertical;
+    width: 100%; min-height: 560px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 14px;
+    background: var(--card); color: var(--ink); font: 13px/1.55 var(--mono); font-variant-ligatures: none;
+    tab-size: 4; resize: vertical;
   }
   .sheet {
     min-width: 0; min-height: 560px; border-radius: 4px; background: var(--sheet); overflow: auto;
     display: grid; place-items: center; padding: 18px;
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.08);
+    box-shadow: 0 1px 0 rgba(28, 27, 24, .04), 0 12px 32px -12px rgba(28, 27, 24, .18);
   }
   .sheet svg { max-width: 100%; height: auto; display: block; }
-  .sheet .msg { color: #5d6874; font: 13px/1.5 var(--mono); }
-  .sheet pre.err { color: #b3261e; white-space: pre-wrap; margin: 0; align-self: start; justify-self: stretch; font: 12.5px/1.5 var(--mono); }
-  footer { color: var(--muted); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
-  footer code { font: 12px var(--mono); }
-  footer a { color: var(--pen); }
+  .sheet .msg { color: var(--faint); font: 13px/1.5 var(--mono); }
+  .sheet pre.err { color: var(--err); white-space: pre-wrap; margin: 0; align-self: start; justify-self: stretch; font: 12.5px/1.5 var(--mono); }
+  footer { color: var(--faint); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  footer a { color: var(--ink); }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>LineDream Playground</h1>
+    <h1><a href="../">LineDream</a> Playground</h1>
     <div id="status">Starting Python…</div>
   </header>
   <div class="toolbar">
@@ -80,10 +82,12 @@
         <option value="squares">Loosening squares</option>
         <option value="rings">Wobbly rings</option>
         <option value="fonts">Hershey fonts</option>
+        <option value="flow">Flow field (stress test)</option>
       </select>
     </label>
     <button id="run" class="primary" disabled>Run</button>
     <button id="copy" disabled>Copy SVG</button>
+    <button id="download" disabled>Download SVG</button>
     <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs. The last expression is drawn.</span>
   </div>
   <div class="panes">
@@ -91,7 +95,7 @@
     <div class="sheet" id="out"><span class="msg">Loading Pyodide, numpy, pillow and lxml (about 18 MB the first time)…</span></div>
   </div>
   <footer>
-    <span id="meta">Sketches run in your browser with <a href="https://pyodide.org">Pyodide</a>. <a href="../">LineDream</a></span>
+    <span id="meta">Sketches run in your browser with <a href="https://pyodide.org">Pyodide</a>. New to LineDream? Start with the <a href="../getting-started/">guide</a>.</span>
     <span id="stats"></span>
   </footer>
 </main>
@@ -163,6 +167,50 @@ for ring in range(1, 40):
 
 Canvas.save('', as_string=True)
 </script>
+<script type="text/plain" id="ex-flow">
+import math, random
+import numpy as np
+from LineDream import Canvas, Line, Circle, Text
+
+# Stress test: a flow field of ~6,000 streamlines (about 1.2M vertices) plus 3,000 circles
+random.seed(7)
+rng = np.random.default_rng(7)
+Canvas.flush()
+Canvas.width, Canvas.height = 1600, 1000
+Canvas.background_color = 'white'
+
+W, H = Canvas.width, Canvas.height
+LINES, STEPS, STEP = 6000, 200, 2.0
+
+def angle(x, y):
+	# cheap smooth "noise": a few layered sine waves
+	return (np.sin(x * 0.004) * 2.1 + np.cos(y * 0.005) * 1.7
+	        + np.sin((x + y) * 0.0021) * 1.3 + np.cos((x - y) * 0.003) * 0.9)
+
+# integrate every streamline at once with numpy
+x = rng.uniform(0, W, LINES)
+y = rng.uniform(0, H, LINES)
+path = np.empty((STEPS, LINES, 2))
+for i in range(STEPS):
+	path[i, :, 0], path[i, :, 1] = x, y
+	a = angle(x, y)
+	x = x + np.cos(a) * STEP
+	y = y + np.sin(a) * STEP
+
+for j in range(LINES):
+	pts = path[:, j, :]
+	inside = (pts[:, 0] >= 0) & (pts[:, 0] <= W) & (pts[:, 1] >= 0) & (pts[:, 1] <= H)
+	pts = pts[inside]
+	if len(pts) > 1:
+		Line([tuple(p) for p in pts], stroke_color='#18212b', stroke_width=0.3)
+
+for _ in range(3000):
+	Circle(random.uniform(0, W), random.uniform(0, H), random.uniform(0.5, 3), fill_color='none', stroke_color='#2747c9')
+
+Text(f'{LINES:,} streamlines x {STEPS} steps', 40, H - 60, width=W - 80, font_size=36)
+
+Canvas.save('', as_string=True)
+</script>
 <script type="text/plain" id="ex-fonts">
 from LineDream import Canvas, Text
 
@@ -183,7 +231,7 @@ Canvas.save('', as_string=True)
   import { CORE_PACKAGES } from "./packages.mjs";
 
   const $ = (id) => document.getElementById(id);
-  const status = $("status"), code = $("code"), out = $("out"), run = $("run"), copy = $("copy"), example = $("example"), stats = $("stats");
+  const status = $("status"), code = $("code"), out = $("out"), run = $("run"), copy = $("copy"), download = $("download"), example = $("example"), stats = $("stats");
   // Query parameters, all optional:
   //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN, same version as package.json)
   //   ?wheel=<url>    a LineDream wheel to install, e.g. ../dist/linedream-0.3.15-py3-none-any.whl. The website
@@ -235,7 +283,7 @@ await micropip.install(WHEEL)
       if (typeof svg !== "string") throw new Error("The last line should return SVG text, e.g. Canvas.save('', as_string=True)");
       out.innerHTML = svg;
       lastSvg = svg;
-      copy.disabled = false;
+      copy.disabled = download.disabled = false;
       const n = out.querySelectorAll("svg *").length;
       stats.textContent = `${n.toLocaleString()} SVG elements · ${(svg.length / 1024).toFixed(0)} KB · ${Math.round(performance.now() - t0)} ms`;
     } catch (e) {
@@ -252,6 +300,13 @@ await micropip.install(WHEEL)
     if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); code.setRangeText("\t", code.selectionStart, code.selectionEnd, "end"); }
   });
   example.addEventListener("change", () => { loadExample(example.value); render(); });
+  download.addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([lastSvg], { type: "image/svg+xml" }));
+    a.download = `linedream-${example.value}.svg`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 0);
+  });
   copy.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(lastSvg); copy.textContent = "Copied"; }
     catch { copy.textContent = "Copy blocked"; }
