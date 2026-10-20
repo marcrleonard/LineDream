@@ -123,41 +123,42 @@ Todos:
 ## Development
 
 ### Installation for Development
+LineDream uses [uv](https://docs.astral.sh/uv/) for development.
 ```bash
-# Clone the repository
 git clone https://github.com/marcrleonard/LineDream.git
 cd LineDream
 
-# Install in editable mode with dev dependencies
-pip install -e ".[dev]"
+# Create .venv with LineDream (editable) and the dev tools, exactly as pinned in uv.lock
+uv sync
 ```
 
 ### Running Tests
 ```bash
-# Run tests locally
-pytest
+# Run the tests
+uv run pytest
 
-# Run tests with verbose output
-pytest tests/ -v
+# Against a specific Python version (uv downloads it if needed)
+uv run --python 3.9 pytest
 
-# Run tests across multiple Python versions (3.9, 3.10, 3.11, 3.12)
-tox
+# Coverage report
+uv run coverage run -m pytest && uv run coverage html
+```
 
-# Run tests with coverage report
-tox -e coverage
+CI runs the suite on Python 3.9 to 3.14 (plus macOS and Windows) on every pull request; see `.github/workflows/tests.yml`.
+
+### Building the docs site
+```bash
+uv run --extra docs python docs/build_website.py   # output in public/
 ```
 
 ### Building and Publishing
 
 ```bash
-# Build the package
-python -m build
+# Build the sdist and wheel into dist/
+uv build
 
-# Upload to PyPI (requires twine and PyPI credentials)
-twine upload dist/*
-
-# Or upload to TestPyPI first
-twine upload --repository testpypi dist/*
+# Upload to PyPI (or --publish-url https://test.pypi.org/legacy/ for TestPyPI)
+uv publish
 ```
 
 ### Project Structure

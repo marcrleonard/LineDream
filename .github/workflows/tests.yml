@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: macos-latest
+            python-version: "3.13"
+          - os: windows-latest
+            python-version: "3.13"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install
+        run: uv sync --locked
+      - name: Test
+        run: uv run pytest -v
+
+  build:
+    name: Build and smoke-test the wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Wheel ships the Hershey fonts
+        run: test "$(uv run --no-project python -m zipfile -l dist/*.whl | grep -c 'LineDream/fonts/.*\.json')" -eq 32
+      - name: Installed wheel works without the source tree
+        run: |
+          uv venv /tmp/wheel-env
+          uv pip install --python /tmp/wheel-env dist/*.whl
+          cd /tmp && /tmp/wheel-env/bin/python -c "from LineDream import Canvas, Text; Text('hello', 0, 0); print(Canvas.save('', as_string=True)[:80])"
