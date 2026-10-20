@@ -312,7 +312,7 @@ def build_playground():
 	src = pathlib.Path(__file__).parent.parent / 'browser'
 	dst = pathlib.Path(BUILD_FOLDER, 'playground')
 	dst.mkdir(parents=True, exist_ok=True)
-	for f in ('index.html', 'packages.mjs'):
+	for f in ('index.html', 'packages.mjs', 'worker.mjs'):
 		shutil.copy2(src / f, dst / f)
 	for old in dst.glob('linedream-*.whl'):
 		old.unlink()

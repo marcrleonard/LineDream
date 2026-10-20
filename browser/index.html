@@ -62,8 +62,25 @@
     display: grid; place-items: center; padding: 18px;
     box-shadow: 0 1px 0 rgba(28, 27, 24, .04), 0 12px 32px -12px rgba(28, 27, 24, .18);
   }
+  .sheet { position: relative; }
+  #out { display: grid; place-items: center; width: 100%; }
   .sheet svg { max-width: 100%; height: auto; display: block; }
-  .sheet .msg { color: var(--faint); font: 13px/1.5 var(--mono); }
+  .busy {
+    position: absolute; inset: 0; border-radius: inherit; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center;
+    background: color-mix(in srgb, var(--sheet) 78%, transparent); backdrop-filter: blur(2px);
+  }
+  .sheet.is-busy .busy { display: flex; }
+  #busy-label { font: 500 14px/1.4 var(--mono); }
+  #busy-note { color: var(--faint); font-size: 12.5px; max-width: 36ch; }
+  #busy-note:empty { display: none; }
+  .spinner {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 2px solid var(--rule); border-top-color: var(--ink);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
   .sheet pre.err { color: var(--err); white-space: pre-wrap; margin: 0; align-self: start; justify-self: stretch; font: 12.5px/1.5 var(--mono); }
   footer { color: var(--faint); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
   footer a { color: var(--ink); }
@@ -88,11 +105,19 @@
     <button id="run" class="primary" disabled>Run</button>
     <button id="copy" disabled>Copy SVG</button>
     <button id="download" disabled>Download SVG</button>
-    <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs. The last expression is drawn.</span>
+    <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs, <kbd>Esc</kbd> cancels. The last expression is drawn.</span>
   </div>
   <div class="panes">
     <textarea id="code" spellcheck="false" aria-label="Sketch source"></textarea>
-    <div class="sheet" id="out"><span class="msg">Loading Pyodide, numpy, pillow and lxml (about 18 MB the first time)…</span></div>
+    <div class="sheet">
+      <div id="out"></div>
+      <div class="busy" id="busy">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="busy-label" role="status">Starting Python…</span>
+        <span id="busy-note">Pyodide, numpy, pillow and lxml are about 18 MB the first time.</span>
+        <button id="cancel" hidden>Cancel</button>
+      </div>
+    </div>
   </div>
   <footer>
     <span id="meta">Sketches run in your browser with <a href="https://pyodide.org">Pyodide</a>. New to LineDream? Start with the <a href="../getting-started/">guide</a>.</span>
@@ -168,13 +193,15 @@ for ring in range(1, 40):
 Canvas.save('', as_string=True)
 </script>
 <script type="text/plain" id="ex-flow">
-import math, random
+import random
 import numpy as np
 from LineDream import Canvas, Line, Circle, Text
 
-# Stress test: a flow field of ~6,000 streamlines (about 1.2M vertices) plus 3,000 circles
-random.seed(7)
-rng = np.random.default_rng(7)
+# Stress test: ~6,000 streamlines (about 1.2M vertices) plus 3,000 circles.
+# Change SEED for a different field.
+SEED = 7
+random.seed(SEED)
+rng = np.random.default_rng(SEED)
 Canvas.flush()
 Canvas.width, Canvas.height = 1600, 1000
 Canvas.background_color = 'white'
@@ -182,10 +209,15 @@ Canvas.background_color = 'white'
 W, H = Canvas.width, Canvas.height
 LINES, STEPS, STEP = 6000, 200, 2.0
 
+# the field: a few layered sine waves, each with a seeded direction, frequency and phase
+waves = [(rng.uniform(0, 2 * np.pi), rng.uniform(0.002, 0.006), rng.uniform(0, 2 * np.pi), rng.uniform(0.8, 2.2))
+         for _ in range(4)]
+
 def angle(x, y):
-	# cheap smooth "noise": a few layered sine waves
-	return (np.sin(x * 0.004) * 2.1 + np.cos(y * 0.005) * 1.7
-	        + np.sin((x + y) * 0.0021) * 1.3 + np.cos((x - y) * 0.003) * 0.9)
+	a = 0
+	for direction, freq, phase, amp in waves:
+		a = a + amp * np.sin((x * np.cos(direction) + y * np.sin(direction)) * freq + phase)
+	return a
 
 # integrate every streamline at once with numpy
 x = rng.uniform(0, W, LINES)
@@ -207,7 +239,7 @@ for j in range(LINES):
 for _ in range(3000):
 	Circle(random.uniform(0, W), random.uniform(0, H), random.uniform(0.5, 3), fill_color='none', stroke_color='#2747c9')
 
-Text(f'{LINES:,} streamlines x {STEPS} steps', 40, H - 60, width=W - 80, font_size=36)
+Text(f'seed {SEED}: {LINES:,} streamlines x {STEPS} steps', 40, H - 60, width=W - 80, font_size=36)
 
 Canvas.save('', as_string=True)
 </script>
@@ -228,10 +260,6 @@ Canvas.save('', as_string=True)
 
 
 <script type="module">
-  import { CORE_PACKAGES } from "./packages.mjs";
-
-  const $ = (id) => document.getElementById(id);
-  const status = $("status"), code = $("code"), out = $("out"), run = $("run"), copy = $("copy"), download = $("download"), example = $("example"), stats = $("stats");
   // Query parameters, all optional:
   //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN, same version as package.json)
   //   ?wheel=<url>    a LineDream wheel to install, e.g. ../dist/linedream-0.3.15-py3-none-any.whl. The website
@@ -242,61 +270,92 @@ Canvas.save('', as_string=True)
   const indexURL = new URL(params.get("pyodide") || `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`, location.href).href;
   const wheelParam = params.get("wheel") || document.documentElement.dataset.wheel;
   const wheel = wheelParam ? new URL(wheelParam, location.href).href : "linedream";
-  let lastSvg = "";
 
+  const $ = (id) => document.getElementById(id);
+  const status = $("status"), code = $("code"), out = $("out"), run = $("run"), copy = $("copy"), download = $("download"),
+        example = $("example"), stats = $("stats"), sheet = out.parentElement, busyLabel = $("busy-label"), busyNote = $("busy-note"),
+        cancel = $("cancel");
+  let lastSvg = "", worker, ready, runId = 0, pending = null, timer = 0;
+
+  function busy(label, note = "", cancellable = false) {
+    sheet.classList.add("is-busy");
+    busyLabel.textContent = label;
+    busyNote.textContent = note;
+    cancel.hidden = !cancellable;
+  }
+  function idle() { sheet.classList.remove("is-busy"); clearInterval(timer); }
+  function setControls(enabled) { run.disabled = example.disabled = !enabled; }
   function showError(text) {
-    out.replaceChildren();
     const pre = document.createElement("pre");
     pre.className = "err";
     pre.textContent = text;
-    out.append(pre);
+    out.replaceChildren(pre);
   }
   function loadExample(name) { code.value = $("ex-" + name).textContent.replace(/^\n/, ""); }
-  loadExample("sunburst");
 
-  let py;
-  try {
-    const { loadPyodide } = await import(new URL("pyodide.mjs", indexURL).href);
-    py = await loadPyodide({ indexURL });
-    status.textContent = "Loading numpy, pillow, lxml…";
-    await py.loadPackage(CORE_PACKAGES);
-    status.textContent = "Installing LineDream…";
-    py.globals.set("WHEEL", wheel);
-    await py.runPythonAsync(`
-import micropip
-await micropip.install(WHEEL)
-`);
-    const v = py.runPython(`from importlib.metadata import version; version("linedream")`);
-    status.textContent = `LineDream ${v} · Pyodide ${py.version} · Python ${py.runPython("import sys; sys.version.split()[0]")}`;
-    status.classList.add("ready");
-  } catch (e) {
-    status.textContent = "Python failed to start";
-    showError(String(e && e.stack || e));
-    throw e;
+  // Start (or restart, after a cancel) the Python worker; resolves once LineDream is importable
+  function startWorker(firstNote) {
+    worker = new Worker(new URL("worker.mjs", import.meta.url), { type: "module" });
+    setControls(false);
+    status.classList.remove("ready");
+    ready = new Promise((resolve, reject) => {
+      worker.onmessage = ({ data }) => {
+        if (data.type === "progress") { busy(data.text, firstNote); status.textContent = data.text; }
+        else if (data.type === "ready") { status.textContent = data.versions; status.classList.add("ready"); setControls(true); resolve(); }
+        else if (data.type === "fatal") { status.textContent = "Python failed to start"; idle(); showError(data.error); reject(new Error(data.error)); }
+        else if (pending && data.id === pending.id) { pending.resolve(data); }
+      };
+      worker.onerror = (e) => { status.textContent = "Python failed to start"; idle(); showError(e.message || "The Python worker crashed."); reject(e); };
+    });
+    worker.postMessage({ type: "init", indexURL, wheel });
+    return ready;
   }
 
   async function render() {
-    run.disabled = true;
-    const t0 = performance.now();
-    try {
-      const svg = await py.runPythonAsync(code.value);
-      if (typeof svg !== "string") throw new Error("The last line should return SVG text, e.g. Canvas.save('', as_string=True)");
-      out.innerHTML = svg;
-      lastSvg = svg;
+    if (pending) return;
+    await ready;
+    setControls(false);
+    const id = ++runId, t0 = performance.now();
+    busy("Running… 0.0 s", "", true);
+    timer = setInterval(() => (busyLabel.textContent = `Running… ${((performance.now() - t0) / 1000).toFixed(1)} s`), 100);
+    const data = await new Promise((resolve) => {
+      pending = { id, resolve };
+      worker.postMessage({ type: "run", id, code: code.value });
+    });
+    pending = null;
+    clearInterval(timer);
+    if (data.type === "cancelled") return;
+    const ran = performance.now() - t0;
+    if (data.type === "error") {
+      showError(data.error);
+      stats.textContent = "";
+    } else {
+      // putting a big SVG into the page blocks for a moment; let the label paint first
+      busy(`Drawing ${(data.svg.length / 1e6).toFixed(1)} MB of SVG…`);
+      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+      out.innerHTML = data.svg;
+      lastSvg = data.svg;
       copy.disabled = download.disabled = false;
       const n = out.querySelectorAll("svg *").length;
-      stats.textContent = `${n.toLocaleString()} SVG elements · ${(svg.length / 1024).toFixed(0)} KB · ${Math.round(performance.now() - t0)} ms`;
-    } catch (e) {
-      showError(e.message || String(e));
-      stats.textContent = "";
-    } finally {
-      run.disabled = false;
+      stats.textContent = `${n.toLocaleString()} SVG elements · ${(data.svg.length / 1024).toFixed(0)} KB · ${Math.round(ran)} ms in Python`;
     }
+    idle();
+    setControls(true);
   }
 
+  cancel.addEventListener("click", () => {
+    if (!pending) return;
+    worker.terminate();
+    pending.resolve({ type: "cancelled" });
+    pending = null;
+    idle();
+    stats.textContent = "Run cancelled.";
+    startWorker("Cancelled. Restarting Python, which is quick now that the packages are cached.").then(idle);
+  });
   run.addEventListener("click", render);
   code.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); render(); }
+    if (e.key === "Escape" && pending) cancel.click();
     if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); code.setRangeText("\t", code.selectionStart, code.selectionEnd, "end"); }
   });
   example.addEventListener("change", () => { loadExample(example.value); render(); });
@@ -312,8 +371,9 @@ await micropip.install(WHEEL)
     catch { copy.textContent = "Copy blocked"; }
     setTimeout(() => (copy.textContent = "Copy SVG"), 1500);
   });
-  example.disabled = false;
-  await render();
+
+  loadExample("sunburst");
+  startWorker("Pyodide, numpy, pillow and lxml are about 18 MB the first time.").then(render, () => {});
 </script>
 </body>
 </html>
