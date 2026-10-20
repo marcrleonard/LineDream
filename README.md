@@ -1,183 +1,199 @@
-![](./example.svg)
+<h1 align="center">LineDream</h1>
 
-LineDream is a generative art library for Python. It is heavily influenced by P5 and Processing. However, it takes a more object oriented approach, with less global state in regards to styling and transformations.
+<p align="center">
+  <strong>Generative art for Python, built for pen plotters.</strong><br>
+  Object-oriented sketches that render to clean, layered SVG.
+</p>
 
-The current output target is SVG. As this provides a robust output set for vector graphics. There is not yet support for a draw loop - it is single frame output, but you could use a loop to simulate this. There are future plans to implement an OpenGL render window.
+<p align="center">
+  <a href="https://pypi.org/project/LineDream/"><img alt="pip install LineDream" src="https://img.shields.io/badge/pip%20install-LineDream-3775A9"></a>
+  <a href="pyproject.toml"><img alt="Python 3.9 to 3.14" src="https://img.shields.io/badge/python-3.9%E2%80%933.14-3775A9"></a>
+  <a href="pyproject.toml"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <a href="https://linedream.marcrleonard.com/playground/"><img alt="Try it in your browser" src="https://img.shields.io/badge/playground-try%20in%20browser-E8A33D"></a>
+</p>
 
-LineDream library was originally created to make art for a pen plotter, however, the inner object structure could be applied to many different rendering platforms.
+<p align="center">
+  <img src="docs/images/flow_field.svg" width="24%" alt="Flow field">
+  <img src="docs/images/topography.svg" width="24%" alt="Topography">
+  <img src="docs/images/spirograph.svg" width="24%" alt="Spirograph">
+  <img src="docs/images/schotter.svg" width="14.4%" alt="Schotter, after Georg Nees">
+</p>
 
-Installation
-------------
-`pip install LineDream`
+<p align="center">
+  <a href="https://linedream.marcrleonard.com">Website</a> ·
+  <a href="https://linedream.marcrleonard.com/playground/">Playground</a> ·
+  <a href="https://linedream.marcrleonard.com/documentation/">Documentation</a> ·
+  <a href="https://pypi.org/project/LineDream/">PyPI</a>
+</p>
 
-Documentation
--------------
-https://linedream.marcrleonard.com/documentation/
+---
 
-Example
--------
-```python
-import random
-from LineDream import Line, Canvas, Rectangle, Square, Ellipse, Point, Circle, CircleMath, TextLine
+LineDream is object-oriented from the ground up: every shape owns its own style and transformations, so there is
+almost no global state to manage. Output is SVG, with groups written as Inkscape layers so a sketch goes straight to an AxiDraw or any other pen
+plotter. There is no draw loop; a sketch renders a single frame, and a plain Python loop is enough to make a series.
 
-Canvas.width=900
-Canvas.height=500
-Canvas.background_color='black'
+## Try it in your browser
 
-for pp in range(100):
-	x = random.randint(0, Canvas.width)
-	y = random.randint(0, 400)
+The **[playground](https://linedream.marcrleonard.com/playground/)** runs LineDream entirely client-side with
+[Pyodide](https://pyodide.org): edit a sketch, hit run, download the SVG. Nothing to install.
 
-	coords = (x,y)
-	p = Point(*coords)
+## Install
 
-	p.stroke_color= 'white'
-
-c_size = 180
-
-circle_center = Canvas.width/2, Canvas.height+c_size/2
-c = Circle(*circle_center, 180)
-c.stroke_color='white'
-
-c = Circle(*circle_center, 200)
-c.stroke_color='white'
-
-c = Circle(*circle_center, 220)
-c.stroke_color='white'
-
-long=True
-for degrees in range(360,180,-10):
-
-	dist_from_circle = 250
-
-	line_len = 40
-	if long:
-		line_len = 100
-		long=False
-	else:
-		long=True
-
-	d_x_s, d_y_s = CircleMath.distance_to_coords(degrees, dist_from_circle)
-	x1 = circle_center[0] + d_x_s
-	y1 = circle_center[1] + d_y_s
-
-	d_x, d_y = CircleMath.distance_to_coords(degrees, dist_from_circle + line_len)
-	x2 = circle_center[0] + d_x
-	y2 = circle_center[1] + d_y
-
-	Line([(x1,y1), (x2,y2)], stroke_color='white')
-
-# EXPERIMENTAL
-tt = TextLine('LineDream', kerning=10, stroke_color='white', stroke_width=2)
-tt.transform(100, 100)
-tt.scale(1.4)
-
-Canvas.save(f'example.svg')
+```bash
+pip install LineDream
+# or
+uv add LineDream
 ```
-# Custom LineDream Shapes
+
+Python 3.9 to 3.14, on Linux, macOS and Windows.
+
+## Quickstart
 
 ```python
 import math
-from LineDream.primitives.BaseShape import BaseShape
+from LineDream import Canvas, Circle, Group, Line, Text
 
-class Hexagon(BaseShape):
+Canvas.width = 600
+Canvas.height = 400
+Canvas.background_color = "#F4EEE1"
 
-    def __init__(self, c_x, c_y, radius, **kwargs):
-        super().__init__(_close_path=True, **kwargs)
+# Concentric rings in their own (Inkscape/AxiDraw) layer
+rings = Group(label="rings")
+for r in range(10, 180, 10):
+    rings.add_item(Circle(300, 200, r, stroke_color="#1C1B18"))
 
-        num_points = 6
+# One continuous sine stroke, rotated about its center
+wave = Line([(x, 200 + 40 * math.sin(x / 25)) for x in range(40, 561)], stroke_color="#C2410C")
+wave.rotate(-15)
 
-        # Calculate the angle between each point
-        angle_step = 2 * math.pi / num_points
+Text("LineDream", 24, 360, font_size=28, stroke_color="#1C1B18")
 
-        for i in range(num_points):
-            angle = i * angle_step
-            x = c_x + radius * math.cos(angle)
-            y = c_y + radius * math.sin(angle)
-            self.add_vertex(x, y)
-
-
-if __name__ == "__main__":
-    from LineDream import Canvas
-
-    Canvas.width=356
-    Canvas.height=276
-    Canvas.units = "mm"
-    Canvas.background_color = "beige"
-
-    # Add a Hexagon in the middle of canvas with a radius of 50
-    Hexagon(Canvas.width/2, Canvas.height/2, 50, )
-
-    Canvas.save('', open_viewer=True)
-
+Canvas.save("hello.svg")
 ```
 
-Todos:
------
-- Better document colors/opacity/styles for the SVG
-- Add 'tag' notion for lines
-- Add `Group` to the example
+<p align="center"><img src="docs/images/quickstart.svg" width="600" alt="Output of the quickstart sketch"></p>
+
+`Canvas.save("hello.svg", open_viewer=True)` opens the result as soon as it is written, and
+`Canvas.save("", as_string=True)` returns the SVG instead of writing a file.
+
+## What's in the box
+
+| | |
+|---|---|
+| **Primitives** | `Line`, `Point`, `Circle`, `Ellipse`, `Arc`, `Rectangle`, `Square` |
+| **Text** | `Text`: single-stroke [Hershey](https://en.wikipedia.org/wiki/Hershey_fonts) fonts (32 bundled), wrapped and aligned, so lettering plots as one pen line |
+| **Grouping** | `Group(label=...)` becomes an Inkscape layer, which AxiDraw and similar tools plot pen by pen |
+| **Styling** | `stroke_color`, `stroke_width`, `fill_color`, `fill_opacity`, as keyword arguments or attributes on any shape |
+| **Transforms** | `transform(x, y)`, `rotate(degrees)`, `rotate_x/y/z`, `scale(amt)`, applied per shape |
+| **Canvas** | `width`, `height`, `units` (e.g. `"mm"` for plotter-ready sizes), `background_color` |
+| **Helpers** | `CircleMath` for polar/cartesian conversions; `Line.from_array` for NumPy (N, 2) or (N, 3) arrays |
+
+### Custom shapes
+
+Subclass `BaseShape`, add vertices, and the new shape gets styling, transforms and SVG output for free:
+
+```python
+import math
+from LineDream import BaseShape, Canvas
+
+class Hexagon(BaseShape):
+    def __init__(self, cx, cy, radius, **kwargs):
+        super().__init__(**kwargs)
+        self.close_path = True
+        for i in range(6):
+            angle = i * math.pi / 3
+            self.add_vertex(cx + radius * math.cos(angle), cy + radius * math.sin(angle))
+
+Canvas.width, Canvas.height = 356, 276
+Canvas.units = "mm"
+
+Hexagon(Canvas.width / 2, Canvas.height / 2, 50).rotate(15)
+Canvas.save("hexagon.svg")
+```
+
+More sketches, with their source, live in the [gallery](https://linedream.marcrleonard.com) and in
+[`docs/source/gallery`](docs/source/gallery).
+
+## Using LineDream in your own web page
+
+LineDream is pure Python, so it installs into Pyodide with micropip:
+
+```js
+const pyodide = await loadPyodide();
+await pyodide.loadPackage(["numpy", "pillow", "lxml", "micropip"]);  // CORE_PACKAGES in browser/packages.mjs
+await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("linedream")
+`);
+```
+
+This needs 0.4.0 or later; earlier releases depend on vpype, which does not run under Pyodide.
+`Canvas.save(open_viewer=True)` is unavailable there, so use `as_string=True` and hand the SVG to the page.
 
 ---
 
 ## Development
 
-### Installation for Development
-LineDream uses [uv](https://docs.astral.sh/uv/) for development.
+LineDream uses [uv](https://docs.astral.sh/uv/).
+
 ```bash
 git clone https://github.com/marcrleonard/LineDream.git
 cd LineDream
-
-# Create .venv with LineDream (editable) and the dev tools, exactly as pinned in uv.lock
-uv sync
+uv sync            # .venv with LineDream (editable) and the dev tools, as pinned in uv.lock
 ```
 
-### Running Tests
+### Tests
+
 ```bash
-# Run the tests
 uv run pytest
-
-# Against a specific Python version (uv downloads it if needed)
-uv run --python 3.9 pytest
-
-# Coverage report
+uv run --python 3.9 pytest                          # any supported version; uv fetches it if needed
 uv run coverage run -m pytest && uv run coverage html
 ```
 
-CI runs the suite on Python 3.9 to 3.14 (plus macOS and Windows) on every pull request; see `.github/workflows/tests.yml`.
+CI ([`tests.yml`](.github/workflows/tests.yml)) runs on every pull request: the suite on Python 3.9 to 3.14 on Linux
+plus macOS and Windows, a smoke test of the built wheel, and the suite again under Pyodide in Node.
 
-### Running in the browser (Pyodide)
-LineDream runs under [Pyodide](https://pyodide.org). numpy, pillow and lxml come from the Pyodide distribution and
-drawsvg from PyPI; the `drawsvg[all]` extras (only used by `Canvas.save(open_viewer=True)`) are skipped there.
+### Pyodide and the playground
+
+numpy, pillow and lxml come from the Pyodide distribution and drawsvg from PyPI; the `drawsvg[all]` extras (only
+used by `open_viewer=True`) are skipped on emscripten.
 
 ```bash
-# Run the test suite under Pyodide in Node
 uv build --wheel
-cd browser && npm install && npm test   # LINEDREAM_TERRAIN=1 also loads scipy and scikit-image
+cd browser && npm install && npm test      # LINEDREAM_TERRAIN=1 also loads scipy and scikit-image
 
-# Playground: serve the repo root and open http://localhost:8000/browser/?wheel=../dist/linedream-0.3.15-py3-none-any.whl
+# Local playground: serve the repo root, then open
+# http://localhost:8000/browser/?wheel=../dist/linedream-<version>-py3-none-any.whl
 python -m http.server
 ```
 
-The website build copies the playground to `/playground/` together with a wheel built from the same checkout.
+The website build copies the playground to `/playground/` along with a wheel built from the same checkout.
 
-In your own page, load the packages in `browser/packages.mjs` with `pyodide.loadPackage`, then
-`await micropip.install("linedream")`. Releases up to 0.3.15 on PyPI still import vpype, so this needs the next release.
+### Docs site
 
-### Building the docs site
 ```bash
 uv run --extra docs python docs/build_website.py   # output in public/
 ```
 
-### Building and Publishing
+### Releasing
 
 ```bash
-# Build the sdist and wheel into dist/
-uv build
-
-# Upload to PyPI (or --publish-url https://test.pypi.org/legacy/ for TestPyPI)
-uv publish
+uv build      # sdist and wheel into dist/
 ```
 
-### Project Structure
-All package metadata and dependencies are defined in `pyproject.toml` following modern Python packaging standards (PEP 517/518).
+Releases are published by `.github/workflows/release.yml` when a `v*` tag is pushed, using PyPI trusted publishing
+(no token). To cut one:
+
+1. Set the version in `pyproject.toml` and `LineDream/__version__.py`, run `uv lock`, and move the `CHANGELOG.md`
+   entry out of "unreleased".
+2. Merge to master, then `git tag v0.4.0 && git push origin v0.4.0`.
+
+The workflow checks the tag matches both versions, builds, publishes to PyPI and creates a GitHub release with the
+changelog section as its notes. `uv publish` still works for a manual upload.
+
+All package metadata and dependencies live in [`pyproject.toml`](pyproject.toml).
+
+## License
+
+MIT. The bundled Hershey font data and text layout are vendored from [vpype](https://github.com/abey79/vpype), which
+adapted them from [fogleman/axi](https://github.com/fogleman/axi); see [`LineDream/fonts/LICENSE`](LineDream/fonts/LICENSE).
