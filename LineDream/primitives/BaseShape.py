@@ -158,10 +158,9 @@ class BaseShape(object):
 	def add_vertex(self, x, y, z=0):
 		'''Append a set of vertexes to the primitive shape'''
 
-		l = self._vertices.tolist()
-		l.append([x,y,z,1])
-
-		self._vertices = np.array(l)
+		# vstack copies the existing array once; the old tolist()/np.array() round trip
+		# rebuilt every vertex through Python objects on each call
+		self._vertices = np.vstack([self._vertices.reshape(-1, 4), [[x, y, z, 1]]])
 
 		return self
 
