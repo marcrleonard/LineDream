@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LineDream Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/edit/matchbrackets.js"></script>
+<style>
+  /* Layout: editor and plot sheet side by side, stacking on phones, on the main site's dotted plotter paper.
+     Colors and type follow docs/source/css/site.css, which is light only. */
+  :root {
+    --paper: #F6F1E6; --paper-2: #EFE7D6; --card: #FBF8F1; --sheet: #ffffff;
+    --ink: #1C1B18; --faint: #7A7366; --rule: #E0D6C2; --amber-soft: #FFCB6B; --err: #b3261e;
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: light;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--ink); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased;
+    background: var(--paper) radial-gradient(circle at 1px 1px, rgba(28, 27, 24, .13) 1px, transparent 0) 0 0 / 24px 24px;
+  }
+  ::selection { background: var(--amber-soft); color: var(--ink); }
+  main {
+    max-width: 1240px; margin: 0 auto; display: grid; gap: 18px;
+    padding-block: 28px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+  h1 { margin: 0; font: 600 32px/1.1 var(--display); letter-spacing: -0.015em; text-wrap: balance; }
+  h1 a { color: inherit; text-decoration: none; }
+  #status { color: var(--faint); font: 12.5px/1.4 var(--mono); }
+  #status.ready::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2e9d5b; margin-right: 8px; vertical-align: 1px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  label.ex { display: flex; gap: 8px; align-items: center; color: var(--faint); font-size: 13px; }
+  select, button {
+    font: 600 14px/1 var(--body); border-radius: 999px; padding: 10px 16px; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--card); color: var(--ink);
+    transition: background-color .15s ease, transform .15s ease;
+  }
+  button:hover:not(:disabled) { background: var(--paper-2); }
+  button.primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  button.primary:hover:not(:disabled) { background: var(--ink); transform: translateY(-1px); }
+  button:disabled, select:disabled { opacity: 0.45; cursor: default; }
+  button:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } button.primary:hover:not(:disabled) { transform: none; } }
+  .hint { color: var(--faint); font-size: 12.5px; margin-left: auto; }
+  kbd { font: 11.5px var(--mono); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; background: var(--card); }
+  .panes { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
+  @media (max-width: 860px) { .panes { grid-template-columns: minmax(0, 1fr); } .hint { display: none; } }
+  textarea {
+    width: 100%; min-height: 560px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 14px;
+    background: var(--card); color: var(--ink); font: 13px/1.55 var(--mono); font-variant-ligatures: none;
+    tab-size: 4; resize: vertical;
+  }
+  /* editor: CodeMirror 5 with a soft theme on the site's card color */
+  .CodeMirror {
+    height: 560px; border: 1px solid var(--rule); border-radius: 14px; padding: 6px 0;
+    background: var(--card); color: var(--ink); font: 13px/1.6 var(--mono); font-variant-ligatures: none;
+  }
+  .panes > * { min-width: 0; }
+  @media (max-width: 860px) { .CodeMirror { height: 420px; } }
+  .CodeMirror-focused { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .CodeMirror-lines { padding: 8px 0; }
+  .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like { padding: 0 16px; }
+  .CodeMirror-cursor { border-left: 2px solid var(--ink); }
+  .CodeMirror-selected, .CodeMirror-focused .CodeMirror-selected { background: rgba(255, 203, 107, .38); }
+  .CodeMirror-matchingbracket { color: inherit !important; background: rgba(255, 203, 107, .55); border-radius: 2px; }
+  .cm-s-default .cm-keyword { color: #8a4f7d; }
+  .cm-s-default .cm-def { color: #2f6a8a; font-weight: 500; }
+  .cm-s-default .cm-builtin { color: #2f6a8a; }
+  .cm-s-default .cm-variable { color: var(--ink); }
+  .cm-s-default .cm-variable-2, .cm-s-default .cm-property { color: #45413A; }
+  .cm-s-default .cm-string { color: #5d7a3a; }
+  .cm-s-default .cm-number { color: #b0672a; }
+  .cm-s-default .cm-meta { color: #b0672a; }
+  .cm-s-default .cm-operator, .cm-s-default .cm-punctuation { color: var(--faint); }
+  .cm-s-default .cm-comment { color: #9a917f; font-style: italic; }
+  .cm-s-default .cm-error { color: var(--err); }
+  .sheet {
+    min-width: 0; min-height: 560px; border-radius: 4px; background: var(--sheet); overflow: auto;
+    display: grid; place-items: center; padding: 18px;
+    box-shadow: 0 1px 0 rgba(28, 27, 24, .04), 0 12px 32px -12px rgba(28, 27, 24, .18);
+  }
+  .sheet { position: relative; }
+  #out { display: grid; place-items: center; width: 100%; }
+  .sheet svg { max-width: 100%; height: auto; display: block; }
+  .busy {
+    position: absolute; inset: 0; border-radius: inherit; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center;
+    background: color-mix(in srgb, var(--sheet) 78%, transparent); backdrop-filter: blur(2px);
+  }
+  .sheet.is-busy .busy { display: flex; }
+  #busy-label { font: 500 14px/1.4 var(--mono); }
+  #busy-note { color: var(--faint); font-size: 12.5px; max-width: 36ch; }
+  #busy-note:empty { display: none; }
+  .spinner {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 2px solid var(--rule); border-top-color: var(--ink);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+  .sheet pre.err { color: var(--err); white-space: pre-wrap; margin: 0; align-self: start; justify-self: stretch; font: 12.5px/1.5 var(--mono); }
+  footer { color: var(--faint); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  footer a { color: var(--ink); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><a href="../">LineDream</a> Playground</h1>
+    <div id="status">Starting Python…</div>
+  </header>
+  <div class="toolbar">
+    <label class="ex" for="example">Example
+      <select id="example" disabled>
+        <option value="sunburst">Sunburst (example.py)</option>
+        <option value="squares">Loosening squares</option>
+        <option value="rings">Wobbly rings</option>
+        <option value="fonts">Hershey fonts</option>
+        <option value="flow">Flow field (stress test)</option>
+      </select>
+    </label>
+    <button id="run" class="primary" disabled>Run</button>
+    <button id="copy" disabled>Copy SVG</button>
+    <button id="download" disabled>Download SVG</button>
+    <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs, <kbd>Esc</kbd> cancels. The last expression is drawn.</span>
+  </div>
+  <div class="panes">
+    <textarea id="code" spellcheck="false" aria-label="Sketch source"></textarea>
+    <div class="sheet">
+      <div id="out"></div>
+      <div class="busy" id="busy">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="busy-label" role="status">Starting Python…</span>
+        <span id="busy-note">Pyodide, numpy, pillow and lxml are about 18 MB the first time.</span>
+        <button id="cancel" hidden>Cancel</button>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <span id="meta">Sketches run in your browser with <a href="https://pyodide.org">Pyodide</a>. New to LineDream? Start with the <a href="../getting-started/">guide</a>.</span>
+    <span id="stats"></span>
+  </footer>
+</main>
+
+<script type="text/plain" id="ex-sunburst">
+import random
+from LineDream import Canvas, Circle, Line, Text, CircleMath
+
+random.seed(10)
+Canvas.flush()
+Canvas.width, Canvas.height = 900, 500
+Canvas.background_color = 'beige'
+
+cx, cy, r = Canvas.width / 2, Canvas.height, 150
+Circle(cx, cy, r)
+for angle in range(0, 360, 2):
+	d = r
+	for ring in range(1, 6):
+		dx, dy = CircleMath.distance_to_coords(angle, d)
+		x, y = cx + dx, cy + dy
+		step = random.randint(4, 24 * ring)
+		ex, ey = CircleMath.distance_to_coords(angle, step)
+		Line([(x, y), (x + ex, y + ey)])
+		Circle(x + ex, y + ey, 2, fill_color='beige')
+		d += step + 2 * ring
+
+Text('LineDream', 0, Canvas.height - 50, width=Canvas.width, align='center', font_size=32)
+
+# the last expression is what gets drawn
+Canvas.save('', as_string=True)
+</script>
+<script type="text/plain" id="ex-squares">
+import random
+from LineDream import Canvas, Square
+
+random.seed(3)
+Canvas.flush()
+Canvas.width, Canvas.height = 700, 700
+Canvas.background_color = 'white'
+
+# A grid of squares that come loose as you move down the page
+cell = 50
+for row in range(12):
+	for col in range(12):
+		s = Square(75 + col * cell, 75 + row * cell, cell * 0.8)
+		s.rotate(random.uniform(-1, 1) * row * 3)
+		s.transform(random.uniform(-1, 1) * row, random.uniform(-1, 1) * row)
+
+Canvas.save('', as_string=True)
+</script>
+<script type="text/plain" id="ex-rings">
+import math
+from LineDream import Canvas, Line
+
+Canvas.flush()
+Canvas.width, Canvas.height = 700, 700
+Canvas.background_color = 'white'
+
+# Concentric wobbly rings, one polyline each
+cx, cy = Canvas.width / 2, Canvas.height / 2
+for ring in range(1, 40):
+	r = ring * 8
+	pts = []
+	for step in range(361):
+		a = math.radians(step)
+		wobble = 6 * math.sin(a * 5 + ring * 0.4) * math.sin(ring / 6)
+		pts.append((cx + (r + wobble) * math.cos(a), cy + (r + wobble) * math.sin(a)))
+	Line(pts)
+
+Canvas.save('', as_string=True)
+</script>
+<script type="text/plain" id="ex-flow">
+import random
+import numpy as np
+from LineDream import Canvas, Line, Circle, Text
+
+# Stress test: ~6,000 streamlines (about 1.2M vertices) plus 3,000 circles.
+# Change SEED for a different field.
+SEED = 7
+random.seed(SEED)
+rng = np.random.default_rng(SEED)
+Canvas.flush()
+Canvas.width, Canvas.height = 1600, 1000
+Canvas.background_color = 'white'
+
+W, H = Canvas.width, Canvas.height
+LINES, STEPS, STEP = 6000, 200, 2.0
+
+# the field: a few layered sine waves, each with a seeded direction, frequency and phase
+waves = [(rng.uniform(0, 2 * np.pi), rng.uniform(0.002, 0.006), rng.uniform(0, 2 * np.pi), rng.uniform(0.8, 2.2))
+         for _ in range(4)]
+
+def angle(x, y):
+	a = 0
+	for direction, freq, phase, amp in waves:
+		a = a + amp * np.sin((x * np.cos(direction) + y * np.sin(direction)) * freq + phase)
+	return a
+
+# integrate every streamline at once with numpy
+x = rng.uniform(0, W, LINES)
+y = rng.uniform(0, H, LINES)
+path = np.empty((STEPS, LINES, 2))
+for i in range(STEPS):
+	path[i, :, 0], path[i, :, 1] = x, y
+	a = angle(x, y)
+	x = x + np.cos(a) * STEP
+	y = y + np.sin(a) * STEP
+
+for j in range(LINES):
+	pts = path[:, j, :]
+	inside = (pts[:, 0] >= 0) & (pts[:, 0] <= W) & (pts[:, 1] >= 0) & (pts[:, 1] <= H)
+	pts = pts[inside]
+	if len(pts) > 1:
+		Line([tuple(p) for p in pts], stroke_color='#18212b', stroke_width=0.3)
+
+for _ in range(3000):
+	Circle(random.uniform(0, W), random.uniform(0, H), random.uniform(0.5, 3), fill_color='none', stroke_color='#2747c9')
+
+Text(f'seed {SEED}: {LINES:,} streamlines x {STEPS} steps', 40, H - 60, width=W - 80, font_size=36)
+
+Canvas.save('', as_string=True)
+</script>
+<script type="text/plain" id="ex-fonts">
+from LineDream import Canvas, Text
+
+Canvas.flush()
+Canvas.width, Canvas.height = 700, 560
+Canvas.background_color = 'white'
+
+# Single-stroke Hershey fonts, ready for a pen plotter
+fonts = ['futural', 'futuram', 'rowmans', 'timesr', 'scripts', 'cursive', 'gothiceng', 'greek']
+for i, name in enumerate(fonts):
+	Text(f'{name}: Sphinx of black quartz', 30, 50 + i * 62, width=640, font_size=26, font_name=name)
+
+Canvas.save('', as_string=True)
+</script>
+
+
+<script type="module">
+  // Query parameters, all optional:
+  //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN, same version as package.json)
+  //   ?wheel=<url>    a LineDream wheel to install, e.g. ../dist/linedream-0.3.15-py3-none-any.whl. The website
+  //                   build sets data-wheel on <html> to the wheel it ships; otherwise LineDream comes from PyPI
+  //                   (releases up to 0.3.15 still import vpype and require drawsvg[all], so they don't run here)
+  const PYODIDE_VERSION = "314.0.7";
+  const params = new URLSearchParams(location.search);
+  const indexURL = new URL(params.get("pyodide") || `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`, location.href).href;
+  const wheelParam = params.get("wheel") || document.documentElement.dataset.wheel;
+  const wheel = wheelParam ? new URL(wheelParam, location.href).href : "linedream";
+
+  const $ = (id) => document.getElementById(id);
+  const status = $("status"), code = $("code"), out = $("out"), run = $("run"), copy = $("copy"), download = $("download"),
+        example = $("example"), stats = $("stats"), sheet = out.parentElement, busyLabel = $("busy-label"), busyNote = $("busy-note"),
+        cancel = $("cancel");
+  const editor = CodeMirror.fromTextArea(code, {
+    mode: "python", indentUnit: 4, tabSize: 4, indentWithTabs: true, lineWrapping: true, matchBrackets: true,
+    extraKeys: {
+      "Ctrl-Enter": () => render(), "Cmd-Enter": () => render(),
+      Esc: () => { if (pending) cancel.click(); },
+    },
+  });
+  let lastSvg = "", worker, ready, runId = 0, pending = null, timer = 0;
+
+  function busy(label, note = "", cancellable = false) {
+    sheet.classList.add("is-busy");
+    busyLabel.textContent = label;
+    busyNote.textContent = note;
+    cancel.hidden = !cancellable;
+  }
+  function idle() { sheet.classList.remove("is-busy"); clearInterval(timer); }
+  function setControls(enabled) { run.disabled = example.disabled = !enabled; }
+  function showError(text) {
+    const pre = document.createElement("pre");
+    pre.className = "err";
+    pre.textContent = text;
+    out.replaceChildren(pre);
+  }
+  function loadExample(name) { editor.setValue($("ex-" + name).textContent.replace(/^\n/, "")); }
+
+  // Start (or restart, after a cancel) the Python worker; resolves once LineDream is importable
+  function startWorker(firstNote) {
+    worker = new Worker(new URL("worker.mjs", import.meta.url), { type: "module" });
+    setControls(false);
+    status.classList.remove("ready");
+    ready = new Promise((resolve, reject) => {
+      worker.onmessage = ({ data }) => {
+        if (data.type === "progress") { busy(data.text, firstNote); status.textContent = data.text; }
+        else if (data.type === "ready") { status.textContent = data.versions; status.classList.add("ready"); setControls(true); resolve(); }
+        else if (data.type === "fatal") { status.textContent = "Python failed to start"; idle(); showError(data.error); reject(new Error(data.error)); }
+        else if (pending && data.id === pending.id) { pending.resolve(data); }
+      };
+      worker.onerror = (e) => { status.textContent = "Python failed to start"; idle(); showError(e.message || "The Python worker crashed."); reject(e); };
+    });
+    worker.postMessage({ type: "init", indexURL, wheel });
+    return ready;
+  }
+
+  async function render() {
+    if (pending) return;
+    await ready;
+    setControls(false);
+    const id = ++runId, t0 = performance.now();
+    busy("Running… 0.0 s", "", true);
+    timer = setInterval(() => (busyLabel.textContent = `Running… ${((performance.now() - t0) / 1000).toFixed(1)} s`), 100);
+    const data = await new Promise((resolve) => {
+      pending = { id, resolve };
+      worker.postMessage({ type: "run", id, code: editor.getValue() });
+    });
+    pending = null;
+    clearInterval(timer);
+    if (data.type === "cancelled") return;
+    const ran = performance.now() - t0;
+    if (data.type === "error") {
+      showError(data.error);
+      stats.textContent = "";
+    } else {
+      // putting a big SVG into the page blocks for a moment; let the label paint first
+      busy(`Drawing ${(data.svg.length / 1e6).toFixed(1)} MB of SVG…`);
+      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+      out.innerHTML = data.svg;
+      lastSvg = data.svg;
+      copy.disabled = download.disabled = false;
+      const n = out.querySelectorAll("svg *").length;
+      stats.textContent = `${n.toLocaleString()} SVG elements · ${(data.svg.length / 1024).toFixed(0)} KB · ${Math.round(ran)} ms in Python`;
+    }
+    idle();
+    setControls(true);
+  }
+
+  cancel.addEventListener("click", () => {
+    if (!pending) return;
+    worker.terminate();
+    pending.resolve({ type: "cancelled" });
+    pending = null;
+    idle();
+    stats.textContent = "Run cancelled.";
+    startWorker("Cancelled. Restarting Python, which is quick now that the packages are cached.").then(idle);
+  });
+  run.addEventListener("click", render);
+  example.addEventListener("change", () => { loadExample(example.value); render(); });
+  download.addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([lastSvg], { type: "image/svg+xml" }));
+    a.download = `linedream-${example.value}.svg`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 0);
+  });
+  copy.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(lastSvg); copy.textContent = "Copied"; }
+    catch { copy.textContent = "Copy blocked"; }
+    setTimeout(() => (copy.textContent = "Copy SVG"), 1500);
+  });
+
+  loadExample("sunburst");
+  startWorker("Pyodide, numpy, pillow and lxml are about 18 MB the first time.").then(render, () => {});
+</script>
+</body>
+</html>

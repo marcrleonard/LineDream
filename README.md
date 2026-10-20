@@ -146,6 +146,24 @@ uv run coverage run -m pytest && uv run coverage html
 
 CI runs the suite on Python 3.9 to 3.14 (plus macOS and Windows) on every pull request; see `.github/workflows/tests.yml`.
 
+### Running in the browser (Pyodide)
+LineDream runs under [Pyodide](https://pyodide.org). numpy, pillow and lxml come from the Pyodide distribution and
+drawsvg from PyPI; the `drawsvg[all]` extras (only used by `Canvas.save(open_viewer=True)`) are skipped there.
+
+```bash
+# Run the test suite under Pyodide in Node
+uv build --wheel
+cd browser && npm install && npm test   # LINEDREAM_TERRAIN=1 also loads scipy and scikit-image
+
+# Playground: serve the repo root and open http://localhost:8000/browser/?wheel=../dist/linedream-0.3.15-py3-none-any.whl
+python -m http.server
+```
+
+The website build copies the playground to `/playground/` together with a wheel built from the same checkout.
+
+In your own page, load the packages in `browser/packages.mjs` with `pyodide.loadPackage`, then
+`await micropip.install("linedream")`. Releases up to 0.3.15 on PyPI still import vpype, so this needs the next release.
+
 ### Building the docs site
 ```bash
 uv run --extra docs python docs/build_website.py   # output in public/

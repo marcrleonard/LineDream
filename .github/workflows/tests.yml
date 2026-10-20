@@ -52,3 +52,27 @@ jobs:
           uv venv /tmp/wheel-env
           uv pip install --python /tmp/wheel-env dist/*.whl
           cd /tmp && /tmp/wheel-env/bin/python -c "from LineDream import Canvas, Text; Text('hello', 0, 0); print(Canvas.save('', as_string=True)[:80])"
+
+  pyodide:
+    name: Pyodide (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: browser/package-lock.json
+      - name: Build the wheel
+        run: uv build --wheel
+      - name: Install Pyodide
+        working-directory: browser
+        run: npm ci
+      - name: Test under Pyodide
+        working-directory: browser
+        env:
+          LINEDREAM_TERRAIN: "1"
+        run: npm test

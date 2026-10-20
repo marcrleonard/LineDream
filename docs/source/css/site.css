@@ -132,6 +132,10 @@ a { color: inherit; }
 	.site-nav .nav-github { margin-left: 4px; padding: 8px; }
 	.brand { font-size: 1.2rem; }
 }
+@media (max-width: 420px) {
+	/* five nav items don't fit; GitHub stays linked from the hero and footer */
+	.site-nav .nav-github { display: none; }
+}
 
 /* ---------- Buttons ---------- */
 
