@@ -1,0 +1,4 @@
+cache/
+renders/*
+!renders/contact_sheet.png
+!renders/seed_sweep.png
