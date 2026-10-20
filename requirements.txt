@@ -1,0 +1,3 @@
+# Installs LineDream plus what docs/build_website.py needs.
+# Cloudflare Pages installs this before running the site build.
+.[docs]
