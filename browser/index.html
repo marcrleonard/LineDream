@@ -290,9 +290,9 @@ Canvas.save('', as_string=True)
 <script type="module">
   // Query parameters, all optional:
   //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN, same version as package.json)
-  //   ?wheel=<url>    a LineDream wheel to install, e.g. ../dist/linedream-0.3.15-py3-none-any.whl. The website
+  //   ?wheel=<url>    a LineDream wheel to install, e.g. ../dist/linedream-0.4.0-py3-none-any.whl. The website
   //                   build sets data-wheel on <html> to the wheel it ships; otherwise LineDream comes from PyPI
-  //                   (releases up to 0.3.15 still import vpype and require drawsvg[all], so they don't run here)
+  //                   (0.4.0 or later; earlier releases import vpype and require drawsvg[all], so they do not run here)
   const PYODIDE_VERSION = "314.0.7";
   const params = new URLSearchParams(location.search);
   const indexURL = new URL(params.get("pyodide") || `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`, location.href).href;

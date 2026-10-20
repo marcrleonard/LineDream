@@ -155,14 +155,14 @@ drawsvg from PyPI; the `drawsvg[all]` extras (only used by `Canvas.save(open_vie
 uv build --wheel
 cd browser && npm install && npm test   # LINEDREAM_TERRAIN=1 also loads scipy and scikit-image
 
-# Playground: serve the repo root and open http://localhost:8000/browser/?wheel=../dist/linedream-0.3.15-py3-none-any.whl
+# Playground: serve the repo root and open http://localhost:8000/browser/?wheel=../dist/linedream-0.4.0-py3-none-any.whl
 python -m http.server
 ```
 
 The website build copies the playground to `/playground/` together with a wheel built from the same checkout.
 
 In your own page, load the packages in `browser/packages.mjs` with `pyodide.loadPackage`, then
-`await micropip.install("linedream")`. Releases up to 0.3.15 on PyPI still import vpype, so this needs the next release.
+`await micropip.install("linedream")` (0.4.0 or later; earlier releases import vpype and do not run under Pyodide).
 
 ### Building the docs site
 ```bash
@@ -175,9 +175,17 @@ uv run --extra docs python docs/build_website.py   # output in public/
 # Build the sdist and wheel into dist/
 uv build
 
-# Upload to PyPI (or --publish-url https://test.pypi.org/legacy/ for TestPyPI)
-uv publish
 ```
+
+Releases are published by `.github/workflows/release.yml` when a `v*` tag is pushed, using PyPI trusted publishing
+(no token). To cut one:
+
+1. Set the version in `pyproject.toml` and `LineDream/__version__.py`, run `uv lock`, and move the `CHANGELOG.md`
+   entry out of "unreleased".
+2. Merge to master, then `git tag v0.4.0 && git push origin v0.4.0`.
+
+The workflow checks the tag matches both versions, builds, publishes to PyPI and creates a GitHub release with the
+changelog section as its notes. `uv publish` still works for a manual upload.
 
 ### Project Structure
 All package metadata and dependencies are defined in `pyproject.toml` following modern Python packaging standards (PEP 517/518).
