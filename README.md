@@ -6,9 +6,8 @@
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/LineDream/"><img alt="PyPI" src="https://img.shields.io/pypi/v/LineDream"></a>
-  <a href="https://pypi.org/project/LineDream/"><img alt="Python versions" src="https://img.shields.io/pypi/pyversions/LineDream"></a>
-  <a href="https://github.com/marcrleonard/LineDream/actions/workflows/tests.yml"><img alt="Tests" src="https://github.com/marcrleonard/LineDream/actions/workflows/tests.yml/badge.svg"></a>
+  <a href="https://pypi.org/project/LineDream/"><img alt="pip install LineDream" src="https://img.shields.io/badge/pip%20install-LineDream-3775A9"></a>
+  <a href="pyproject.toml"><img alt="Python 3.9 to 3.14" src="https://img.shields.io/badge/python-3.9%E2%80%933.14-3775A9"></a>
   <a href="pyproject.toml"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
   <a href="https://linedream.marcrleonard.com/playground/"><img alt="Try it in your browser" src="https://img.shields.io/badge/playground-try%20in%20browser-E8A33D"></a>
 </p>
@@ -29,9 +28,8 @@
 
 ---
 
-LineDream is heavily influenced by [p5.js](https://p5js.org) and [Processing](https://processing.org), but takes a
-more object-oriented approach: every shape owns its own style and transformations, so there is very little global
-state. Output is SVG, with groups written as Inkscape layers so a sketch goes straight to an AxiDraw or any other pen
+LineDream is object-oriented from the ground up: every shape owns its own style and transformations, so there is
+almost no global state to manage. Output is SVG, with groups written as Inkscape layers so a sketch goes straight to an AxiDraw or any other pen
 plotter. There is no draw loop; a sketch renders a single frame, and a plain Python loop is enough to make a series.
 
 ## Try it in your browser
