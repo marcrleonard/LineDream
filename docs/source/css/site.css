@@ -205,9 +205,7 @@ a { color: inherit; }
 	font-variation-settings: 'opsz' 144, 'SOFT' 50;
 	margin: 0;
 }
-.display em {
-	font-style: italic;
-	font-weight: 400;
+.display .mark {
 	position: relative;
 	white-space: nowrap;
 }
@@ -260,7 +258,7 @@ a { color: inherit; }
 	font: 500 .75rem/1.4 var(--font-mono);
 }
 .hero h1 {
-	font-size: clamp(2.8rem, 6.6vw, 5.4rem);
+	font-size: clamp(2.6rem, 5.4vw, 4.6rem);
 	margin: 28px 0 0;
 }
 .squiggle {
