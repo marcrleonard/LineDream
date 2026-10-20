@@ -32,3 +32,11 @@ class Group(BaseShape):
         self.items.append(item)
         _Canvas.remove_by_id(item.id)
 
+    def extend(self, items):
+        '''Add many shapes to the group at once. Removes them from the draw queue in a single pass,
+        so it stays fast for thousands of items (add_item scans the queue once per item).'''
+        items = list(items)
+        self.items.extend(items)
+        ids = {item.id for item in items}
+        _Canvas.draw_queue = [q for q in _Canvas.draw_queue if q.id not in ids]
+
