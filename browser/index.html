@@ -7,6 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/edit/matchbrackets.js"></script>
 <style>
   /* Layout: editor and plot sheet side by side, stacking on phones, on the main site's dotted plotter paper.
      Colors and type follow docs/source/css/site.css, which is light only. */
@@ -57,6 +61,30 @@
     background: var(--card); color: var(--ink); font: 13px/1.55 var(--mono); font-variant-ligatures: none;
     tab-size: 4; resize: vertical;
   }
+  /* editor: CodeMirror 5 with a soft theme on the site's card color */
+  .CodeMirror {
+    height: 560px; border: 1px solid var(--rule); border-radius: 14px; padding: 6px 0;
+    background: var(--card); color: var(--ink); font: 13px/1.6 var(--mono); font-variant-ligatures: none;
+  }
+  .panes > * { min-width: 0; }
+  @media (max-width: 860px) { .CodeMirror { height: 420px; } }
+  .CodeMirror-focused { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .CodeMirror-lines { padding: 8px 0; }
+  .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like { padding: 0 16px; }
+  .CodeMirror-cursor { border-left: 2px solid var(--ink); }
+  .CodeMirror-selected, .CodeMirror-focused .CodeMirror-selected { background: rgba(255, 203, 107, .38); }
+  .CodeMirror-matchingbracket { color: inherit !important; background: rgba(255, 203, 107, .55); border-radius: 2px; }
+  .cm-s-default .cm-keyword { color: #8a4f7d; }
+  .cm-s-default .cm-def { color: #2f6a8a; font-weight: 500; }
+  .cm-s-default .cm-builtin { color: #2f6a8a; }
+  .cm-s-default .cm-variable { color: var(--ink); }
+  .cm-s-default .cm-variable-2, .cm-s-default .cm-property { color: #45413A; }
+  .cm-s-default .cm-string { color: #5d7a3a; }
+  .cm-s-default .cm-number { color: #b0672a; }
+  .cm-s-default .cm-meta { color: #b0672a; }
+  .cm-s-default .cm-operator, .cm-s-default .cm-punctuation { color: var(--faint); }
+  .cm-s-default .cm-comment { color: #9a917f; font-style: italic; }
+  .cm-s-default .cm-error { color: var(--err); }
   .sheet {
     min-width: 0; min-height: 560px; border-radius: 4px; background: var(--sheet); overflow: auto;
     display: grid; place-items: center; padding: 18px;
@@ -275,6 +303,13 @@ Canvas.save('', as_string=True)
   const status = $("status"), code = $("code"), out = $("out"), run = $("run"), copy = $("copy"), download = $("download"),
         example = $("example"), stats = $("stats"), sheet = out.parentElement, busyLabel = $("busy-label"), busyNote = $("busy-note"),
         cancel = $("cancel");
+  const editor = CodeMirror.fromTextArea(code, {
+    mode: "python", indentUnit: 4, tabSize: 4, indentWithTabs: true, lineWrapping: true, matchBrackets: true,
+    extraKeys: {
+      "Ctrl-Enter": () => render(), "Cmd-Enter": () => render(),
+      Esc: () => { if (pending) cancel.click(); },
+    },
+  });
   let lastSvg = "", worker, ready, runId = 0, pending = null, timer = 0;
 
   function busy(label, note = "", cancellable = false) {
@@ -291,7 +326,7 @@ Canvas.save('', as_string=True)
     pre.textContent = text;
     out.replaceChildren(pre);
   }
-  function loadExample(name) { code.value = $("ex-" + name).textContent.replace(/^\n/, ""); }
+  function loadExample(name) { editor.setValue($("ex-" + name).textContent.replace(/^\n/, "")); }
 
   // Start (or restart, after a cancel) the Python worker; resolves once LineDream is importable
   function startWorker(firstNote) {
@@ -320,7 +355,7 @@ Canvas.save('', as_string=True)
     timer = setInterval(() => (busyLabel.textContent = `Running… ${((performance.now() - t0) / 1000).toFixed(1)} s`), 100);
     const data = await new Promise((resolve) => {
       pending = { id, resolve };
-      worker.postMessage({ type: "run", id, code: code.value });
+      worker.postMessage({ type: "run", id, code: editor.getValue() });
     });
     pending = null;
     clearInterval(timer);
@@ -353,11 +388,6 @@ Canvas.save('', as_string=True)
     startWorker("Cancelled. Restarting Python, which is quick now that the packages are cached.").then(idle);
   });
   run.addEventListener("click", render);
-  code.addEventListener("keydown", (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); render(); }
-    if (e.key === "Escape" && pending) cancel.click();
-    if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); code.setRangeText("\t", code.selectionStart, code.selectionEnd, "end"); }
-  });
   example.addEventListener("change", () => { loadExample(example.value); render(); });
   download.addEventListener("click", () => {
     const a = document.createElement("a");
