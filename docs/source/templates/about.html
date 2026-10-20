@@ -1,21 +1,31 @@
 {% extends "base_template.html" %}
+{% set active = 'about' %}
 
-{% block secondary_content %}
+{% block title %}About — LineDream{% endblock %}
 
-<section class="mt-4" style="background: white">
-    <div class="container">
-        <div class="row">
-            <div class="col-8">
-                <h1>About</h1>
-                <p>LineDream was created to because to make creating vector graphics simple and intuitive. Though the library is heavily inspired by P5 and Processing's cabailities,
-                the goal is to allow primitives to have their own style, positioning and transformation methods.</p>
-                <p>The library was created and is being maintained by <a target="_blank" href="https://marcrleonard.com">Marc Leonard</a></p>
-            </div>
-
-        </div>
-
-
+{% block content %}
+<section class="page-head">
+    <div class="wrap">
+        <span class="eyebrow">About</span>
+        <h1 class="display">Why <em>LineDream</em>?</h1>
     </div>
 </section>
 
+<div class="wrap about-grid">
+    <div class="prose">
+        <p>LineDream was created to make creating vector graphics simple and intuitive. Though the library is heavily inspired by P5 and Processing's capabilities, the goal is to allow primitives to have their own style, positioning and transformation methods.</p>
+        <p>It was originally built to make art for a pen plotter, so it outputs SVG: a format that keeps every line a line, all the way to the paper. The object structure underneath is renderer-agnostic and could drive other targets too.</p>
+        <p>The library was created and is maintained by <a target="_blank" rel="noopener" href="https://marcrleonard.com">Marc Leonard</a>. Bug reports, ideas and pull requests are welcome on <a href="https://github.com/marcrleonard/LineDream">GitHub</a>.</p>
+    </div>
+    <aside class="about-card">
+        <img src="{{ url_root }}static/gallery/spirograph.svg" alt="A spirograph drawn with LineDream" width="600" height="600" style="background: #F4EEE1">
+        <dl>
+            {% if version %}<dt>Version</dt><dd>{{ version }}</dd>{% endif %}
+            <dt>License</dt><dd>MIT</dd>
+            <dt>Python</dt><dd>3.9+</dd>
+            <dt>Output</dt><dd>SVG</dd>
+            <dt>Install</dt><dd><code>pip install LineDream</code></dd>
+        </dl>
+    </aside>
+</div>
 {% endblock %}

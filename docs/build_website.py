@@ -1,5 +1,8 @@
+import ast
+import datetime
 import json
 import pathlib
+from importlib import metadata
 
 import pdoc
 import re
@@ -71,11 +74,80 @@ env = Environment(
 
 os.makedirs(BUILD_FOLDER, exist_ok=True)
 
+def _round_svg_floats(svg):
+	'''Trim coordinates to one decimal place. Keeps generated SVGs (some are inlined) small.'''
+	return re.sub(r'(\d+\.\d)\d+', r'\1', svg)
+
+def build_gallery():
+	'''Run each sketch in source/gallery and collect its rendered SVG, highlighted code and metadata.'''
+	from LineDream import Canvas
+
+	gallery_src = pathlib.Path(SOURCE_FOLDER, 'gallery')
+	gallery_dst = pathlib.Path(BUILD_FOLDER, 'static', 'gallery')
+	os.makedirs(gallery_dst, exist_ok=True)
+
+	pieces = []
+	for sketch in sorted(gallery_src.glob('*.py')):
+		src = sketch.read_text()
+		module = ast.parse(src)
+		docstring = ast.get_docstring(module) or ''
+		title, _, description = docstring.partition('\n')
+
+		# Strip the docstring so the displayed code starts at the imports
+		body = src
+		if docstring:
+			body = '\n'.join(src.splitlines()[module.body[0].end_lineno:]).strip() + '\n'
+
+		save_match = re.search(r'Canvas\.save\(["\'](.+?)["\']\)', body)
+		if not save_match:
+			raise Exception(f'{sketch.name} must end with Canvas.save("<name>.svg")')
+		filename = save_match.group(1)
+
+		Canvas.flush()
+		Canvas.width, Canvas.height = 1200, 800
+		Canvas.units = None
+		Canvas.background_color = None
+
+		exec(body.replace(save_match.group(0), ''), {})
+		background = Canvas.background_color
+		svg = _round_svg_floats(Canvas.save('', as_string=True))
+		Canvas.flush()
+
+		pathlib.Path(gallery_dst, filename).write_text(svg)
+
+		pieces.append({
+			'name': pathlib.Path(filename).stem,
+			'title': title.strip(),
+			'description': description.strip(),
+			'filename': filename,
+			'script_name': filename.replace('.svg', '.py'),
+			'width': Canvas.width,
+			'height': Canvas.height,
+			'background': background,
+			'svg': svg,
+			'code_html': _highlight(body),
+			'line_count': len(body.strip().splitlines()),
+		})
+	return pieces
+
+gallery = build_gallery()
+gallery_by_name = {piece['name']: piece for piece in gallery}
+
+try:
+	version = metadata.version('LineDream')
+except metadata.PackageNotFoundError:
+	version = ''
+
+site_context = {
+	'url_root': root,
+	'version': version.lstrip('v'),
+	'year': datetime.date.today().year,
+}
+
 pages = [
 	('', 'index.html'), # landing page
 	('documentation', 'documentation.html'),
 	('about', 'about.html'),
-	('tutorials', 'getting_started.html'),
 ]
 
 for path, template in pages:
@@ -89,10 +161,19 @@ for path, template in pages:
 
 	with open(f'{BUILD_FOLDER}/{f_name}', 'w') as f:
 		f.write(template_obj.render({
-			'url_root':root,
+			**site_context,
 			'doc_nav': str(nav),
-			'doc_main': str(docs)
+			'doc_main': str(docs),
+			'hero': gallery_by_name['flow_field'],
+			'showcase': gallery_by_name['rectangles'],
+			'gallery': [piece for piece in gallery if piece['name'] not in ('flow_field', 'rectangles')],
 		}))
+
+# /tutorials used to be a duplicate of the guide; keep the URL alive as a redirect
+os.makedirs(f'{BUILD_FOLDER}/tutorials', exist_ok=True)
+with open(f'{BUILD_FOLDER}/tutorials/index.html', 'w') as f:
+	f.write(f'<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url={root}getting-started/">'
+			f'<link rel="canonical" href="{root}getting-started/"><a href="{root}getting-started/">Getting Started</a>')
 
 # move css into the folder
 
@@ -218,20 +299,12 @@ with open(f'{BUILD_FOLDER}/getting-started/index.html', 'w') as f:
 
 
 	f.write(template_obj.render({
-		'url_root': root,
+		**site_context,
 		'tut_articles': articles,
 		'tut_contents': article_names
 	}))
 
 
-	# os.makedirs(target_dir, exist_ok=True)
-cwd = os.getcwd()
-env_vars = os.environ
-
 print("run complete.")
-print('run from', cwd, pathlib.Path(cwd).absolute())
 print('source dir', SOURCE_FOLDER, pathlib.Path(SOURCE_FOLDER).absolute())
 print('dst dir', BUILD_FOLDER, pathlib.Path(BUILD_FOLDER).absolute())
-print('env vars:', env_vars)
-for k,v in env_vars.items():
-	print(k, v)
