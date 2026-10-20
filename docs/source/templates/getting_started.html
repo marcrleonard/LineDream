@@ -1,38 +1,33 @@
 {% extends "base_template.html" %}
-{% block secondary_content %}
+{% set active = 'guide' %}
 
+{% block title %}Getting Started — LineDream{% endblock %}
 
-<section class="mt-4" style="background: white">
-    <div class="container">
-        <h1>Getting Started</h1>
-        <div>
-                <p>Follow these guides below to learn how to use LineDream!</p>
-            </div>
-        <div class="row">
-
-
-            <div class="col-md-3 pl-0" style="border-right: 1px solid #ccc;">
-                <ul>
-                    {% for c in tut_contents %}
-                        {{ c | safe }}
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="col-md-9 gs-col">
-                {% for article in tut_articles %}
-                        {{ article | safe }}
-                    {% endfor %}
-
-            </div>
-
-
-<!--            <div class="col-md-4">NAV</div>-->
-<!--            <div class="col-md-8">DOCS</div>-->
-
-        </div>
-
-
+{% block content %}
+<section class="page-head">
+    <div class="wrap">
+        <h1 class="display">Getting started</h1>
+        <p>Install the library, draw your first shapes, and learn how the canvas, primitives, styles and transforms fit together.</p>
     </div>
 </section>
 
+<div class="wrap doc-layout">
+    <aside class="doc-sidebar" aria-label="Guide contents">
+        <p class="toc-title">On this page</p>
+        <ul data-scrollspy>
+            {% for c in tut_contents %}
+                {{ c | safe }}
+            {% endfor %}
+        </ul>
+    </aside>
+    <article class="prose gs-col">
+        {% for article in tut_articles %}
+            {{ article | safe }}
+        {% endfor %}
+    </article>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% include "scrollspy.html" %}
 {% endblock %}

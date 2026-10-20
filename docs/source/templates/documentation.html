@@ -1,24 +1,26 @@
 {% extends "base_template.html" %}
+{% set active = 'api' %}
 
-{% block secondary_content %}
+{% block title %}API Reference — LineDream{% endblock %}
 
-<section class="mt-4" style="background: white">
-    <div class="container">
-        <div class="ml-2">
-                <p>This is the API documentation of LineDream. This was auto generated from the <a href="https://pypi.org/project/LineDream/">current release</a>.</p>
-            </div>
-        <div class="row ml-2">
+{% block head %}
+    <link rel="stylesheet" href="{{ url_root }}css/pdoc.css">
+{% endblock %}
 
-            <div class="col-md-3 pl-0" style="border-right: 1px solid #ccc;">{{ doc_nav | safe }}</div>
-            <div class="col-md-9 pl-4 pr-0">{{ doc_main | safe }} </div>
-
-<!--            <div class="col-md-4">NAV</div>-->
-<!--            <div class="col-md-8">DOCS</div>-->
-
-        </div>
-
-
+{% block content %}
+<section class="page-head">
+    <div class="wrap">
+        <h1 class="display">API documentation</h1>
+        <p>Every class LineDream exports, generated from the docstrings of the <a href="https://pypi.org/project/LineDream/">current release</a>{% if version %} (v{{ version }}){% endif %}.</p>
     </div>
 </section>
 
+<div class="wrap doc-layout">
+    <aside class="doc-sidebar" data-scrollspy aria-label="API contents">{{ doc_nav | safe }}</aside>
+    <div class="api-main">{{ doc_main | safe }}</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% include "scrollspy.html" %}
 {% endblock %}

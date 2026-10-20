@@ -1,0 +1,20 @@
+<script>
+(function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('[data-scrollspy] a[href^="#"]'));
+    var targets = links.map(function (a) { return document.getElementById(decodeURIComponent(a.hash.slice(1))); });
+    if (!links.length) return;
+    var ticking = false;
+    function update() {
+        ticking = false;
+        // The current section is the last one whose top has passed under the sticky header
+        var current = 0;
+        targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top < 140) current = i; });
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = targets.length - 1;
+        links.forEach(function (a, i) { a.classList.toggle('is-active', i === current); });
+    }
+    window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+})();
+</script>
