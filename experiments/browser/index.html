@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LineDream in Pyodide</title>
+<style>
+	:root { --ink: #1c1b19; --paper: #f1ece2; --muted: #6b665c; --line: #d8d1c4; }
+	body { margin: 0; padding: 24px 16px; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+	main { max-width: 1100px; margin: 0 auto; }
+	h1 { font-size: 22px; margin: 0 0 4px; }
+	p { color: var(--muted); margin: 0 0 16px; }
+	table { border-collapse: collapse; margin: 12px 0 24px; min-width: 320px; }
+	td { padding: 4px 16px 4px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+	td:last-child { text-align: right; }
+	pre { background: #fff8; padding: 12px; overflow-x: auto; font-size: 13px; }
+	.renders { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+	.renders div { background: #fff; border: 1px solid var(--line); }
+	.renders svg { width: 100%; height: auto; display: block; }
+</style>
+</head>
+<body>
+<main>
+	<h1>LineDream in the browser</h1>
+	<p>The unmodified Python (LineDream, Strata, Vista) running in Pyodide; Numba is unavailable, so the no-numba fallbacks run.</p>
+	<table><tbody id="startup"></tbody></table>
+	<table><tbody id="bench"></tbody></table>
+	<pre id="log"></pre>
+	<div class="renders" id="renders"></div>
+</main>
+<script src="pyodide/pyodide.js"></script>
+<script>
+const logEl = document.getElementById("log");
+const log = (msg) => { logEl.textContent += msg + "\n"; console.log(msg); };
+const row = (tbody, k, v) => { document.getElementById(tbody).insertAdjacentHTML("beforeend", `<tr><td>${k}</td><td>${v}</td></tr>`); };
+
+async function main() {
+	const startup = {};
+	let t = performance.now();
+	const lap = (k) => { const now = performance.now(); startup[k] = +((now - t) / 1000).toFixed(3); t = now; row("startup", k, startup[k] + " s"); };
+
+	const manifest = await (await fetch("manifest.json")).json();
+	const pyodide = await loadPyodide({ indexURL: "pyodide/" });
+	lap("boot Pyodide (Python " + pyodide.version + ")");
+
+	await pyodide.loadPackage(manifest.packages, { messageCallback: () => {} });
+	lap("load numpy / scipy / scikit-image / pillow / lxml");
+
+	const micropip = pyodide.pyimport("micropip");
+	await micropip.install(manifest.wheels.map((w) => new URL("wheels/" + w, location.href).href), { deps: false });
+	lap("install LineDream + drawsvg wheels");
+
+	pyodide.FS.mkdirTree("/bench/py");
+	pyodide.FS.mkdirTree("/bench/data");
+	for (const m of manifest.modules) pyodide.FS.writeFile("/bench/py/" + m, await (await fetch("py/" + m)).text());
+	for (const d of manifest.data) pyodide.FS.writeFile("/bench/data/" + d, new Uint8Array(await (await fetch("data/" + d)).arrayBuffer()));
+	lap("fetch modules + elevation data");
+
+	pyodide.runPython("import sys; sys.path.insert(0, '/bench/py'); import bench");
+	lap("import LineDream, strata, vista");
+
+	const bench = pyodide.pyimport("bench");
+	const out = bench.run("/bench/data", log).toJs({ dict_converter: Object.fromEntries });
+	const [results, svgs] = out;
+	lap("benchmark (total)");
+	for (const [k, v] of Object.entries(results)) row("bench", k, typeof v === "number" && !k.endsWith("strokes") ? v + " s" : v);
+	for (const svg of Object.values(svgs)) document.getElementById("renders").insertAdjacentHTML("beforeend", `<div>${svg.replace(/^<\?xml[^>]*>/, "")}</div>`);
+
+	window.benchResults = { startup, results, userAgent: navigator.userAgent };
+	window.benchDone = true;
+}
+main().catch((e) => { log("ERROR: " + e); window.benchError = String(e); window.benchDone = true; });
+</script>
+</body>
+</html>

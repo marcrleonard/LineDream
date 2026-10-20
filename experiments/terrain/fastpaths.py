@@ -8,10 +8,26 @@ Grid convention matches Vista.ground(): world (x, y) -> row = (1 - y) / px, col 
 coordinates clamped to the grid edge (= map_coordinates(order=1, mode="nearest")).
 """
 import math
+import os
 
 import numpy as np
-from numba import njit, prange
-from numba.typed import List
+
+try:
+	if os.environ.get("LINEDREAM_NO_NUMBA") == "1":
+		raise ImportError("numba disabled by LINEDREAM_NO_NUMBA=1")
+	from numba import njit, prange
+	from numba.typed import List
+	HAVE_NUMBA = True
+except ImportError:
+	# Pyodide (the browser) has no numba. The loop kernels below then run as plain Python, and the
+	# ray kernels are swapped for vectorized numpy versions at the bottom of this file.
+	HAVE_NUMBA = False
+	prange, List = range, list
+
+	def njit(*args, **kwargs):
+		if args and callable(args[0]):
+			return args[0]
+		return lambda f: f
 
 
 @njit(cache=True, fastmath=True, inline="always")
@@ -330,3 +346,92 @@ def flow_ortho(seeds, vx, vy, cells, flow_len):
 		if k > 4:
 			out.append(buf[:k].copy())
 	return out
+
+
+# ------------------------------------------------------------------ no-numba fallbacks
+# Same stopping rules as the kernels above, vectorized over all rays/points that are still marching.
+
+if not HAVE_NUMBA:
+	from scipy import ndimage
+	from skimage.measure import approximate_polygon
+
+	def _bil(F, row, col):
+		return ndimage.map_coordinates(F, [row, col], order=1, mode="nearest")
+
+	def gbuffer_march(C, D, Z, px, zmax, slope, zmist, maxit):
+		n = D.shape[0]
+		t = np.full(n, 2 * px)
+		hit = np.zeros(n, dtype=np.int8)
+		hf = np.hypot(D[:, 0], D[:, 1]) + 1e-9
+		a = np.arange(n)
+		for _ in range(maxit):
+			if not a.size:
+				break
+			R = C + D[a] * t[a, None]
+			out = (R[:, 0] < 0) | (R[:, 0] > 1) | (R[:, 1] < 0) | (R[:, 1] > 1) | ((R[:, 2] > zmax) & (D[a, 2] >= 0))
+			gap = R[:, 2] - _bil(Z, (1 - R[:, 1]) / px, R[:, 0] / px)
+			ground = (gap <= 0) & ~out
+			mist = (R[:, 2] < zmist) & ~ground & ~out
+			hit[a[ground]] = 1
+			hit[a[mist]] = 2
+			stay = ~(out | ground | mist)
+			a = a[stay]
+			t[a] += np.maximum(0.7 * px, 0.8 * gap[stay] / slope) / hf[a]
+		return t, hit
+
+	def visible(P, C, Z, px, zmax, slope, maxit):
+		D = C - P
+		dist = np.linalg.norm(D, axis=1)
+		Dn = D / dist[:, None]
+		hf = np.hypot(Dn[:, 0], Dn[:, 1]) + 1e-9
+		t = 2 * px / hf
+		vis = np.ones(len(P), dtype=bool)
+		bias = 0.35 * px
+		a = np.arange(len(P))
+		for _ in range(maxit):
+			if not a.size:
+				break
+			R = P[a] + Dn[a] * t[a, None]
+			gap = R[:, 2] - _bil(Z, (1 - R[:, 1]) / px, R[:, 0] / px)
+			out = (R[:, 0] < 0) | (R[:, 0] > 1) | (R[:, 1] < 0) | (R[:, 1] > 1)
+			done = (t[a] >= dist[a]) | (R[:, 2] > zmax) | out
+			blocked = (gap < -bias) & ~done
+			vis[a[blocked]] = False
+			stay = ~(done | blocked)
+			a = a[stay]
+			t[a] += np.maximum(px, 0.8 * np.maximum(gap[stay], 0) / slope) / hf[a]
+		return vis
+
+	def cast_shadow(Zc, px, sx, sy, rise, zmax):
+		m = Zc.shape[0]
+		rr, cc = np.mgrid[0:m, 0:m]
+		x0, y0, z0 = (cc * px).ravel(), (1 - rr * px).ravel(), Zc.ravel()
+		out_arr = np.zeros(m * m)
+		a = np.arange(m * m)
+		t = 1.5 * px
+		while a.size:
+			X, Y, Rz = x0[a] + sx * t, y0[a] + sy * t, z0[a] + rise * t
+			out = (X < 0) | (X > 1) | (Y < 0) | (Y > 1) | (Rz > zmax)
+			blocked = ~out & (_bil(Zc, (1 - Y) / px, X / px) > Rz + 0.3 * px)
+			out_arr[a[blocked]] = 1.0
+			a = a[~(out | blocked)]
+			t += px
+		return out_arr.reshape(m, m)
+
+	def visible_ortho(P, to_cam, Hr, ts, bias):
+		n = Hr.shape[0]
+		vis = np.ones(P.shape[0], dtype=bool)
+		a = np.arange(P.shape[0])
+		for t in ts:
+			if not a.size:
+				break
+			x = P[a, 0] + t * to_cam[0] + 0.5
+			y = 0.5 - (P[a, 1] + t * to_cam[1])
+			out = (x < 0) | (x > 1) | (y < 0) | (y > 1)
+			blocked = ~out & (_bil(Hr, y * (n - 1), x * (n - 1)) > P[a, 2] + t * to_cam[2] + bias)
+			vis[a[blocked]] = False
+			a = a[~(out | blocked)]
+		return vis
+
+	def simplify(xy, tol):
+		return approximate_polygon(xy, tol)
