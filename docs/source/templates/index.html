@@ -1,106 +1,239 @@
 {% extends "base_template.html" %}
+{% set active = 'home' %}
 
 {% block content %}
-<div class="row mt-6">
-    <div class="col-md-8 mx-auto text-center">
-        <h1>A simple <span class="text-warning">creative coding</span> library for Python</h1>
-        <p class="lead mb-3">LineDream makes creating generative art simple and intuitive. Output SVGs for use on the web, pen plotters, or games!</p>
 
-        <a href="/getting-started" class="btn btn-warning svg-icon mb-3">
-            <em class="" data-feather="github"></em>
-            Getting Started
-        </a>
-        <a href="/documentation" class="btn btn-warning svg-icon mb-3">
-            <em class="" data-feather="github"></em>
-            Documentation
-        </a>
-        <a href="https://github.com/marcrleonard/LineDream" class="btn btn-warning svg-icon mb-3">
-            <em class="" data-feather="github"></em>
-            View on GitHub
-        </a>
+<section class="hero">
+    <div class="wrap">
+        <div class="hero-copy">
+            <a class="hero-meta" href="https://pypi.org/project/LineDream/">
+                <span class="tag">v{{ version }}</span>
+                Open source &middot; MIT &middot; Python 3.9+
+            </a>
+            <h1 class="display">A creative coding library for <span class="mark">Python.<svg class="squiggle" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 13 C 30 4, 52 18, 80 10 S 130 3, 160 11 S 190 12, 197 7"/></svg></span></h1>
+            <p class="lead">LineDream is inspired by Processing and P5. Each shape has its own style and transform methods, and everything saves to SVG.</p>
+            <div class="hero-actions">
+                <a href="{{ url_root }}getting-started/" class="btn btn-primary">
+                    Get started
+                    <svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+                </a>
+                <a href="https://github.com/marcrleonard/LineDream" class="btn btn-ghost">
+                    {% include "icon_github.html" %}
+                    View on GitHub
+                </a>
+            </div>
+            <div class="install">
+                <code><span class="prompt">$</span>pip install LineDream</code>
+                <button class="copy-btn" type="button" data-copy="pip install LineDream">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg>
+                    <span class="label">Copy</span>
+                </button>
+            </div>
+        </div>
+
+        <figure class="hero-art">
+            <div class="paper">
+                {{ hero.svg | replace('<svg ', '<svg id="hero-plot" data-plot="2600" role="img" aria-label="' ~ hero.title ~ ': ' ~ hero.description ~ '" ', 1) | safe }}
+            </div>
+            <figcaption>
+                <span>{{ hero.script_name }} &middot; {{ hero.line_count }} lines of Python &middot; <a href="#sketchbook" data-open-piece="{{ hero.name }}">see the code</a></span>
+                <button class="replay" type="button" data-replay="#hero-plot">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>
+                    Replot
+                </button>
+            </figcaption>
+        </figure>
     </div>
-</div>
-    <!--Features Section-->
-<section class="py-3">
-    <div class="container">
-        <div class="row">
-            <div class="mx-auto text-center">
-                <h2 class="text-center text-md-center">Install <span class="text-warning">LineDream</span></h2>
-                <div class="mx-auto">
-                    <div class="code-window" style="background: #263238">
-                        <div class="dots pb-3">
-                            <div class="red"></div>
-                            <div class="orange"></div>
-                            <div class="green"></div>
-                        </div>
-                        <pre style="background: #263238; color: #EEFFFF" class="line-numbers"><code class="">pip install LineDream</code></pre>
-                    </div>
+</section>
+
+<section class="section">
+    <div class="wrap">
+        <div class="section-head reveal">
+            <h2 class="display">A quick example</h2>
+            <p>Set the canvas size, add some shapes, rotate them, and save.</p>
+        </div>
+        <div class="showcase reveal">
+            <div class="window">
+                <div class="window-bar">
+                    <div class="dots"><i></i><i></i><i></i></div>
+                    <span class="file">{{ showcase.script_name }}</span>
+                </div>
+                {{ showcase.code_html | safe }}
+            </div>
+            <div class="flow-arrow" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+            </div>
+            <div class="window">
+                <div class="window-bar">
+                    <div class="dots"><i></i><i></i><i></i></div>
+                    <span class="file">{{ showcase.filename }}</span>
+                </div>
+                <div class="window-art" style="background: {{ showcase.background or '#fff' }}">
+                    {{ showcase.svg | replace('<svg ', '<svg data-plot="1600" role="img" aria-label="Eighteen rotated squares forming a ring" ', 1) | safe }}
                 </div>
             </div>
         </div>
     </div>
 </section>
-<div class="row mt-5 mb-4">
-    <div class="col-md-6 mx-auto mb-4">
-        <div class="code-window" style="background: #263238">
-            <div class="dots">
-                <div class="red"></div>
-                <div class="orange"></div>
-                <div class="green"></div>
+
+<section class="section" style="padding-top: 0">
+    <div class="wrap">
+        <div class="section-head reveal">
+            <h2 class="display">Plotter ready</h2>
+            <p>LineDream was originally designed for pen plotters, so its SVGs work well on them out of the box. It's just as useful for general SVG creation.</p>
+        </div>
+        <div class="features">
+            <article class="feature reveal">
+                <svg class="icon" viewBox="0 0 52 52" aria-hidden="true">
+                    <circle cx="17" cy="17" r="10"/>
+                    <rect x="27" y="27" width="18" height="18"/>
+                    <path class="hl" d="M6 46 L22 30"/>
+                    <path d="M30 6 L46 6 L38 20 Z"/>
+                </svg>
+                <h3>Shapes are objects</h3>
+                <p><code>Line</code>, <code>Circle</code>, <code>Rectangle</code>, <code>Arc</code> and friends each carry their own stroke, fill and vertices. Subclass <code>BaseShape</code> to make your own.</p>
+            </article>
+            <article class="feature reveal">
+                <svg class="icon" viewBox="0 0 52 52" aria-hidden="true">
+                    <rect x="14" y="14" width="24" height="24"/>
+                    <rect class="hl" x="14" y="14" width="24" height="24" transform="rotate(25 26 26)"/>
+                    <path d="M42 8 A 22 22 0 0 1 46 22"/>
+                    <path d="M46 22 L42 19 M46 22 L48 18"/>
+                </svg>
+                <h3>Transform anything</h3>
+                <p>Call <code>rotate()</code>, <code>scale()</code> or <code>transform()</code> on any shape, around any origin. No push/pop matrix bookkeeping.</p>
+            </article>
+            <article class="feature reveal">
+                <svg class="icon" viewBox="0 0 52 52" aria-hidden="true">
+                    <path d="M6 20 L26 10 L46 20 L26 30 Z"/>
+                    <path d="M6 27 L26 37 L46 27"/>
+                    <path class="hl" d="M6 34 L26 44 L46 34"/>
+                </svg>
+                <h3>Plotter-ready SVG</h3>
+                <p>Set <code>Canvas.units = 'mm'</code> for real-world sizes, and use <code>Group</code> to export Inkscape layers, one per pen.</p>
+            </article>
+            <article class="feature reveal">
+                <svg class="icon" viewBox="0 0 52 52" aria-hidden="true">
+                    <path d="M6 40 L15 12 L24 40 M9.5 30 L20.5 30"/>
+                    <path class="hl" d="M44 24 C 40 19, 30 20, 30 30 C 30 40, 40 41, 44 36 M44 21 L44 40"/>
+                </svg>
+                <h3>Single-stroke text</h3>
+                <p><code>Text</code> renders with Hershey fonts: lettering made of strokes, not outlines, so a pen draws each character once.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section gallery-section" id="sketchbook">
+    <div class="wrap">
+        <div class="section-head reveal">
+            <h2 class="display">Gallery</h2>
+            <p>These are generated by LineDream when the site is built. Click one to see its code.</p>
+        </div>
+        <div class="gallery">
+            {% for piece in gallery %}
+            <button class="piece reveal" type="button" data-open-piece="{{ piece.name }}">
+                <div class="piece-art" style="background: {{ piece.background or '#FFFDF8' }}">
+                    <img src="{{ url_root }}static/gallery/{{ piece.filename }}" alt="{{ piece.title }}: {{ piece.description }}" loading="lazy" width="{{ piece.width }}" height="{{ piece.height }}">
+                </div>
+                <div class="piece-body">
+                    <h3>{{ piece.title }}</h3>
+                    <p>{{ piece.description }}</p>
+                    <div class="meta">
+                        <span>{{ piece.script_name }}</span>
+                        <span class="view">View code &rarr;</span>
+                    </div>
+                </div>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="wrap">
+        <div class="cta reveal">
+            <img class="cta-art" src="{{ url_root }}static/gallery/topography.svg" alt="" aria-hidden="true">
+            <div>
+                <h2 class="display">Get started</h2>
+                <p>Install from PyPI, then work through the guide.</p>
             </div>
-            <div class="highlight" style="background: #263238">
-
-                        <pre style="line-height: 125%;"><span></span><span style="color: #89DDFF; font-style: italic">from</span> <span
-                                style="color: #FFCB6B">LineDream</span> <span
-                                style="color: #89DDFF; font-style: italic">import</span> <span style="color: #EEFFFF">Canvas</span><span
-                                style="color: #89DDFF">,</span> <span style="color: #EEFFFF">Rectangle</span>
-
-<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">width</span> <span
-                                    style="color: #89DDFF">=</span> <span style="color: #F78C6C">300</span>
-<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span
-                                    style="color: #EEFFFF">height</span> <span style="color: #89DDFF">=</span> <span
-                                    style="color: #F78C6C">300</span>
-<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">background_color</span><span
-                                    style="color: #89DDFF">=</span><span style="color: #C3E88D">'#263238'</span>
-
-<span style="color: #BB80B3">for</span> <span style="color: #EEFFFF">x</span> <span
-                                    style="color: #89DDFF; font-style: italic">in</span> <span style="color: #82AAFF">range</span><span
-                                    style="color: #89DDFF">(</span><span style="color: #F78C6C">18</span><span
-                                    style="color: #89DDFF">):</span>
-	<span style="color: #EEFFFF">r</span> <span style="color: #89DDFF">=</span> <span
-                                    style="color: #EEFFFF">Rectangle</span><span style="color: #89DDFF">(</span><span
-                                    style="color: #F78C6C">150</span><span style="color: #89DDFF">,</span><span
-                                    style="color: #F78C6C">150</span><span style="color: #89DDFF">,</span> <span
-                                    style="color: #F78C6C">200</span><span style="color: #89DDFF">,</span> <span
-                                    style="color: #F78C6C">200</span><span style="color: #89DDFF">)</span>
-	<span style="color: #EEFFFF">r</span><span style="color: #89DDFF">.</span><span style="color: #EEFFFF">rotate</span><span
-                                    style="color: #89DDFF">(</span><span style="color: #F78C6C">10</span><span
-                                    style="color: #89DDFF">*</span><span style="color: #EEFFFF">x</span><span
-                                    style="color: #89DDFF">)</span>
-	<span style="color: #EEFFFF">r</span><span style="color: #89DDFF">.</span><span
-                                    style="color: #EEFFFF">stroke_color</span> <span
-                                    style="color: #89DDFF">=</span> <span style="color: #C3E88D">'#FFCB6B'</span>
-
-<span style="color: #EEFFFF">Canvas</span><span style="color: #89DDFF">.</span><span
-                                    style="color: #EEFFFF">save</span><span style="color: #89DDFF">(</span><span
-                                    style="color: #C3E88D">"rectangles.svg"</span><span style="color: #89DDFF">)</span>
-</pre>
-
-
+            <div class="cta-actions">
+                <div class="install">
+                    <code><span class="prompt">$</span>pip install LineDream</code>
+                    <button class="copy-btn" type="button" data-copy="pip install LineDream">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg>
+                        <span class="label">Copy</span>
+                    </button>
+                </div>
+                <div class="hero-actions" style="margin: 0">
+                    <a href="{{ url_root }}getting-started/" class="btn btn-primary">
+                        Read the guide
+                        <svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+                    </a>
+                    <a href="{{ url_root }}documentation/" class="btn btn-ghost">API reference</a>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6 mx-auto">
-        <div class="code-window" style="background: #263238; height: 348px">
-            <img style="overflow: hidden; height: 100%" src="{{ root_url }}/static/rectangles.svg"
-             class="rounded mx-auto d-block ">
-        </div>
+</section>
 
-    </div>
-</div>
 {% endblock %}
 
-{% block secondary_content %}
+{% block after_body %}
+<dialog class="piece-dialog" id="piece-dialog" aria-labelledby="piece-dialog-title">
+    <div class="dialog-art"><img alt=""></div>
+    <div class="dialog-code">
+        <header>
+            <div>
+                <h3 id="piece-dialog-title"></h3>
+                <span class="file"></span>
+            </div>
+            <span class="spacer"></span>
+            <button class="copy-btn" type="button" data-copy="">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg>
+                <span class="label">Copy</span>
+            </button>
+            <button class="icon-btn" type="button" data-close aria-label="Close">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg>
+            </button>
+        </header>
+        <div class="code-slot"></div>
+    </div>
+</dialog>
 
+{% for piece in [hero] + gallery %}
+<template id="piece-{{ piece.name }}" data-title="{{ piece.title }}" data-file="{{ piece.script_name }}" data-img="{{ url_root }}static/gallery/{{ piece.filename }}" data-bg="{{ piece.background or '#FFFDF8' }}">{{ piece.code_html | safe }}</template>
+{% endfor %}
+{% endblock %}
 
+{% block scripts %}
+<script>
+(function () {
+    var dialog = document.getElementById('piece-dialog');
+    if (!dialog || !dialog.showModal) return;
+    var art = dialog.querySelector('.dialog-art');
+    var img = art.querySelector('img');
+    var copyBtn = dialog.querySelector('[data-copy]');
+
+    document.querySelectorAll('[data-open-piece]').forEach(function (trigger) {
+        trigger.addEventListener('click', function (e) {
+            var tpl = document.getElementById('piece-' + trigger.getAttribute('data-open-piece'));
+            if (!tpl) return;
+            e.preventDefault();
+            dialog.querySelector('h3').textContent = tpl.dataset.title;
+            dialog.querySelector('.file').textContent = tpl.dataset.file;
+            img.src = tpl.dataset.img;
+            img.alt = tpl.dataset.title;
+            art.style.background = tpl.dataset.bg;
+            var slot = dialog.querySelector('.code-slot');
+            slot.replaceChildren(tpl.content.cloneNode(true));
+            copyBtn.setAttribute('data-copy', slot.textContent.trim() + '\n');
+            dialog.showModal();
+        });
+    });
+    dialog.querySelector('[data-close]').addEventListener('click', function () { dialog.close(); });
+    dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+})();
+</script>
 {% endblock %}
