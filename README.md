@@ -155,9 +155,11 @@ drawsvg from PyPI; the `drawsvg[all]` extras (only used by `Canvas.save(open_vie
 uv build --wheel
 cd browser && npm install && npm test   # LINEDREAM_TERRAIN=1 also loads scipy and scikit-image
 
-# Live demo: serve the repo root and open http://localhost:8000/browser/?wheel=../dist/linedream-0.3.15-py3-none-any.whl
+# Playground: serve the repo root and open http://localhost:8000/browser/?wheel=../dist/linedream-0.3.15-py3-none-any.whl
 python -m http.server
 ```
+
+The website build copies the playground to `/playground/` together with a wheel built from the same checkout.
 
 In your own page, load the packages in `browser/packages.mjs` with `pyodide.loadPackage`, then
 `await micropip.install("linedream")`. Releases up to 0.3.15 on PyPI still import vpype, so this needs the next release.

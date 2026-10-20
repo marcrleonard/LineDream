@@ -305,6 +305,30 @@ with open(f'{BUILD_FOLDER}/getting-started/index.html', 'w') as f:
 	}))
 
 
+def build_playground():
+	'''Copy the Pyodide playground (browser/) to playground/, with a wheel built from this checkout so it runs the
+	same LineDream as the rest of the site rather than the PyPI release.'''
+	import subprocess, sys
+	src = pathlib.Path(__file__).parent.parent / 'browser'
+	dst = pathlib.Path(BUILD_FOLDER, 'playground')
+	dst.mkdir(parents=True, exist_ok=True)
+	for f in ('index.html', 'packages.mjs'):
+		shutil.copy2(src / f, dst / f)
+	for old in dst.glob('linedream-*.whl'):
+		old.unlink()
+	# Cloudflare Pages builds with pip; a uv venv has no pip, so use uv there
+	if shutil.which('uv'):
+		cmd = ['uv', 'build', '--wheel', '-q', '-o', str(dst), str(src.parent)]
+	else:
+		cmd = [sys.executable, '-m', 'pip', 'wheel', '--no-deps', '-q', '-w', str(dst), str(src.parent)]
+	subprocess.run(cmd, check=True)
+	(dst / '.gitignore').unlink(missing_ok=True)  # uv build drops one into the output folder
+	wheel = next(dst.glob('linedream-*.whl')).name
+	page = dst / 'index.html'
+	page.write_text(page.read_text().replace('<html lang="en">', f'<html lang="en" data-wheel="{wheel}">', 1))
+
+build_playground()
+
 print("run complete.")
 print('source dir', SOURCE_FOLDER, pathlib.Path(SOURCE_FOLDER).absolute())
 print('dst dir', BUILD_FOLDER, pathlib.Path(BUILD_FOLDER).absolute())

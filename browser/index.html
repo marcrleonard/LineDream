@@ -3,34 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LineDream in the browser</title>
+<title>LineDream Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-  :root { --bg: #f6f1e7; --fg: #1d1b18; --muted: #6b655c; --line: #d9d1c2; --accent: #1d1b18; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #17161a; --fg: #ece8e1; --muted: #9a958c; --line: #34323a; --accent: #ece8e1; }
+  /* Layout: editor and plot sheet side by side, stacking on phones; the plot is a sheet of paper on a drafting table */
+  :root {
+    --table: #e9ecef; --sheet: #ffffff; --ink: #18212b; --muted: #5d6874; --rule: #cfd5db;
+    --pen: #2747c9; --pen-ink: #ffffff; --err: #b3261e; --code-bg: #f7f8f9;
+    --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
-  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: grid; gap: 16px; }
-  h1 { margin: 0; font-size: 20px; font-weight: 600; }
-  #status { color: var(--muted); font-size: 13px; }
-  .panes { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
-  textarea { width: 100%; min-height: 420px; padding: 12px; border: 1px solid var(--line); border-radius: 6px;
-             background: transparent; color: inherit; font: 13px/1.45 ui-monospace, monospace; tab-size: 4; resize: vertical; }
-  #out { border: 1px solid var(--line); border-radius: 6px; min-height: 420px; display: grid; place-items: center; overflow: auto; }
-  #out svg { max-width: 100%; height: auto; }
-  pre.err { color: #c0392b; white-space: pre-wrap; padding: 12px; margin: 0; align-self: start; }
-  button { justify-self: start; padding: 8px 16px; border: 1px solid var(--accent); border-radius: 6px;
-           background: var(--accent); color: var(--bg); font: inherit; cursor: pointer; }
-  button:disabled { opacity: 0.4; cursor: default; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --table: #14181d; --sheet: #f4f5f6; --ink: #e6e9ec; --muted: #98a2ad; --rule: #2c333b;
+      --pen: #8ea2ff; --pen-ink: #0f1420; --err: #ff8a80; --code-bg: #1b2027; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --table: #14181d; --sheet: #f4f5f6; --ink: #e6e9ec; --muted: #98a2ad; --rule: #2c333b;
+    --pen: #8ea2ff; --pen-ink: #0f1420; --err: #ff8a80; --code-bg: #1b2027; color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--table); color: var(--ink); font: 15px/1.5 var(--body); }
+  main {
+    max-width: 1240px; margin: 0 auto; display: grid; gap: 18px;
+    padding-block: 28px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+  h1 { margin: 0; font: 700 28px/1.1 var(--display); letter-spacing: -0.01em; text-wrap: balance; }
+  #status { color: var(--muted); font: 12.5px/1.4 var(--mono); }
+  #status.ready::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2e9d5b; margin-right: 8px; vertical-align: 1px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  label.ex { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
+  select, button {
+    font: 500 14px/1 var(--body); border-radius: 6px; padding: 9px 14px; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--code-bg); color: var(--ink);
+  }
+  button.primary { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
+  button:disabled, select:disabled { opacity: 0.45; cursor: default; }
+  button:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
+  .hint { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+  kbd { font: 11.5px var(--mono); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; }
+  .panes { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
+  @media (max-width: 860px) { .panes { grid-template-columns: minmax(0, 1fr); } .hint { display: none; } }
+  textarea {
+    width: 100%; min-height: 560px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 8px;
+    background: var(--code-bg); color: var(--ink); font: 13px/1.55 var(--mono); tab-size: 4; resize: vertical;
+  }
+  .sheet {
+    min-width: 0; min-height: 560px; border-radius: 4px; background: var(--sheet); overflow: auto;
+    display: grid; place-items: center; padding: 18px;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.08);
+  }
+  .sheet svg { max-width: 100%; height: auto; display: block; }
+  .sheet .msg { color: #5d6874; font: 13px/1.5 var(--mono); }
+  .sheet pre.err { color: #b3261e; white-space: pre-wrap; margin: 0; align-self: start; justify-self: stretch; font: 12.5px/1.5 var(--mono); }
+  footer { color: var(--muted); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  footer code { font: 12px var(--mono); }
+  footer a { color: var(--pen); }
 </style>
 </head>
 <body>
 <main>
-  <h1>LineDream in the browser</h1>
-  <div id="status">Loading Pyodide…</div>
+  <header>
+    <h1>LineDream Playground</h1>
+    <div id="status">Starting Python…</div>
+  </header>
+  <div class="toolbar">
+    <label class="ex" for="example">Example
+      <select id="example" disabled>
+        <option value="sunburst">Sunburst (example.py)</option>
+        <option value="squares">Loosening squares</option>
+        <option value="rings">Wobbly rings</option>
+        <option value="fonts">Hershey fonts</option>
+      </select>
+    </label>
+    <button id="run" class="primary" disabled>Run</button>
+    <button id="copy" disabled>Copy SVG</button>
+    <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs. The last expression is drawn.</span>
+  </div>
   <div class="panes">
-    <textarea id="code" spellcheck="false">import random
+    <textarea id="code" spellcheck="false" aria-label="Sketch source"></textarea>
+    <div class="sheet" id="out"><span class="msg">Loading Pyodide, numpy, pillow and lxml (about 18 MB the first time)…</span></div>
+  </div>
+  <footer>
+    <span id="meta">Sketches run in your browser with <a href="https://pyodide.org">Pyodide</a>. <a href="../">LineDream</a></span>
+    <span id="stats"></span>
+  </footer>
+</main>
+
+<script type="text/plain" id="ex-sunburst">
+import random
 from LineDream import Canvas, Circle, Line, Text, CircleMath
 
 random.seed(10)
@@ -55,58 +122,142 @@ Text('LineDream', 0, Canvas.height - 50, width=Canvas.width, align='center', fon
 
 # the last expression is what gets drawn
 Canvas.save('', as_string=True)
-</textarea>
-    <div id="out"></div>
-  </div>
-  <button id="run" disabled>Run</button>
-</main>
+</script>
+<script type="text/plain" id="ex-squares">
+import random
+from LineDream import Canvas, Square
+
+random.seed(3)
+Canvas.flush()
+Canvas.width, Canvas.height = 700, 700
+Canvas.background_color = 'white'
+
+# A grid of squares that come loose as you move down the page
+cell = 50
+for row in range(12):
+	for col in range(12):
+		s = Square(75 + col * cell, 75 + row * cell, cell * 0.8)
+		s.rotate(random.uniform(-1, 1) * row * 3)
+		s.transform(random.uniform(-1, 1) * row, random.uniform(-1, 1) * row)
+
+Canvas.save('', as_string=True)
+</script>
+<script type="text/plain" id="ex-rings">
+import math
+from LineDream import Canvas, Line
+
+Canvas.flush()
+Canvas.width, Canvas.height = 700, 700
+Canvas.background_color = 'white'
+
+# Concentric wobbly rings, one polyline each
+cx, cy = Canvas.width / 2, Canvas.height / 2
+for ring in range(1, 40):
+	r = ring * 8
+	pts = []
+	for step in range(361):
+		a = math.radians(step)
+		wobble = 6 * math.sin(a * 5 + ring * 0.4) * math.sin(ring / 6)
+		pts.append((cx + (r + wobble) * math.cos(a), cy + (r + wobble) * math.sin(a)))
+	Line(pts)
+
+Canvas.save('', as_string=True)
+</script>
+<script type="text/plain" id="ex-fonts">
+from LineDream import Canvas, Text
+
+Canvas.flush()
+Canvas.width, Canvas.height = 700, 560
+Canvas.background_color = 'white'
+
+# Single-stroke Hershey fonts, ready for a pen plotter
+fonts = ['futural', 'futuram', 'rowmans', 'timesr', 'scripts', 'cursive', 'gothiceng', 'greek']
+for i, name in enumerate(fonts):
+	Text(f'{name}: Sphinx of black quartz', 30, 50 + i * 62, width=640, font_size=26, font_name=name)
+
+Canvas.save('', as_string=True)
+</script>
+
+
 <script type="module">
-  // Query parameters, all optional:
-  //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN, same version as package.json)
-  //   ?wheel=<url>    a LineDream wheel to install instead of the PyPI release, e.g. ../dist/linedream-0.3.15-py3-none-any.whl
-  //                   (PyPI releases up to 0.3.15 still import vpype and require drawsvg[all], so they don't run here)
   import { CORE_PACKAGES } from "./packages.mjs";
 
+  const $ = (id) => document.getElementById(id);
+  const status = $("status"), code = $("code"), out = $("out"), run = $("run"), copy = $("copy"), example = $("example"), stats = $("stats");
+  // Query parameters, all optional:
+  //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN, same version as package.json)
+  //   ?wheel=<url>    a LineDream wheel to install, e.g. ../dist/linedream-0.3.15-py3-none-any.whl. The website
+  //                   build sets data-wheel on <html> to the wheel it ships; otherwise LineDream comes from PyPI
+  //                   (releases up to 0.3.15 still import vpype and require drawsvg[all], so they don't run here)
   const PYODIDE_VERSION = "314.0.7";
   const params = new URLSearchParams(location.search);
   const indexURL = new URL(params.get("pyodide") || `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`, location.href).href;
-  const wheel = params.get("wheel") ? new URL(params.get("wheel"), location.href).href : "linedream";
+  const wheelParam = params.get("wheel") || document.documentElement.dataset.wheel;
+  const wheel = wheelParam ? new URL(wheelParam, location.href).href : "linedream";
+  let lastSvg = "";
 
-  const status = document.getElementById("status");
-  const code = document.getElementById("code");
-  const out = document.getElementById("out");
-  const run = document.getElementById("run");
+  function showError(text) {
+    out.replaceChildren();
+    const pre = document.createElement("pre");
+    pre.className = "err";
+    pre.textContent = text;
+    out.append(pre);
+  }
+  function loadExample(name) { code.value = $("ex-" + name).textContent.replace(/^\n/, ""); }
+  loadExample("sunburst");
 
-  const { loadPyodide } = await import(new URL("pyodide.mjs", indexURL).href);
-  const py = await loadPyodide({ indexURL });
-  status.textContent = "Loading numpy, pillow, lxml…";
-  await py.loadPackage(CORE_PACKAGES);
-  status.textContent = "Installing LineDream…";
-  py.globals.set("WHEEL", wheel);
-  await py.runPythonAsync(`
+  let py;
+  try {
+    const { loadPyodide } = await import(new URL("pyodide.mjs", indexURL).href);
+    py = await loadPyodide({ indexURL });
+    status.textContent = "Loading numpy, pillow, lxml…";
+    await py.loadPackage(CORE_PACKAGES);
+    status.textContent = "Installing LineDream…";
+    py.globals.set("WHEEL", wheel);
+    await py.runPythonAsync(`
 import micropip
 await micropip.install(WHEEL)
 `);
-  const version = py.runPython(`from importlib.metadata import version; version("linedream")`);
-  status.textContent = `LineDream ${version} on Pyodide ${py.version}`;
+    const v = py.runPython(`from importlib.metadata import version; version("linedream")`);
+    status.textContent = `LineDream ${v} · Pyodide ${py.version} · Python ${py.runPython("import sys; sys.version.split()[0]")}`;
+    status.classList.add("ready");
+  } catch (e) {
+    status.textContent = "Python failed to start";
+    showError(String(e && e.stack || e));
+    throw e;
+  }
 
   async function render() {
     run.disabled = true;
+    const t0 = performance.now();
     try {
       const svg = await py.runPythonAsync(code.value);
-      out.innerHTML = typeof svg === "string" ? svg : "";
+      if (typeof svg !== "string") throw new Error("The last line should return SVG text, e.g. Canvas.save('', as_string=True)");
+      out.innerHTML = svg;
+      lastSvg = svg;
+      copy.disabled = false;
+      const n = out.querySelectorAll("svg *").length;
+      stats.textContent = `${n.toLocaleString()} SVG elements · ${(svg.length / 1024).toFixed(0)} KB · ${Math.round(performance.now() - t0)} ms`;
     } catch (e) {
-      out.innerHTML = "";
-      const pre = document.createElement("pre");
-      pre.className = "err";
-      pre.textContent = e.message;
-      out.append(pre);
+      showError(e.message || String(e));
+      stats.textContent = "";
     } finally {
       run.disabled = false;
     }
   }
+
   run.addEventListener("click", render);
-  code.addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") render(); });
+  code.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); render(); }
+    if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); code.setRangeText("\t", code.selectionStart, code.selectionEnd, "end"); }
+  });
+  example.addEventListener("change", () => { loadExample(example.value); render(); });
+  copy.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(lastSvg); copy.textContent = "Copied"; }
+    catch { copy.textContent = "Copy blocked"; }
+    setTimeout(() => (copy.textContent = "Copy SVG"), 1500);
+  });
+  example.disabled = false;
   await render();
 </script>
 </body>
