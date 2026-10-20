@@ -181,8 +181,17 @@ uv run --extra docs python docs/build_website.py   # output in public/
 
 ```bash
 uv build      # sdist and wheel into dist/
-uv publish    # manual upload; add --publish-url https://test.pypi.org/legacy/ for TestPyPI
 ```
+
+Releases are published by `.github/workflows/release.yml` when a `v*` tag is pushed, using PyPI trusted publishing
+(no token). To cut one:
+
+1. Set the version in `pyproject.toml` and `LineDream/__version__.py`, run `uv lock`, and move the `CHANGELOG.md`
+   entry out of "unreleased".
+2. Merge to master, then `git tag v0.4.0 && git push origin v0.4.0`.
+
+The workflow checks the tag matches both versions, builds, publishes to PyPI and creates a GitHub release with the
+changelog section as its notes. `uv publish` still works for a manual upload.
 
 All package metadata and dependencies live in [`pyproject.toml`](pyproject.toml).
 
