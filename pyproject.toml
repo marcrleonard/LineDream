@@ -32,7 +32,7 @@ dependencies = [
 # kept as an extra (not a dependency group) because Cloudflare Pages installs it with pip: requirements.txt -> .[docs]
 docs = [
     "pdoc ==8.0.1",
-    "Jinja2 ==3.0.3",
+    "Jinja2 ==3.1.6",
     "beautifulsoup4 >=4.12",
 ]
 
