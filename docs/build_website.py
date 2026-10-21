@@ -62,6 +62,12 @@ nav.name = 'div'
 docs = _docs_soup.find('main')
 docs.name = 'div'
 
+# pdoc links the Canvas repr to BaseCanvas, which isn't documented on the page; drop links with no target
+_doc_ids = {t['id'] for t in docs.find_all(id=True)}
+for a in docs.select('a[href^="#"]'):
+	if a['href'][1:] not in _doc_ids:
+		a.unwrap()
+
 #######
 
 

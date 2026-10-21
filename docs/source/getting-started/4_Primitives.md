@@ -4,9 +4,9 @@ This is the list of primitive object shapes and types that LineDream provides. T
 
 All primitive objects have access to:
 
-* [Primitive Attributes](#PrimitivesAttributes) - Attrs that describe the shape
-* [Styling Attributes](#StylingAttributes) - Attrs that change the way the shape looks
-* [Transformation Methods](#TransformationMethods) - Methods that move, rotate, and scale the shapes
+* [Primitive Attributes](#Primitive_Attributes) - Attrs that describe the shape
+* [Styling Attributes](#Styling_Attributes) - Attrs that change the way the shape looks
+* [Transformation Methods](#Transformation_Methods) - Methods that move, rotate, and scale the shapes
 
 
 ###Line
