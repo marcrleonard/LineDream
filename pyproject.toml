@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "LineDream"
-version = "0.3.15"
+version = "0.4.0"
 description = "A generative art library"
 authors = [{ name = "Marc Leonard", email = "marc.r.leonard@gmail.com" }]
 license = "MIT"
