@@ -1,0 +1,52 @@
+# LineDream Terrain
+
+A web page that turns real elevation data into line art, separate from the playground. Deployed at `/terrain/`
+(for example https://linedream.marcrleonard.com/terrain/), built by `docs/build_website.py`.
+
+1. **Place:** pick an area on the topo map (or search, or choose a preset); elevation comes straight from the AWS
+   Terrarium tiles.
+2. **Camera:** drag the eye and aim handles on the top-down map; the cone shows the field of view and the compass
+   shows the sun.
+3. **Render:** every change re-renders a preview; **Render full quality** for the final drawing; **Download SVG**
+   keeps the plotter layers (one pen per layer).
+
+Two renderers, both the Python terrain experiments running unchanged in Pyodide:
+
+- **Vista** (`py/vista.py`): a perspective view from a real spot. Tone hatching (form-following strokes, etching,
+  distance rings), outlines with lost edges, labelled contours in the lit areas, haze, mist, sun disc, sky streaks,
+  a floating ring, a tone window, plotter mode.
+- **Strata** (`py/strata.py`): one family of curves across the whole map (scan lines, rays, a spiral, rings,
+  contours, flow lines, engraving hatch), lifted in 3D or pushed sideways.
+
+`py/fastpaths.py` holds the hot loops; it uses Numba when available and falls back to numpy / plain Python, which is
+what runs in the browser. `py/terrain_app.py` is the small API the worker calls.
+
+## Files
+
+| file | what |
+|---|---|
+| `index.html` | layout and styles |
+| `app.mjs` | UI: map, camera planner, controls, render queue, URL-hash state |
+| `schema.mjs` | every control (defaults match `vista.Scene` / `strata.Params`) and the presets |
+| `tiles.mjs` | fetches and decodes elevation tiles; hillshade for the planner |
+| `worker.mjs` | Pyodide in a worker: loads numpy/scipy/scikit-image + the LineDream wheel, runs renders |
+| `py/` | the renderers |
+
+The whole scene (place, camera, mode, parameters) is kept in the URL hash, so a link reproduces a drawing.
+
+## Running locally
+
+```bash
+uv run --extra docs python docs/build_website.py    # builds public/, including public/terrain/
+python -m http.server -d public 8000                # http://localhost:8000/terrain/
+```
+
+Query parameters: `?pyodide=<url>` loads Pyodide from a local distribution instead of the jsDelivr CDN;
+`?wheel=<url>` installs a specific LineDream wheel.
+
+## Speed
+
+Measured in headless Chromium (Pyodide 314.0.7) on a 4-core machine: about 15–20 s to start Python the first time
+(about 60 MB, cached by the browser afterwards), previews in 1–6 s, full-quality Vista renders in about 15–20 s.
+Strata is faster (about 1 s previews). See `experiments/browser/README.md` on the `terrain-strata` branch for the
+breakdown, and `experiments/terrain/RUST_PORT.md` for how a Rust/WebAssembly core would make it interactive.

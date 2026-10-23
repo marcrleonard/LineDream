@@ -335,6 +335,22 @@ def build_playground():
 
 build_playground()
 
+
+def build_terrain():
+	'''Copy the terrain app (browser/terrain/) to terrain/. It installs the wheel build_playground() just put in
+	playground/, so both pages run the same LineDream.'''
+	root = pathlib.Path(__file__).parent.parent / 'browser'
+	src, dst = root / 'terrain', pathlib.Path(BUILD_FOLDER, 'terrain')
+	if dst.exists():
+		shutil.rmtree(dst)
+	shutil.copytree(src, dst, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+	shutil.copy2(root / 'packages.mjs', dst / 'packages.mjs')
+	wheel = next(pathlib.Path(BUILD_FOLDER, 'playground').glob('linedream-*.whl')).name
+	page = dst / 'index.html'
+	page.write_text(page.read_text().replace('<html lang="en">', f'<html lang="en" data-wheel="../playground/{wheel}">', 1))
+
+build_terrain()
+
 print("run complete.")
 print('source dir', SOURCE_FOLDER, pathlib.Path(SOURCE_FOLDER).absolute())
 print('dst dir', BUILD_FOLDER, pathlib.Path(BUILD_FOLDER).absolute())
