@@ -81,6 +81,18 @@ class Scene:
 	contour_above: float = -1e9  # ... only inside this elevation band
 	contour_below: float = 1e9
 
+	# TOPO: quiet labelled contours in the lit areas the tone hatching leaves blank
+	topo_every: float = 0.0      # contour interval in topo_units (0 = off)
+	topo_units: str = "m"        # "m" or "ft"; levels and labels use these units
+	topo_label_every: int = 5    # label every Nth contour (index contours, as on USGS maps); 0 = no labels
+	topo_gap: float = 0.08       # tone margin kept blank between hatching and contours
+	topo_max_depth: int = 2      # no contours in the haziest distance bands (0..3)
+	topo_label_size: float = 7.0 # label height, canvas px
+	topo_label_spacing: float = 0.35  # min distance between labels, frame units (frame width = 2)
+	topo_label_depth: int = 1    # label only the nearer haze bands
+	topo_font: str = "futural"
+	topo_ink: str = None         # contour + label colour; default: ink mixed 45% toward paper (a finer / grey pen)
+
 	# ATMOSPHERE
 	haze: float = 0.6
 	haze_near: float = 0.1
@@ -409,6 +421,95 @@ class Vista:
 				P = self._world(cnt[:, 1] * self.px, cnt[:, 0] * self.px)
 				self.emit(P, np.ones(len(P), dtype=bool), "accent" if style == "accent" else "contour")
 
+	def topo(self):
+		"""Labelled contours only where the tone hatching leaves the paper blank: map language on the lit
+		slopes, drawing language in the shadows. Labels sit on straight, visible stretches, rotated along the
+		line and kept upright, with the contour broken underneath them."""
+		from LineDream.primitives.hershey_text import text_block
+		s = self.s
+		if not s.topo_every:
+			return
+		k = 3.28084 if s.topo_units == "ft" else 1.0
+		half = s.canvas[0] * (1 - 2 * s.margin) / 2
+		thr = max(s.flow_min_tone - s.topo_gap, 0.02)
+		# gate on the same smoothed screen-space tone the flow hatch uses, so the two regions interlock
+		tone_img = None
+		if getattr(self, "g_tone", None) is not None:
+			tone_img = ndimage.gaussian_filter(np.where(self.g_hit == 1, np.maximum(self.g_tone, 0), 0), 1.8)
+		lo, hi = self.E.min() * k, self.E.max() * k
+		levels = np.arange(np.ceil(lo / s.topo_every) * s.topo_every, hi, s.topo_every)
+		placed = []
+
+		for lv in levels:
+			if s.mist is not None and lv / k <= s.mist:
+				continue
+			index = s.topo_label_every and int(round(lv / s.topo_every)) % s.topo_label_every == 0
+			for cnt in measure.find_contours(self.E, lv / k):
+				P = self._world(cnt[:, 1] * self.px, cnt[:, 0] * self.px)
+				keep = np.ones(len(P), dtype=bool)
+				if tone_img is None:
+					keep &= self.ground(P[:, 0], P[:, 1], self.dark) * (1 - self.fade(P)) < thr
+				saved, self.strokes = self.strokes, []
+				self.emit(P, keep, "topo")
+				runs, self.strokes = self.strokes, saved
+				for _, depth, S in runs:
+					if depth > s.topo_max_depth:
+						continue
+					ok = np.ones(len(S), dtype=bool) if tone_img is None else self._gsample(tone_img, S, order=1) < thr
+					for a, b, _ in _runs(np.where(ok, 0, -1)):
+						seg = S[a:b]
+						if index and depth <= s.topo_label_depth:
+							seg_parts, labels = self._label_run(seg, f"{int(round(lv))}", half, placed, text_block)
+							self.strokes += [("label", depth, L) for L in labels]
+						else:
+							seg_parts = [seg]
+						self.strokes += [("topo", depth, part) for part in seg_parts]
+
+	def _label_run(self, S, text, half, placed, text_block):
+		"""Place labels along a screen-space run; return (run pieces with gaps cut, label strokes)."""
+		s = self.s
+		lines = text_block(text, 1e6, s.topo_font, s.topo_label_size)
+		allp = np.concatenate(lines)
+		cx, cy = (allp.real.min() + allp.real.max()) / 2, (allp.imag.min() + allp.imag.max()) / 2
+		w = (allp.real.max() - allp.real.min()) / half
+		h = (allp.imag.max() - allp.imag.min()) / half
+		gap = w / 2 + 0.6 * h
+		d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(S, axis=0).T))])
+		if d[-1] < 2 * gap + 2 * h:
+			return [S], []
+		cut = np.zeros(len(S), dtype=bool)
+		labels = []
+		for sc in np.arange(gap + h, d[-1] - gap - h, max(s.topo_label_spacing, 3 * gap)):
+			i0, i1 = np.searchsorted(d, sc - gap), np.searchsorted(d, sc + gap)
+			if i1 - i0 < 2:
+				continue
+			c = S[np.searchsorted(d, sc)]
+			if abs(c[0]) > 0.93 or abs(c[1]) > self.aspect - 0.05:
+				continue
+			if any(np.hypot(*(c - q)) < s.topo_label_spacing for q in placed):
+				continue
+			chord = S[i1 - 1] - S[i0]
+			L = np.hypot(*chord)
+			if L < 1.5 * gap:   # too curly here
+				continue
+			nrm = np.array([-chord[1], chord[0]]) / L
+			if np.abs((S[i0:i1] - S[i0]) @ nrm).max() > 0.35 * h:   # not straight enough to read
+				continue
+			th = np.arctan2(chord[1], chord[0])
+			if th > np.pi / 2:
+				th -= np.pi
+			elif th < -np.pi / 2:
+				th += np.pi
+			ct, st = np.cos(th), np.sin(th)
+			for line in lines:
+				x, y = (line.real - cx) / half, -(line.imag - cy) / half
+				labels.append(np.column_stack([c[0] + x * ct - y * st, c[1] + x * st + y * ct]))
+			cut[i0:i1] = True
+			placed.append(c)
+		if not labels:
+			return [S], []
+		return [S[a:b] for a, b, _ in _runs(np.where(~cut, 0, -1))], labels
+
 	def mist_surface(self):
 		s = self.s
 		if s.mist is None or not s.mist_lines:
@@ -510,6 +611,7 @@ class Vista:
 		if self.s.silhouettes:
 			self.silhouettes()
 		self.contours()
+		self.topo()
 		self.mist_surface()
 		self.sky()
 		self.halo()
@@ -560,10 +662,12 @@ class Vista:
 		m = s.margin * W
 		half = (W - 2 * m) / 2
 
+		topo_ink = s.topo_ink or _mix(s.ink, s.paper, 0.45)
 		styles = {  # role -> (width multiplier, base color)
 			"hatch": (1.0, s.ink), "sil": (1.6, s.ink), "contour": (1.1, s.ink),
 			"mist": (0.8, _mix(s.ink, s.paper, 0.45)), "sky": (0.9, _mix(s.ink, s.paper, 0.35)),
 			"sun": (1.2, s.accent), "accent": (1.6, s.accent),
+			"topo": (0.7, topo_ink), "label": (0.8, topo_ink),
 		}
 		Canvas.flush()
 		Canvas.width, Canvas.height = W, H
@@ -571,12 +675,13 @@ class Vista:
 		layers = {}
 		for role, depth, S in strokes:
 			xy = np.column_stack([W / 2 + S[:, 0] * half, H / 2 - S[:, 1] * half])
-			xy = self._handmade(xy, role)
+			if role not in ("topo", "label"):  # map lines stay crisp against the hand-drawn strokes
+				xy = self._handmade(xy, role)
 			accent = role in ("sun", "accent")
 			if s.plotter:
-				col, width = (s.accent if accent else s.ink), s.stroke_width
+				col, width = (s.accent if accent else topo_ink if role in ("topo", "label") else s.ink), s.stroke_width
 				parts = self._dashes(xy, depth) if role in ("sil", "contour") else [xy]
-				label = "2-accent" if accent else "1-ink"
+				label = "2-accent" if accent else "3-topo" if role in ("topo", "label") else "1-ink"
 			else:
 				wm, col = styles[role]
 				if not accent:
