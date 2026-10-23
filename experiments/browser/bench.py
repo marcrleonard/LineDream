@@ -36,6 +36,30 @@ PASS_FALL = dict(
 )
 
 
+# render_topo.py's Cirque scene: fall-line strokes in the shadows, labelled contours (ft) in the light
+TOPO = dict(PASS_FALL, sun_az=165, sun_alt=28, flow_sep=2.4, flow_sep_max=9, shade_gamma=0.7,
+			topo_every=120, topo_units="ft", topo_label_every=5, topo_label_size=11)
+# what an interactive app would render while you move the camera: half-size grid, image and ray count
+PREVIEW = dict(size=512, gres=450, canvas=(800, 500), topo_label_size=7)
+
+
+def vista_stages(R, key, dem, info, scene):
+	"""Render a Vista scene stage by stage; record each stage's time under key_<stage>; return the SVG."""
+	sc = place(scene, info, JACKASS_PASS, BETWEEN)
+	t0 = time.perf_counter()
+	v = timed(R, f"{key}_setup", lambda: Vista(dem, info, sc))
+	v.strokes = []
+	timed(R, f"{key}_gbuffer", v.gbuffer)
+	timed(R, f"{key}_flow_hatch", lambda: v.flow_hatch(sc.flow_dir))
+	timed(R, f"{key}_silhouettes", v.silhouettes)
+	timed(R, f"{key}_topo", v.topo)
+	timed(R, f"{key}_rest", lambda: (v.contours(), v.mist_surface(), v.sky()))
+	out = pathlib.Path(tempfile.gettempdir()) / f"{key}.svg"
+	timed(R, f"{key}_draw", lambda: v.draw(v.strokes, str(out)))
+	R[f"{key}_total"] = round(time.perf_counter() - t0, 3)
+	return out.read_text()
+
+
 def load(data_dir, name):
 	grid = np.load(pathlib.Path(data_dir) / f"{name}.npy")
 	meta = json.loads((pathlib.Path(data_dir) / f"{name}.json").read_text())
@@ -87,6 +111,12 @@ def run(data_dir=HERE / "data", log=print):
 	R["vista_total"] = round(sum(R[k] for k in R if k.startswith("vista_") and k not in ("vista_strokes", "vista_total")), 3)
 	svgs["vista"] = out.read_text()
 	log(f"vista total: {R['vista_total']}s ({R['vista_strokes']} strokes)")
+
+	# 4. the topo scene, full quality and as a quick preview
+	svgs["topo"] = vista_stages(R, "topo", cirque, info, Scene(**TOPO))
+	log(f"topo full: {R['topo_total']}s")
+	svgs["topo_preview"] = vista_stages(R, "preview", cirque, info, Scene(**{**TOPO, **PREVIEW}))
+	log(f"topo preview: {R['preview_total']}s")
 	return R, svgs
 
 

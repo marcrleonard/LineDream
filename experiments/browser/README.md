@@ -54,6 +54,19 @@ Native runs are CPython 3.13. Browser numbers are the range over two runs.
 | · silhouettes | 0.36 s | 0.78 s | 1.08–1.30 s | 1.5× |
 | · draw (simplify + SVG) | 0.25 s | 1.00 s | 1.83–1.93 s | 1.9× |
 
+### Topo scene (fall-line strokes + labelled contours), LineDream 0.4.0
+
+Measured 2026-10-23. "Preview" is what an interactive app would render while you move the camera: a 512² grid,
+450 rays across, and an 800×500 image (vs 1024², 900 and 1600×1000 for full quality).
+
+| | native + numba | native, no numba | browser (Pyodide) |
+|---|---|---|---|
+| full quality | 2.6 s | 11.1 s | 19.4–19.6 s |
+| · per-pixel ray cast | 0.56 s | 4.85 s | 8.1–8.5 s |
+| · flow hatch | 0.55 s | 3.66 s | 6.6–6.8 s |
+| · contours + labels | 0.54 s | 0.93 s | 1.7–1.9 s |
+| **preview** | **0.5 s** | **2.8 s** | **4.8–5.2 s** |
+
 Startup before the first render, browser only:
 
 | phase | time |
