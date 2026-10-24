@@ -185,6 +185,13 @@ const VM = { eye: 10, target_eye: -200, fov: 24, shift: -0.2, sun_az: 120, sun_a
 const GRAND_TETON = [43.7411, -110.8024];
 const TETON_STYLE = { tone: "flow", flow_dir: 90, flow_sep: 2.4, flow_sep_max: 10, flow_min_tone: 0.3, shade_gamma: 0.8,
   lost_edges: 0.2, overshoot: 3, wobble: 0.5, ...PEN, curvature: true };
+const STROKES = { ...TETON_STYLE, curvature: false };
+
+const SANDIA_CREST = [35.2125, -106.4507], PETROGLYPH_HIGH = [35.14181, -106.77269];
+const MOUNT_HOOKER = [42.8525, -109.3042];
+const GRAVE_LAKE = { lat: 42.8565, lon: -109.272, zoom: 14, size: 1024 };
+const GRAVE_LAKE_STYLE = { ...STROKES, _mist_on: true, _mist_elev: 3039, mist_lines: 45, haze: 0.3, _haze_near_km: 1.5, _haze_far_km: 8,
+  exaggeration: 1.1, smooth: 0.5, sun_az: 238, sun_alt: 16 };
 
 // Presets give haze in map widths (haze_near / haze_far, as the original renders did) or directly in km
 // (_haze_near_km / _haze_far_km); app.mjs converts the former using the preset area's real width.
@@ -195,6 +202,14 @@ export const PRESETS = [
   { name: "Grand Tetons from Snake River Overlook", mode: "vista", area: { lat: 43.69925, lon: -110.7087, zoom: 12, size: 1024 },
     cam: [43.6574, -110.615], target: GRAND_TETON,
     params: { ...TETON_STYLE, eye: 5, target_eye: 0, fov: 26, shift: -0.1, sun_az: 250, sun_alt: 18, haze: 0.45, _haze_near_km: 4, _haze_far_km: 35 } },
+  { name: "Sandias at sunrise from Petroglyph (29 km)", mode: "vista", area: { lat: 35.18716, lon: -106.58170, zoom: 11, size: 1024 },
+    cam: PETROGLYPH_HIGH, target: SANDIA_CREST,
+    params: { ...TETON_STYLE, eye: 20, target_eye: -1100, fov: 17, shift: -0.08, haze: 0.45, _haze_near_km: 8, _haze_far_km: 45, exaggeration: 1.4,
+      sun_az: 80, sun_alt: 3.5, sun_disc: 0.08, sun_lines: 12 } },
+  { name: "Grave Lake & Mount Hooker from the knob", mode: "vista", area: GRAVE_LAKE, cam: [42.8737, -109.23509], target: MOUNT_HOOKER,
+    params: { ...GRAVE_LAKE_STYLE, eye: 3, target_eye: -900, fov: 48, shift: 0 } },
+  { name: "Grave Lake & Mount Hooker from the high ridge", mode: "vista", area: GRAVE_LAKE, cam: [42.88357, -109.2447], target: MOUNT_HOOKER,
+    params: { ...GRAVE_LAKE_STYLE, eye: 3, target_eye: -1200, fov: 50, shift: 0.05 } },
   { name: "Topo duality · Cirque of the Towers", mode: "vista", area: CIRQUE, cam: JACKASS_PASS, target: CIRQUE_AIM,
     params: { ...PASS, ...FALL, shade_floor: 0, sun_az: 165, sun_alt: 28, topo_every: 120, topo_units: "ft", topo_label_every: 5, topo_label_size: 11 } },
   { name: "Topo duality · Yosemite", mode: "vista", area: YOSEMITE, cam: TUNNEL_VIEW, target: HALF_DOME,

@@ -349,7 +349,12 @@ class Vista:
 		TH = self.flow_field(angle)
 		P = self.g_P.reshape(-1, 3)
 		grad = np.hypot(self.ground(P[:, 0], P[:, 1], self.dzdx), self.ground(P[:, 0], P[:, 1], self.dzdy)).reshape(gh, gw)
-		flat = np.ascontiguousarray(grad < np.percentile(grad[self.g_hit == 1], 8))
+		# Where the ground is too flat for its slope direction to mean anything (meadows, plateaus, filled data
+		# gaps), blend the stroke direction toward screen-horizontal, the way flat ground is engraved: full slope
+		# direction above ~2 degrees of real slope, horizontal at 0. Smooth, so no hard edges and no swirls.
+		w = np.clip(grad / (np.tan(np.radians(2.0)) * self.s.exaggeration), 0, 1)
+		TH = 0.5 * np.arctan2(w * np.sin(2 * TH), w * np.cos(2 * TH) + (1 - w))
+		flat = np.zeros_like(self.g_hit, dtype=bool)
 		tone = ndimage.gaussian_filter(np.where(self.g_hit == 1, np.maximum(self.g_tone, 0), 0), 1.8)
 		tone[self.g_hit != 1] = -1
 		half = (s.canvas[0] * (1 - 2 * s.margin)) / 2
