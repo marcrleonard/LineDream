@@ -7,7 +7,7 @@ A web page that turns real elevation data into line art, separate from the playg
    Terrarium tiles.
 2. **Camera:** drag the eye and aim handles on the top-down map; the cone shows the field of view and the compass
    shows the sun.
-3. **Render:** every change re-renders a preview; **Render full quality** for the final drawing; **Download SVG**
+3. **Render:** every change re-renders (turn off **Live** to render on demand); switch **Preview | Full** to **Full** for the final drawing; **Download SVG**
    keeps the plotter layers (one pen per layer).
 
 Two renderers, both the Python terrain experiments running unchanged in Pyodide:
@@ -63,10 +63,11 @@ when the new render lands. Walk off the loaded square and a new area is loaded a
 
 ## Saving scenes
 
-There's no server, so scenes live in this browser, in files and in links. **Save** keeps the current scene under a
-name in **My scenes** (top of the preset menu; stored in localStorage, so per browser) and **Delete** removes the one
-selected. **Download** saves it as JSON (area, eye, aim, renderer and every parameter); **Open**, or dropping the file
-on the drawing, brings it back. **Link** copies the
+There's no server, so scenes live in this browser, in files and in links. The scene bar under the drawing: **Save to My
+scenes** keeps the current scene under a name in **My scenes** (top of the preset menu; stored in localStorage, so per
+browser), and **Delete from My scenes** removes the one selected. **Download .json** saves it as a file (area, eye,
+aim, renderer and every parameter); **Open .json…**, or dropping the file on the drawing, brings it back. **Copy
+link** copies the
 address, which holds the same scene. A saved file has exactly the shape of a preset in `schema.mjs` (plus a
 `format`/`version` header), so a scene you like can be pasted into `PRESETS` as is. Files and links are checked on
 the way in (`scene.mjs`): values are clamped to their sliders, unknown options reset, and what was fixed is logged

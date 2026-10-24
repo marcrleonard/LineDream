@@ -34,6 +34,8 @@ let shadeImg = null;      // hillshade canvas for the planner
 let worker, workerReady = false, demSent = false;
 let busy = false, pending = null, reqId = 0, previewTimer = null;
 let lastSvg = null, lastQuality = null, lastUrl = null;
+// Preview (half size, ~4x faster) or full; a per-browser preference, not part of the scene.
+let quality = (() => { try { return localStorage.getItem("linedream-terrain/quality") === "full" ? "full" : "preview"; } catch { return "preview"; } })();
 let placing = "cam";
 let navT = { s: 1, x: 0, y: 0 }, sentNav = navT, navLoading = false;  // see "navigation" below
 
@@ -90,7 +92,7 @@ function schedulePreview(delay = 450) {
   saveHash();
   if (!$("auto").checked) return;
   clearTimeout(previewTimer);
-  previewTimer = setTimeout(() => requestRender("preview"), delay);
+  previewTimer = setTimeout(() => requestRender(quality), delay);
 }
 
 // ------------------------------------------------------------------------------------------- params for Python
@@ -625,7 +627,7 @@ function showSvg(svg, quality) {
   $("drawing").hidden = false;
   $("empty").hidden = true;
   $("download").disabled = false;
-  $("download").textContent = quality === "full" ? "Download SVG" : "Download preview SVG";
+  $("download").textContent = quality === "full" ? "Download SVG" : "Download SVG (preview)";
 }
 
 function download() {
@@ -768,9 +770,15 @@ $("preset").onchange = (e) => {
   else if (v !== "") applyPreset(+v);
   else selectPreset("");
 };
-$("render-full").onclick = () => requestRender("full");
-$("render-preview").onclick = () => requestRender("preview");
-$("auto").onchange = () => { if ($("auto").checked) schedulePreview(0); };
+function setQuality(q) {
+  quality = q;
+  for (const b of document.querySelectorAll("[data-quality]")) b.setAttribute("aria-pressed", b.dataset.quality === q ? "true" : "false");
+  try { localStorage.setItem("linedream-terrain/quality", q); } catch {}
+}
+for (const b of document.querySelectorAll("[data-quality]")) b.onclick = () => { setQuality(b.dataset.quality); schedulePreview(0); };
+setQuality(quality);
+$("render").onclick = () => requestRender(quality);
+$("auto").onchange = () => { $("render").hidden = $("auto").checked; if ($("auto").checked) schedulePreview(0); };
 $("download").onclick = download;
 $("use-view").onclick = useMapView;
 $("frame-view").onclick = () => frameView();

@@ -65,6 +65,10 @@
 
   /* toolbar */
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .toolbar #preset { flex: 1 1 180px; min-width: 0; max-width: 420px; text-overflow: ellipsis; }
+  .render-group { display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: nowrap; }
+  .scene-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .scene-label { font: 600 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin-right: 4px; }
   .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; background: var(--card); padding: 3px; }
   .seg button { border: 0; background: transparent; border-radius: 999px; padding: 7px 14px; font: 600 13.5px/1 var(--body); color: var(--faint); cursor: pointer; }
   .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
@@ -107,8 +111,11 @@
   .sheet-busy {
     position: absolute; inset: 0; border-radius: inherit; display: none; z-index: 1;
     flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center;
-    background: color-mix(in srgb, var(--sheet) 70%, transparent); backdrop-filter: blur(2px);
+    background: color-mix(in srgb, var(--sheet) 22%, transparent);
   }
+  /* light enough to keep the drawing (and the walking preview) readable; the label sits on its own card */
+  .sheet-busy > span:not(.spinner), .sheet-busy .spinner { background: var(--sheet); }
+  .sheet-busy > span:not(.spinner):not(:empty) { padding: 4px 10px; border-radius: 8px; box-shadow: 0 0 0 1px var(--rule); }
   .sheet.is-busy .sheet-busy { display: flex; }
   #busy-label { font: 500 14px/1.4 var(--mono); }
   #busy-note { color: var(--faint); font-size: 12.5px; max-width: 40ch; }
@@ -165,7 +172,7 @@
     <div class="card pad">
       <p id="mode-blurb"></p>
       <div id="controls"></div>
-      <div class="controls-foot"><span class="muted">Every change re-renders a preview.</span><button class="btn" id="reset" type="button">Reset</button></div>
+      <div class="controls-foot"><span class="muted">Every change re-renders (see Live).</span><button class="btn" id="reset" type="button">Reset</button></div>
     </div>
   </aside>
 
@@ -176,19 +183,15 @@
         <button type="button" data-mode="strata" aria-pressed="false">Strata</button>
       </div>
       <select id="preset" aria-label="Presets"></select>
-      <div class="seg scene" role="group" aria-label="Scene">
-        <button type="button" id="scene-save" title="Keep this scene in My scenes (in this browser)">Save</button>
-        <button type="button" id="scene-delete" title="Delete this scene from My scenes" hidden>Delete</button>
-        <button type="button" id="scene-download" title="Download this scene as a JSON file">Download</button>
-        <button type="button" id="scene-open" title="Open a saved scene (or drop the file on the drawing)">Open</button>
-        <button type="button" id="scene-link" title="Copy a link to this exact scene">Link</button>
+      <div class="render-group">
+      <div class="seg" role="group" aria-label="Render quality">
+        <button type="button" data-quality="preview" aria-pressed="true" title="Half size, about four times faster: for exploring">Preview</button>
+        <button type="button" data-quality="full" aria-pressed="false" title="Full size: for printing and plotting">Full</button>
       </div>
-      <input type="file" id="scene-file" accept=".json,application/json" hidden>
-      <span class="spacer"></span>
-      <label class="auto"><input type="checkbox" id="auto" checked> Live preview</label>
-      <button class="btn" id="render-preview" type="button">Preview</button>
-      <button class="btn primary" id="render-full" type="button">Render full quality</button>
-      <button class="btn" id="download" type="button" disabled>Download SVG</button>
+      <label class="auto" title="Re-render after every change"><input type="checkbox" id="auto" checked> Live</label>
+      <button class="btn" id="render" type="button" hidden>Render</button>
+      <button class="btn primary" id="download" type="button" disabled>Download SVG</button>
+      </div>
     </div>
     <div class="sheet is-busy" id="sheet">
       <img id="drawing" alt="The rendered line drawing" hidden>
@@ -212,6 +215,15 @@
       </div>
       <p id="nav-help">W A S D / ↑ ↓ walk · ← → turn<br>E Q up / down · R F look up / down<br>hold Shift for big steps</p>
       <p id="empty"></p>
+    </div>
+    <div class="scene-bar" role="group" aria-label="Scene">
+      <span class="scene-label">Scene</span>
+      <button class="btn" type="button" id="scene-save" title="Keep this scene in My scenes, at the top of the preset menu (stored in this browser)">Save to My scenes</button>
+      <button class="btn" type="button" id="scene-delete" title="Delete the selected scene from My scenes" hidden>Delete from My scenes</button>
+      <button class="btn" type="button" id="scene-download" title="Download this scene as a .json file">Download .json</button>
+      <button class="btn" type="button" id="scene-open" title="Open a scene .json file (or drop it on the drawing)">Open .json…</button>
+      <button class="btn" type="button" id="scene-link" title="Copy a link that opens this exact scene">Copy link</button>
+      <input type="file" id="scene-file" accept=".json,application/json" hidden>
     </div>
     <div id="versions"></div>
   </main>
