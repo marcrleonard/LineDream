@@ -7,8 +7,11 @@ A web page that turns real elevation data into line art, separate from the playg
    Terrarium tiles.
 2. **Camera:** drag the eye and aim handles on the top-down map; the cone shows the field of view and the compass
    shows the sun.
-3. **Render:** every change re-renders (turn off **Live** to render on demand); switch **Preview | Full** to **Full** for the final drawing; **Download SVG**
-   keeps the plotter layers (one pen per layer).
+3. **Compose and walk:** **Compose** frames the highest summit in view; the pad over the drawing (or WASD) moves the
+   camera. See below.
+4. **Render:** every change re-renders (turn off **Live** to render on demand); switch **Preview | Full** to **Full**
+   for the final drawing; **Download SVG** keeps the plotter layers (one pen per layer).
+5. **Keep it:** save to **My scenes**, download the scene as `.json`, or copy the link.
 
 Two renderers, both the Python terrain experiments running unchanged in Pyodide:
 
@@ -29,6 +32,10 @@ what runs in the browser. `py/terrain_app.py` is the small API the worker calls.
 | `app.mjs` | UI: map, camera planner, controls, render queue, URL-hash state |
 | `schema.mjs` | every control (defaults match `vista.Scene` / `strata.Params`) and the presets |
 | `tiles.mjs` | fetches and decodes elevation tiles; hillshade for the planner |
+| `scene.mjs` | the scene format shared by presets, saved files and the URL hash; checks what comes in |
+| `compose.mjs` | the Compose button: finds the summit, picks lens, light and haze |
+| `myscenes.mjs` | My scenes in localStorage |
+| `test/` | `node --test` unit tests for the three modules above (no browser, no dependencies) |
 | `worker.mjs` | Pyodide in a worker: loads numpy/scipy/scikit-image + the LineDream wheel, runs renders |
 | `py/` | the renderers |
 
