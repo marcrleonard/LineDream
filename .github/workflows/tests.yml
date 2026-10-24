@@ -53,6 +53,18 @@ jobs:
           uv pip install --python /tmp/wheel-env dist/*.whl
           cd /tmp && /tmp/wheel-env/bin/python -c "from LineDream import Canvas, Text; Text('hello', 0, 0); print(Canvas.save('', as_string=True)[:80])"
 
+  terrain:
+    name: Terrain app unit tests (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Scene format, presets, saved files and links
+        working-directory: browser
+        run: npm run test:terrain
+
   pyodide:
     name: Pyodide (Node)
     runs-on: ubuntu-latest

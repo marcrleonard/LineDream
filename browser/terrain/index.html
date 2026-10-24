@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LineDream Terrain</title>
+<meta name="description" content="Turn real elevation data into line art: pick a place, stand somewhere, render it with LineDream in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  /* Colors and type follow docs/source/css/site.css and the playground (light only). */
+  :root {
+    --paper: #F6F1E6; --paper-2: #EFE7D6; --card: #FBF8F1; --sheet: #ffffff;
+    --ink: #1C1B18; --faint: #7A7366; --rule: #E0D6C2; --amber: #C98A12; --amber-soft: #FFCB6B; --err: #b3261e; --ok: #2e9d5b;
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: light;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--ink); font: 14px/1.45 var(--body); -webkit-font-smoothing: antialiased;
+    background: var(--paper) radial-gradient(circle at 1px 1px, rgba(28, 27, 24, .13) 1px, transparent 0) 0 0 / 24px 24px;
+  }
+  ::selection { background: var(--amber-soft); color: var(--ink); }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+    padding: 16px max(16px, env(safe-area-inset-left, 0px)) 12px max(16px, env(safe-area-inset-right, 0px));
+  }
+  h1 { margin: 0; font: 600 26px/1.1 var(--display); letter-spacing: -0.015em; }
+  h1 a { text-decoration: none; }
+  h1 span { color: var(--faint); font-weight: 500; }
+  nav.links { display: flex; gap: 14px; font-size: 13px; color: var(--faint); }
+  #status { margin-left: auto; color: var(--faint); font: 12.5px/1.4 var(--mono); max-width: 100%; overflow-wrap: anywhere; }
+  #status.ok::before, #status.busy::before, #status.err::before {
+    content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; vertical-align: 1px;
+  }
+  #status.ok::before { background: var(--ok); }
+  #status.busy::before { background: var(--amber); animation: pulse 1s ease-in-out infinite; }
+  #status.err { color: var(--err); }
+  #status.err::before { background: var(--err); }
+  @keyframes pulse { 50% { opacity: .3; } }
+  @media (prefers-reduced-motion: reduce) { #status.busy::before { animation: none; } }
+
+  .app {
+    display: grid; gap: 14px; align-items: start;
+    grid-template-columns: 300px minmax(0, 1fr) 340px;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  }
+  .app > * { min-width: 0; }
+  @media (max-width: 1180px) { .app { grid-template-columns: 290px minmax(0, 1fr); } .side { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } }
+  @media (max-width: 760px) { .app { grid-template-columns: minmax(0, 1fr); } .side { grid-template-columns: minmax(0, 1fr); } .controls-col { order: 3; } }
+
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; }
+  .pad { padding: 12px 14px; }
+  h2 { margin: 0 0 8px; font: 600 15px/1.2 var(--body); }
+  .muted { color: var(--faint); font-size: 12.5px; }
+
+  /* toolbar */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .toolbar #preset { flex: 1 1 180px; min-width: 0; max-width: 420px; text-overflow: ellipsis; }
+  .render-group { display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: nowrap; }
+  .scene-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .scene-label { font: 600 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin-right: 4px; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; background: var(--card); padding: 3px; }
+  .seg button { border: 0; background: transparent; border-radius: 999px; padding: 7px 14px; font: 600 13.5px/1 var(--body); color: var(--faint); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  select, button.btn, input[type="search"] {
+    font: 600 13.5px/1 var(--body); border-radius: 999px; padding: 9px 14px;
+    border: 1px solid var(--rule); background: var(--card); color: var(--ink);
+  }
+  select { cursor: pointer; max-width: 100%; }
+  button.btn { cursor: pointer; transition: background-color .15s ease, transform .15s ease; }
+  button.btn:hover:not(:disabled) { background: var(--paper-2); }
+  button.primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  button.primary:hover:not(:disabled) { background: var(--ink); transform: translateY(-1px); }
+  button:disabled { opacity: .45; cursor: default; }
+  :is(button, select, input, summary):focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  label.auto { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--faint); }
+  .spacer { flex: 1; }
+
+  /* sheet */
+  .sheet {
+    position: relative; background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px;
+    aspect-ratio: 16 / 10; display: grid; place-items: center; overflow: hidden;
+    box-shadow: 0 1px 0 rgba(28, 27, 24, .04), 0 12px 30px -18px rgba(28, 27, 24, .35);
+  }
+  .sheet.square { aspect-ratio: 1; max-width: 760px; margin: 0 auto; }
+  #drawing { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* navigation pad over the drawing */
+  #nav { position: absolute; left: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 30px) 8px repeat(2, 30px); gap: 4px;
+    padding: 6px; border-radius: 12px; background: color-mix(in srgb, var(--sheet) 82%, transparent); border: 1px solid var(--rule);
+    backdrop-filter: blur(4px); opacity: .55; transition: opacity 150ms; user-select: none; touch-action: none; }
+  #nav:hover, #nav:focus-within { opacity: 1; }
+  #nav[hidden] { display: none; }
+  #nav button { width: 30px; height: 30px; padding: 0; border-radius: 8px; border: 1px solid var(--rule); background: var(--sheet);
+    font: 14px/1 var(--mono); color: var(--ink); cursor: pointer; }
+  #nav button:active { background: var(--paper-2); }
+  #nav .gap { grid-row: span 2; }
+  #nav-help { position: absolute; left: 12px; bottom: 90px; margin: 0; padding: 8px 10px; border-radius: 10px; font: 11px/1.5 var(--mono);
+    color: var(--faint); background: var(--sheet); border: 1px solid var(--rule); display: none; }
+  #nav:hover + #nav-help { display: block; }
+  @media (max-width: 600px) { #nav-help { display: none !important; } }
+  .sheet-busy {
+    position: absolute; inset: 0; border-radius: inherit; display: none; z-index: 1;
+    flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center;
+    background: color-mix(in srgb, var(--sheet) 22%, transparent);
+  }
+  /* light enough to keep the drawing (and the walking preview) readable; the label sits on its own card */
+  .sheet-busy > span:not(.spinner), .sheet-busy .spinner { background: var(--sheet); }
+  .sheet-busy > span:not(.spinner):not(:empty) { padding: 4px 10px; border-radius: 8px; box-shadow: 0 0 0 1px var(--rule); }
+  .sheet.is-busy .sheet-busy { display: flex; }
+  #busy-label { font: 500 14px/1.4 var(--mono); }
+  #busy-note { color: var(--faint); font-size: 12.5px; max-width: 40ch; }
+  #busy-note:empty { display: none; }
+  .spinner { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--rule); border-top-color: var(--ink); animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+  #nav, #nav-help { z-index: 2; }
+  .sheet.drop { outline: 2px dashed var(--ink); outline-offset: -8px; }
+  #empty { color: var(--faint); text-align: center; padding: 24px; max-width: 40ch; }
+  #versions { margin-top: 8px; color: var(--faint); font: 11.5px/1.4 var(--mono); }
+
+  /* controls */
+  .controls-col .card { max-height: calc(100vh - 110px); overflow: auto; overscroll-behavior: contain; }
+  @media (max-width: 1180px) { .controls-col .card { max-height: none; } }
+  #mode-blurb { margin: 0 0 6px; color: var(--faint); font-size: 12.5px; }
+  details { border-top: 1px solid var(--rule); }
+  details:first-of-type { border-top: 0; }
+  summary { cursor: pointer; padding: 10px 0; font: 600 13px/1.2 var(--body); letter-spacing: .02em; text-transform: uppercase; color: var(--faint); list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "+"; display: inline-block; width: 16px; font-family: var(--mono); }
+  details[open] summary::before { content: "−"; }
+  .ctl { padding: 0 0 10px; }
+  .ctl label { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; margin-bottom: 4px; }
+  .ctl output { font: 12px var(--mono); color: var(--faint); white-space: nowrap; }
+  .ctl select { width: 100%; padding: 7px 10px; font-weight: 500; border-radius: 10px; }
+  .ctl.check label { justify-content: flex-start; align-items: center; cursor: pointer; }
+  input[type="range"] { width: 100%; accent-color: var(--ink); margin: 0; }
+  input[type="checkbox"] { accent-color: var(--ink); width: 15px; height: 15px; margin: 0; }
+  .controls-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid var(--rule); }
+
+  /* side: map + planner */
+  .side { display: grid; gap: 14px; }
+  #map { height: 240px; border-radius: 10px; overflow: hidden; background: var(--paper-2); }
+  .map-missing { padding: 16px; color: var(--faint); font-size: 12.5px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+  .row input[type="search"] { flex: 1; min-width: 120px; font-weight: 500; }
+  .row select { padding: 9px 10px; }
+  #area-info, #planner-info { margin-top: 8px; color: var(--faint); font: 11.5px/1.45 var(--mono); }
+  #planner { width: 100%; aspect-ratio: 1; display: block; border-radius: 10px; touch-action: none; cursor: crosshair; background: var(--paper-2); }
+  .place-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; font-size: 12.5px; color: var(--faint); flex-wrap: wrap; }
+  .leaflet-container { font: 12px var(--body); }
+</style>
+</head>
+<body>
+<header>
+  <h1><a href="../">LineDream</a> <span>Terrain</span></h1>
+  <nav class="links"><a href="../playground/">Playground</a><a href="../documentation/">Docs</a><a href="https://github.com/marcrleonard/LineDream">GitHub</a></nav>
+  <span id="status" class="busy" role="status">Starting…</span>
+</header>
+
+<div class="app">
+  <aside class="controls-col">
+    <div class="card pad">
+      <p id="mode-blurb"></p>
+      <div id="controls"></div>
+      <div class="controls-foot"><span class="muted">Every change re-renders (see Live).</span><button class="btn" id="reset" type="button">Reset</button></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Renderer">
+        <button type="button" data-mode="vista" aria-pressed="true">Vista</button>
+        <button type="button" data-mode="strata" aria-pressed="false">Strata</button>
+      </div>
+      <select id="preset" aria-label="Presets"></select>
+      <div class="render-group">
+      <div class="seg" role="group" aria-label="Render quality">
+        <button type="button" data-quality="preview" aria-pressed="true" title="Half size, about four times faster: for exploring">Preview</button>
+        <button type="button" data-quality="full" aria-pressed="false" title="Full size: for printing and plotting">Full</button>
+      </div>
+      <label class="auto" title="Re-render after every change"><input type="checkbox" id="auto" checked> Live</label>
+      <button class="btn" id="render" type="button" hidden>Render</button>
+      <button class="btn primary" id="download" type="button" disabled>Download SVG</button>
+      </div>
+    </div>
+    <div class="sheet is-busy" id="sheet">
+      <img id="drawing" alt="The rendered line drawing" hidden>
+      <div class="sheet-busy" aria-hidden="true">
+        <span class="spinner"></span>
+        <span id="busy-label">Starting Python…</span>
+        <span id="busy-note">Python and the scientific stack: about 60 MB the first time, cached after that.</span>
+      </div>
+      <div id="nav" role="group" aria-label="Move the camera">
+        <button type="button" data-nav="turn-left" title="Turn left (←)" aria-label="Turn left">↶</button>
+        <button type="button" data-nav="forward" title="Forward (W / ↑)" aria-label="Forward">▲</button>
+        <button type="button" data-nav="turn-right" title="Turn right (→)" aria-label="Turn right">↷</button>
+        <span class="gap"></span>
+        <button type="button" data-nav="up" title="Up (E)" aria-label="Up">⤒</button>
+        <button type="button" data-nav="tilt-up" title="Look up (R)" aria-label="Look up">⌃</button>
+        <button type="button" data-nav="left" title="Step left (A)" aria-label="Step left">◀</button>
+        <button type="button" data-nav="back" title="Back (S / ↓)" aria-label="Back">▼</button>
+        <button type="button" data-nav="right" title="Step right (D)" aria-label="Step right">▶</button>
+        <button type="button" data-nav="down" title="Down (Q)" aria-label="Down">⤓</button>
+        <button type="button" data-nav="tilt-down" title="Look down (F)" aria-label="Look down">⌄</button>
+      </div>
+      <p id="nav-help">W A S D / ↑ ↓ walk · ← → turn<br>E Q up / down · R F look up / down<br>hold Shift for big steps</p>
+      <p id="empty"></p>
+    </div>
+    <div class="scene-bar" role="group" aria-label="Scene">
+      <span class="scene-label">Scene</span>
+      <button class="btn" type="button" id="scene-save" title="Keep this scene in My scenes, at the top of the preset menu (stored in this browser)">Save to My scenes</button>
+      <button class="btn" type="button" id="scene-delete" title="Delete the selected scene from My scenes" hidden>Delete from My scenes</button>
+      <button class="btn" type="button" id="scene-download" title="Download this scene as a .json file">Download .json</button>
+      <button class="btn" type="button" id="scene-open" title="Open a scene .json file (or drop it on the drawing)">Open .json…</button>
+      <button class="btn" type="button" id="scene-link" title="Copy a link that opens this exact scene">Copy link</button>
+      <input type="file" id="scene-file" accept=".json,application/json" hidden>
+    </div>
+    <div id="versions"></div>
+  </main>
+
+  <aside class="side">
+    <div class="card pad">
+      <h2>Place</h2>
+      <div id="map" aria-label="Map for choosing an area"></div>
+      <div class="row">
+        <input type="search" id="search" placeholder="Search a place" aria-label="Search a place">
+        <button class="btn" id="search-go" type="button">Go</button>
+      </div>
+      <div class="row">
+        <select id="area-size" aria-label="Terrain grid size">
+          <option value="512">512 grid (fast)</option>
+          <option value="768">768 grid</option>
+          <option value="1024" selected>1024 grid (detailed)</option>
+        </select>
+        <button class="btn" id="use-view" type="button">Use this view</button>
+      </div>
+      <div id="area-info"></div>
+    </div>
+    <div class="card pad">
+      <h2>Camera</h2>
+      <div class="place-row" id="vista-tools">
+        <span>Click places the</span>
+        <div class="seg" role="group" aria-label="What a click places">
+          <button type="button" data-place="cam" aria-pressed="true">eye</button>
+          <button type="button" data-place="target" aria-pressed="false">aim</button>
+          <button type="button" data-place="halo" aria-pressed="false">ring</button>
+        </div>
+      </div>
+      <canvas id="planner" aria-label="Top-down map: drag the dark dot (eye) and the light dot (aim)"></canvas>
+      <div id="planner-info"></div>
+      <div class="row" id="compose-row"><button class="btn primary" id="compose" type="button">Compose</button><span class="muted">aim at the highest summit in view; set lens, light and haze for it</span></div>
+      <div class="row" id="frame-row"><button class="btn" id="frame-view" type="button">Frame eye + aim</button><span class="muted">reloads just the ground you can see, as sharp as it fits</span></div>
+    </div>
+  </aside>
+</div>
+<script type="module" src="app.mjs"></script>
+</body>
+</html>
