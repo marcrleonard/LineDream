@@ -104,6 +104,19 @@
     color: var(--faint); background: var(--sheet); border: 1px solid var(--rule); display: none; }
   #nav:hover + #nav-help { display: block; }
   @media (max-width: 600px) { #nav-help { display: none !important; } }
+  .sheet-busy {
+    position: absolute; inset: 0; border-radius: inherit; display: none; z-index: 1;
+    flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center;
+    background: color-mix(in srgb, var(--sheet) 70%, transparent); backdrop-filter: blur(2px);
+  }
+  .sheet.is-busy .sheet-busy { display: flex; }
+  #busy-label { font: 500 14px/1.4 var(--mono); }
+  #busy-note { color: var(--faint); font-size: 12.5px; max-width: 40ch; }
+  #busy-note:empty { display: none; }
+  .spinner { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--rule); border-top-color: var(--ink); animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+  #nav, #nav-help { z-index: 2; }
   .sheet.drop { outline: 2px dashed var(--ink); outline-offset: -8px; }
   #empty { color: var(--faint); text-align: center; padding: 24px; max-width: 40ch; }
   #versions { margin-top: 8px; color: var(--faint); font: 11.5px/1.4 var(--mono); }
@@ -164,7 +177,9 @@
       </div>
       <select id="preset" aria-label="Presets"></select>
       <div class="seg scene" role="group" aria-label="Scene">
-        <button type="button" id="scene-save" title="Download this scene as a JSON file">Save</button>
+        <button type="button" id="scene-save" title="Keep this scene in My scenes (in this browser)">Save</button>
+        <button type="button" id="scene-delete" title="Delete this scene from My scenes" hidden>Delete</button>
+        <button type="button" id="scene-download" title="Download this scene as a JSON file">Download</button>
         <button type="button" id="scene-open" title="Open a saved scene (or drop the file on the drawing)">Open</button>
         <button type="button" id="scene-link" title="Copy a link to this exact scene">Link</button>
       </div>
@@ -175,8 +190,13 @@
       <button class="btn primary" id="render-full" type="button">Render full quality</button>
       <button class="btn" id="download" type="button" disabled>Download SVG</button>
     </div>
-    <div class="sheet" id="sheet">
+    <div class="sheet is-busy" id="sheet">
       <img id="drawing" alt="The rendered line drawing" hidden>
+      <div class="sheet-busy" aria-hidden="true">
+        <span class="spinner"></span>
+        <span id="busy-label">Starting Python…</span>
+        <span id="busy-note">Python and the scientific stack: about 60 MB the first time, cached after that.</span>
+      </div>
       <div id="nav" role="group" aria-label="Move the camera">
         <button type="button" data-nav="turn-left" title="Turn left (←)" aria-label="Turn left">↶</button>
         <button type="button" data-nav="forward" title="Forward (W / ↑)" aria-label="Forward">▲</button>
@@ -191,7 +211,7 @@
         <button type="button" data-nav="tilt-down" title="Look down (F)" aria-label="Look down">⌄</button>
       </div>
       <p id="nav-help">W A S D / ↑ ↓ walk · ← → turn<br>E Q up / down · R F look up / down<br>hold Shift for big steps</p>
-      <p id="empty">Loading Python and the scientific stack (about 60 MB the first time, cached after that). Meanwhile, place your camera on the map to the right.</p>
+      <p id="empty"></p>
     </div>
     <div id="versions"></div>
   </main>

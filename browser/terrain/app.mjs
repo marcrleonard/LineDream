@@ -8,6 +8,7 @@
 import { MODES, PALETTES, PRESETS, defaults } from "./schema.mjs";
 import { fetchDEM, hillshade, metersPerPixel, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
 import { compose } from "./compose.mjs";
+import { deleteMyScene, listMyScenes, saveMyScene } from "./myscenes.mjs";
 import { decodeHash, encodeHash, parseScene, sceneFilename, sceneFromState } from "./scene.mjs";
 
 const PYODIDE_VERSION = "314.0.7";
@@ -233,18 +234,34 @@ async function loadArea(area, { keepCamera = false, pins = null } = {}) {
 }
 
 // Show a scene (a preset, an opened file or a link; see scene.mjs).
-async function applyScene(sc) {
+async function applyScene(sc, choice) {
   state.mode = sc.mode;
   state.preset = sc.name;
   state.params[sc.mode] = sc.params;
   Object.assign(state, { cam: sc.cam, target: sc.target, halo: sc.halo, center: sc.center });
-  const i = PRESETS.findIndex((p) => p.name === sc.name);
-  $("preset").value = i >= 0 ? String(i) : "";
+  selectPreset(choice ?? choiceFor(sc.name));
   syncModeButtons();
   await loadArea(sc.area, { keepCamera: true });
 }
 
-const applyPreset = (i) => applyScene(parseScene(PRESETS[i]));
+const applyPreset = (i) => applyScene(parseScene(PRESETS[i]), String(i));
+
+// The dropdown holds presets ("3") and My scenes ("my:0"); a scene that is neither selects nothing.
+const storage = (() => { try { return window.localStorage; } catch { return null; } })();
+let myScenes = listMyScenes(storage);
+
+function choiceFor(name) {
+  if (!name) return "";
+  const m = myScenes.findIndex((s) => s.name === name);
+  if (m >= 0) return `my:${m}`;
+  const i = PRESETS.findIndex((p) => p.name === name);
+  return i >= 0 ? String(i) : "";
+}
+
+function selectPreset(value) {
+  $("preset").value = value;
+  $("scene-delete").hidden = !value.startsWith("my:");
+}
 
 // ------------------------------------------------------------------------------------------- planner (top-down camera placement)
 
@@ -403,7 +420,7 @@ function composeView() {
   state.target = c.target;
   for (const [k, v] of Object.entries(c.params)) setParam(k, v);
   state.preset = "";
-  $("preset").value = "";
+  selectPreset("");
   refreshVisibility();
   drawPlanner();
   syncMapOverlay();
@@ -466,7 +483,7 @@ function navigate(action, big = false) {
 
   state.cam = cam; state.target = target;
   state.preset = "";
-  $("preset").value = "";
+  selectPreset("");
   if (eye !== p.eye) setParam("eye", eye);
   const inside = (uv) => uv.every((x) => x >= 0.002 && x <= 0.998);
   if (!inside(cam) || !inside(target)) {
@@ -558,7 +575,7 @@ function frameView(beyond = 0.25) {
   const size = +$("area-size").value;
   const zoom = Math.max(4, Math.min(MAX_ZOOM, Math.floor(Math.log2((size * metersPerPixel(lat, 0)) / span))));
   state.preset = "";
-  $("preset").value = "";
+  selectPreset("");
   return loadArea({ lat, lon, zoom, size }, { pins });
 }
 
@@ -569,7 +586,7 @@ function useMapView() {
   const widthPx = $("map").clientWidth || 360;
   const zoom = Math.max(4, Math.min(MAX_ZOOM, Math.round(map.getZoom() + Math.log2(size / widthPx))));
   state.preset = "";
-  $("preset").value = "";
+  selectPreset("");
   loadArea({ lat: c.lat, lon: c.lng, zoom, size }, { pins: currentPins() });
 }
 
@@ -620,10 +637,23 @@ function download() {
   a.click();
 }
 
+// The status line also drives the overlay on the drawing: anything "busy" blurs the sheet and shows a spinner, with a
+// running clock while a render is in progress. The nav pad stays above it, so moves keep queueing.
+let busySince = 0, busyTimer = null;
 function setStatus(text, kind) {
   const el = $("status");
   el.textContent = text;
   el.className = kind || "";
+  const busy = kind === "busy";
+  $("sheet").classList.toggle("is-busy", busy);
+  clearInterval(busyTimer);
+  if (!busy) return;
+  const rendering = text.startsWith("Rendering");
+  busySince = performance.now();
+  const tick = () => { $("busy-label").textContent = rendering ? `${text} ${((performance.now() - busySince) / 1000).toFixed(1)} s` : text; };
+  tick();
+  if (rendering) busyTimer = setInterval(tick, 100);
+  $("busy-note").textContent = workerReady ? "" : "Python and the scientific stack: about 60 MB the first time, cached after that.";
 }
 
 // ------------------------------------------------------------------------------------------- URL hash
@@ -637,7 +667,36 @@ function saveHash() {
 // No server: a scene saves as a small JSON file (the same shape as the presets in schema.mjs) and opens again from
 // the file picker or by dropping it on the drawing. The link in the address bar holds the same scene.
 
-function saveScene() {
+function keepScene() {
+  if (!state.area) return;
+  const name = (prompt("Save to My scenes as", state.preset || "") ?? "").trim();
+  if (!name) return;
+  if (myScenes.some((s) => s.name === name) && !confirm(`Replace “${name}” in My scenes?`)) return;
+  try {
+    myScenes = saveMyScene(storage, sceneFromState(state, name));
+  } catch {
+    setStatus("This browser won't keep scenes (private window or storage blocked): use Download instead", "err");
+    return;
+  }
+  state.preset = name;
+  populatePresets();
+  selectPreset(choiceFor(name));
+  saveHash();
+  setStatus(`Saved “${name}” to My scenes`, "ok");
+}
+
+function deleteScene() {
+  const v = $("preset").value;
+  if (!v.startsWith("my:")) return;
+  const name = myScenes[+v.slice(3)].name;
+  if (!confirm(`Delete “${name}” from My scenes?`)) return;
+  try { myScenes = deleteMyScene(storage, name); } catch { setStatus("Couldn't change My scenes in this browser", "err"); return; }
+  populatePresets();
+  selectPreset("");
+  setStatus(`Deleted “${name}”`, "ok");
+}
+
+function downloadScene() {
   if (!state.area) return;
   const name = prompt("Name this scene", state.preset || "");
   if (name === null) return;
@@ -682,16 +741,20 @@ function syncModeButtons() {
 
 function populatePresets() {
   const sel = $("preset");
+  const option = (value, text) => Object.assign(document.createElement("option"), { value, textContent: text });
+  const group = (label, options) => { const g = Object.assign(document.createElement("optgroup"), { label }); g.append(...options); return g; };
+  sel.replaceChildren(option("", "Presets…"));
+  if (myScenes.length) sel.append(group("My scenes", myScenes.map((s, i) => option(`my:${i}`, s.name))));
   const groups = { vista: "Vista (perspective)", strata: "Strata (top-down / oblique)" };
-  sel.innerHTML = `<option value="">Presets…</option>` + Object.entries(groups).map(([m, label]) =>
-    `<optgroup label="${label}">${PRESETS.map((p, i) => (p.mode === m ? `<option value="${i}">${p.name}</option>` : "")).join("")}</optgroup>`).join("");
+  for (const [m, label] of Object.entries(groups))
+    sel.append(group(label, PRESETS.flatMap((p, i) => (p.mode === m ? [option(String(i), p.name)] : []))));
 }
 
 for (const b of document.querySelectorAll("[data-mode]")) {
   b.onclick = () => {
     state.mode = b.dataset.mode;
     state.preset = "";
-    $("preset").value = "";
+    selectPreset("");
     syncModeButtons();
     buildControls();
     drawPlanner();
@@ -699,7 +762,12 @@ for (const b of document.querySelectorAll("[data-mode]")) {
     schedulePreview(0);
   };
 }
-$("preset").onchange = (e) => { if (e.target.value !== "") applyPreset(+e.target.value); };
+$("preset").onchange = (e) => {
+  const v = e.target.value;
+  if (v.startsWith("my:")) applyScene(parseScene(myScenes[+v.slice(3)]), v);
+  else if (v !== "") applyPreset(+v);
+  else selectPreset("");
+};
 $("render-full").onclick = () => requestRender("full");
 $("render-preview").onclick = () => requestRender("preview");
 $("auto").onchange = () => { if ($("auto").checked) schedulePreview(0); };
@@ -707,7 +775,9 @@ $("download").onclick = download;
 $("use-view").onclick = useMapView;
 $("frame-view").onclick = () => frameView();
 $("compose").onclick = composeView;
-$("scene-save").onclick = saveScene;
+$("scene-save").onclick = keepScene;
+$("scene-delete").onclick = deleteScene;
+$("scene-download").onclick = downloadScene;
 $("scene-open").onclick = () => $("scene-file").click();
 $("scene-file").onchange = (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) openScene(f); };
 $("scene-link").onclick = copyLink;
