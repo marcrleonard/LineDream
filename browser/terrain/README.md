@@ -43,6 +43,15 @@ reload just the ground you can see at the finest zoom that fits. At zoom 11 (abo
 away still renders crisply. Haze is set in kilometres, so it means the same thing whatever area is loaded; **Earth
 curvature** sinks distant ground (about 75 m at 33 km) and matters past roughly 20 km. See the two Grand Teton presets.
 
+## Walking around
+
+In Vista, the pad in the corner of the drawing (or the keyboard) moves the camera like a game: **W A S D** or **↑ ↓**
+walk and step sideways, **← →** turn, **E / Q** rise and sink, **R / F** look up and down; hold **Shift** for bigger
+steps. Eye and aim move together and fly level, so altitude, heading and pitch hold while you move; the eye only
+rises where the ground comes up to meet it. Steps scale with the scene: about 8% of the distance to the aim point per step, turns of a sixth of
+the field of view, height in ×1.4 steps. The drawing shifts at once as a rough preview of the move and is replaced
+when the new render lands. Walk off the loaded square and a new area is loaded around you.
+
 ## Running locally
 
 ```bash

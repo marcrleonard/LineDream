@@ -32,6 +32,7 @@ let worker, workerReady = false, demSent = false;
 let busy = false, pending = null, reqId = 0, previewTimer = null;
 let lastSvg = null, lastQuality = null, lastUrl = null;
 let placing = "cam";
+let navT = { s: 1, x: 0, y: 0 }, sentNav = navT, navLoading = false;  // see "navigation" below
 
 // ------------------------------------------------------------------------------------------- worker
 
@@ -77,6 +78,7 @@ function pump() {
   const { quality } = pending;
   pending = null;
   busy = true;
+  sentNav = { ...navT };
   setStatus(quality === "full" ? "Rendering at full quality…" : "Rendering preview…", "busy");
   worker.postMessage({ type: "render", id: ++reqId, mode: state.mode, params: buildParams(), quality });
 }
@@ -386,6 +388,120 @@ function resizePlanner() {
 }
 new ResizeObserver(resizePlanner).observe(planner);
 
+// ------------------------------------------------------------------------------------------- navigation
+// Walk the camera through the scene with the pad over the drawing or the keyboard. Moves carry the eye and the aim
+// together and fly level, so the view keeps its altitude, pitch and heading (the eye only rises where the ground comes up
+// to meet it); steps scale with how far away the aim is (moves) and how high the eye is (up/down). The current drawing is shifted and scaled at once as a rough stand-in until the new preview
+// lands. Walking off the loaded area loads a new one around the camera.
+
+const NAV_KEYS = {
+  w: "forward", arrowup: "forward", s: "back", arrowdown: "back", a: "left", d: "right",
+  arrowleft: "turn-left", arrowright: "turn-right", e: "up", q: "down", r: "tilt-up", f: "tilt-down",
+};
+
+function setParam(k, v) {
+  state.params.vista[k] = v;
+  const el = $(`c-vista-${k}`), c = MODES.vista.groups.flatMap(([, items]) => items).find((c) => c.k === k);
+  if (el && c) { el.value = v; el.closest(".ctl").querySelector("output").textContent = show(c, v); }
+}
+
+function applyNavTransform(animate = true) {
+  const img = $("drawing");
+  img.style.transition = animate ? "transform 160ms ease-out" : "none";
+  img.style.transform = navT.s === 1 && !navT.x && !navT.y ? "" : `translate(${navT.x * 100}%, ${navT.y * 100}%) scale(${navT.s})`;
+}
+
+// screen effect of a move, applied after the ones already showing: scale about the centre, then shift
+function navShift(scale, dx, dy) {
+  navT = { s: navT.s * scale, x: navT.x * scale + dx, y: navT.y * scale + dy };
+  applyNavTransform();
+}
+
+function navigate(action, big = false) {
+  if (state.mode !== "vista" || !dem || navLoading) return;
+  const p = state.params.vista, m = dem.meta, W = m.width_m;
+  const ground = (uv) => sample(dem.grid, m.size, uv[0], uv[1]);
+  const [cu, cv] = state.cam, [tu, tv] = state.target;
+  const D = Math.max(Math.hypot(tu - cu, tv - cv) * W, 1);                 // metres to the aim point
+  const fx = (tu - cu) * W / D, fy = (tv - cv) * W / D;                      // heading, unit vector in metres
+  const eyeAbs = ground(state.cam) + p.eye, aimAbs = ground(state.target) + p.target_eye;
+  const tanH = Math.tan((p.fov * Math.PI) / 360), tanV = tanH * 10 / 16;   // the drawing is 16:10
+  const k = big ? 4 : 1;
+  let cam = state.cam, target = state.target, eye = p.eye, aim = aimAbs;
+
+  if (["forward", "back", "left", "right"].includes(action)) {
+    const step = Math.max(20, 0.08 * D) * k;
+    const [mx, my] = { forward: [fx, fy], back: [-fx, -fy], left: [fy, -fx], right: [-fy, fx] }[action];
+    cam = [cu + (mx * step) / W, cv + (my * step) / W];
+    target = [tu + (mx * step) / W, tv + (my * step) / W];
+    // fly level: same altitude, unless the ground comes up to meet the eye
+    const lift = Math.max(0, Math.min(p.eye, 2) - (eyeAbs - ground(cam)));
+    eye = Math.min(3000, Math.round(eyeAbs + lift - ground(cam)));
+    aim += lift;
+    if (action === "forward" || action === "back") { const d = action === "forward" ? step : -step; navShift(D / Math.max(D - d, D * 0.2), 0, 0); }
+    else navShift(1, (action === "left" ? 1 : -1) * step / (2 * D * tanH), 0);
+  } else if (action === "turn-left" || action === "turn-right") {
+    const a = (action === "turn-left" ? -1 : 1) * Math.max(2, p.fov / 6) * (big ? 3 : 1) * Math.PI / 180;
+    const [rx, ry] = [fx * Math.cos(a) - fy * Math.sin(a), fx * Math.sin(a) + fy * Math.cos(a)];
+    target = [cu + (rx * D) / W, cv + (ry * D) / W];
+    navShift(1, -Math.tan(a) / (2 * tanH), 0);
+  } else if (action === "up" || action === "down") {
+    const f = 1.4 ** (big ? 3 : 1);
+    eye = Math.min(3000, Math.max(0, action === "up" ? (p.eye + 10) * f - 10 : (p.eye + 10) / f - 10));
+    eye = Math.round(eye);
+    aim += eye - p.eye;
+    navShift(1, 0, (eye - p.eye) / (2 * D * tanV));
+  } else if (action === "tilt-up" || action === "tilt-down") {
+    const pitch = Math.atan((aimAbs - eyeAbs) / D), d = (action === "tilt-up" ? 1 : -1) * 3 * (big ? 3 : 1) * Math.PI / 180;
+    const next = Math.max(-1.2, Math.min(1.2, pitch + d));
+    aim = eyeAbs + D * Math.tan(next);
+    navShift(1, 0, (Math.tan(next) - Math.tan(pitch)) / (2 * tanV));
+  }
+
+  state.cam = cam; state.target = target;
+  state.preset = "";
+  $("preset").value = "";
+  if (eye !== p.eye) setParam("eye", eye);
+  const inside = (uv) => uv.every((x) => x >= 0.002 && x <= 0.998);
+  if (!inside(cam) || !inside(target)) {
+    // walked off the loaded terrain: load a new area around the camera (pins work outside 0..1), then restore the
+    // aim height, which is measured from the ground under the aim point
+    const absEye = eyeAbs + (action === "up" || action === "down" ? eye - p.eye : 0);
+    navLoading = true;
+    frameView(1.0).then(() => {
+      navLoading = false;
+      setParam("eye", Math.min(3000, Math.max(Math.min(p.eye, 2), Math.round(absEye - sample(dem.grid, dem.meta.size, ...state.cam)))));
+      setParam("target_eye", Math.max(-3000, Math.min(3000, Math.round(aim - sample(dem.grid, dem.meta.size, ...state.target)))));
+      drawPlanner();
+    });
+    return;
+  }
+  setParam("target_eye", Math.max(-3000, Math.min(3000, Math.round(aim - ground(target)))));
+  drawPlanner();
+  syncMapOverlay();
+  schedulePreview(350);
+}
+
+for (const b of document.querySelectorAll("[data-nav]")) {
+  let timer = null;
+  const stop = () => { clearInterval(timer); timer = null; };
+  b.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    navigate(b.dataset.nav, e.shiftKey);
+    stop();
+    timer = setInterval(() => navigate(b.dataset.nav, e.shiftKey), 260);
+  });
+  for (const ev of ["pointerup", "pointerleave", "pointercancel"]) b.addEventListener(ev, stop);
+  b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(b.dataset.nav, e.shiftKey); } });
+}
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest("input, select, textarea, .leaflet-container")) return;
+  const action = NAV_KEYS[e.key.toLowerCase()];
+  if (!action || state.mode !== "vista") return;
+  e.preventDefault();
+  navigate(action, e.shiftKey);
+});
+
 // ------------------------------------------------------------------------------------------- map (Leaflet, optional)
 
 let map = null, areaRect = null, sightLine = null;
@@ -427,17 +543,17 @@ function currentPins() {
 }
 
 // Load an area that just fits the eye, the aim point and the ground 25% beyond it, at the finest zoom that does.
-function frameView() {
-  if (!dem) return;
+function frameView(beyond = 0.25) {
+  if (!dem) return Promise.resolve();
   const pins = currentPins(), { cam, target } = pins;
-  const back = [target[0] + (target[0] - cam[0]) * 0.25, target[1] + (target[1] - cam[1]) * 0.25];
+  const back = [target[0] + (target[0] - cam[0]) * beyond, target[1] + (target[1] - cam[1]) * beyond];
   const lat = (cam[0] + back[0]) / 2, lon = (cam[1] + back[1]) / 2;
   const span = Math.max(Math.abs(back[1] - cam[1]) * 111320 * Math.cos((lat * Math.PI) / 180), Math.abs(back[0] - cam[0]) * 110540) * 1.15 + 1500;
   const size = +$("area-size").value;
   const zoom = Math.max(4, Math.min(MAX_ZOOM, Math.floor(Math.log2((size * metersPerPixel(lat, 0)) / span))));
   state.preset = "";
   $("preset").value = "";
-  loadArea({ lat, lon, zoom, size }, { pins });
+  return loadArea({ lat, lon, zoom, size }, { pins });
 }
 
 function useMapView() {
@@ -478,6 +594,11 @@ function showSvg(svg, quality) {
   if (lastUrl) URL.revokeObjectURL(lastUrl);
   lastUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   $("drawing").src = lastUrl;
+  // the new drawing already includes the moves made before it was requested; keep showing only the later ones
+  const s = navT.s / sentNav.s;
+  navT = { s, x: navT.x - s * sentNav.x, y: navT.y - s * sentNav.y };
+  sentNav = { s: 1, x: 0, y: 0 };
+  applyNavTransform(false);
   $("drawing").hidden = false;
   $("empty").hidden = true;
   $("download").disabled = false;
@@ -521,6 +642,7 @@ function syncModeButtons() {
   for (const b of document.querySelectorAll("[data-mode]")) b.setAttribute("aria-pressed", b.dataset.mode === state.mode ? "true" : "false");
   $("vista-tools").hidden = state.mode !== "vista";
   $("frame-row").hidden = state.mode !== "vista";
+  $("nav").hidden = state.mode !== "vista";
   $("sheet").classList.toggle("square", state.mode === "strata");
 }
 
@@ -549,7 +671,7 @@ $("render-preview").onclick = () => requestRender("preview");
 $("auto").onchange = () => { if ($("auto").checked) schedulePreview(0); };
 $("download").onclick = download;
 $("use-view").onclick = useMapView;
-$("frame-view").onclick = frameView;
+$("frame-view").onclick = () => frameView();
 $("search-go").onclick = search;
 $("search").onkeydown = (e) => { if (e.key === "Enter") search(); };
 $("reset").onclick = () => { state.params[state.mode] = defaults(state.mode); fitElevationControls(); buildControls(); afterChange(); };

@@ -90,6 +90,20 @@
   }
   .sheet.square { aspect-ratio: 1; max-width: 760px; margin: 0 auto; }
   #drawing { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* navigation pad over the drawing */
+  #nav { position: absolute; left: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 30px) 8px repeat(2, 30px); gap: 4px;
+    padding: 6px; border-radius: 12px; background: color-mix(in srgb, var(--sheet) 82%, transparent); border: 1px solid var(--rule);
+    backdrop-filter: blur(4px); opacity: .55; transition: opacity 150ms; user-select: none; touch-action: none; }
+  #nav:hover, #nav:focus-within { opacity: 1; }
+  #nav[hidden] { display: none; }
+  #nav button { width: 30px; height: 30px; padding: 0; border-radius: 8px; border: 1px solid var(--rule); background: var(--sheet);
+    font: 14px/1 var(--mono); color: var(--ink); cursor: pointer; }
+  #nav button:active { background: var(--paper-2); }
+  #nav .gap { grid-row: span 2; }
+  #nav-help { position: absolute; left: 12px; bottom: 90px; margin: 0; padding: 8px 10px; border-radius: 10px; font: 11px/1.5 var(--mono);
+    color: var(--faint); background: var(--sheet); border: 1px solid var(--rule); display: none; }
+  #nav:hover + #nav-help { display: block; }
+  @media (max-width: 600px) { #nav-help { display: none !important; } }
   #empty { color: var(--faint); text-align: center; padding: 24px; max-width: 40ch; }
   #versions { margin-top: 8px; color: var(--faint); font: 11.5px/1.4 var(--mono); }
 
@@ -156,6 +170,20 @@
     </div>
     <div class="sheet" id="sheet">
       <img id="drawing" alt="The rendered line drawing" hidden>
+      <div id="nav" role="group" aria-label="Move the camera">
+        <button type="button" data-nav="turn-left" title="Turn left (←)" aria-label="Turn left">↶</button>
+        <button type="button" data-nav="forward" title="Forward (W / ↑)" aria-label="Forward">▲</button>
+        <button type="button" data-nav="turn-right" title="Turn right (→)" aria-label="Turn right">↷</button>
+        <span class="gap"></span>
+        <button type="button" data-nav="up" title="Up (E)" aria-label="Up">⤒</button>
+        <button type="button" data-nav="tilt-up" title="Look up (R)" aria-label="Look up">⌃</button>
+        <button type="button" data-nav="left" title="Step left (A)" aria-label="Step left">◀</button>
+        <button type="button" data-nav="back" title="Back (S / ↓)" aria-label="Back">▼</button>
+        <button type="button" data-nav="right" title="Step right (D)" aria-label="Step right">▶</button>
+        <button type="button" data-nav="down" title="Down (Q)" aria-label="Down">⤓</button>
+        <button type="button" data-nav="tilt-down" title="Look down (F)" aria-label="Look down">⌄</button>
+      </div>
+      <p id="nav-help">W A S D / ↑ ↓ walk · ← → turn<br>E Q up / down · R F look up / down<br>hold Shift for big steps</p>
       <p id="empty">Loading Python and the scientific stack (about 60 MB the first time, cached after that). Meanwhile, place your camera on the map to the right.</p>
     </div>
     <div id="versions"></div>
