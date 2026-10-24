@@ -1,0 +1,70 @@
+# LineDream Terrain
+
+A web page that turns real elevation data into line art, separate from the playground. Deployed at `/terrain/`
+(for example https://linedream.marcrleonard.com/terrain/), built by `docs/build_website.py`.
+
+1. **Place:** pick an area on the topo map (or search, or choose a preset); elevation comes straight from the AWS
+   Terrarium tiles.
+2. **Camera:** drag the eye and aim handles on the top-down map; the cone shows the field of view and the compass
+   shows the sun.
+3. **Render:** every change re-renders a preview; **Render full quality** for the final drawing; **Download SVG**
+   keeps the plotter layers (one pen per layer).
+
+Two renderers, both the Python terrain experiments running unchanged in Pyodide:
+
+- **Vista** (`py/vista.py`): a perspective view from a real spot. Tone hatching (form-following strokes, etching,
+  distance rings), outlines with lost edges, labelled contours in the lit areas, haze, mist, sun disc, sky streaks,
+  a floating ring, a tone window, plotter mode.
+- **Strata** (`py/strata.py`): one family of curves across the whole map (scan lines, rays, a spiral, rings,
+  contours, flow lines, engraving hatch), lifted in 3D or pushed sideways.
+
+`py/fastpaths.py` holds the hot loops; it uses Numba when available and falls back to numpy / plain Python, which is
+what runs in the browser. `py/terrain_app.py` is the small API the worker calls.
+
+## Files
+
+| file | what |
+|---|---|
+| `index.html` | layout and styles |
+| `app.mjs` | UI: map, camera planner, controls, render queue, URL-hash state |
+| `schema.mjs` | every control (defaults match `vista.Scene` / `strata.Params`) and the presets |
+| `tiles.mjs` | fetches and decodes elevation tiles; hillshade for the planner |
+| `worker.mjs` | Pyodide in a worker: loads numpy/scipy/scikit-image + the LineDream wheel, runs renders |
+| `py/` | the renderers |
+
+The whole scene (place, camera, mode, parameters) is kept in the URL hash, so a link reproduces a drawing.
+
+## Far views
+
+Vista only knows the ground inside the loaded square (512–1024 samples), so the camera and everything you want to
+see (plus a little beyond it) have to be inside it. To look at a range from 30+ km away: zoom the map out and
+**Use this view** (your eye and aim stay put if they're still inside), drag the eye out, then **Frame eye + aim** to
+reload just the ground you can see at the finest zoom that fits. At zoom 11 (about 55 m per sample) a range 30 km
+away still renders crisply. Haze is set in kilometres, so it means the same thing whatever area is loaded; **Earth
+curvature** sinks distant ground (about 75 m at 33 km) and matters past roughly 20 km. See the two Grand Teton presets.
+
+## Walking around
+
+In Vista, the pad in the corner of the drawing (or the keyboard) moves the camera like a game: **W A S D** or **↑ ↓**
+walk and step sideways, **← →** turn, **E / Q** rise and sink, **R / F** look up and down; hold **Shift** for bigger
+steps. Eye and aim move together and fly level, so altitude, heading and pitch hold while you move; the eye only
+rises where the ground comes up to meet it. Steps scale with the scene: about 8% of the distance to the aim point per step, turns of a sixth of
+the field of view, height in ×1.4 steps. The drawing shifts at once as a rough preview of the move and is replaced
+when the new render lands. Walk off the loaded square and a new area is loaded around you.
+
+## Running locally
+
+```bash
+uv run --extra docs python docs/build_website.py    # builds public/, including public/terrain/
+python -m http.server -d public 8000                # http://localhost:8000/terrain/
+```
+
+Query parameters: `?pyodide=<url>` loads Pyodide from a local distribution instead of the jsDelivr CDN;
+`?wheel=<url>` installs a specific LineDream wheel.
+
+## Speed
+
+Measured in headless Chromium (Pyodide 314.0.7) on a 4-core machine: about 15–20 s to start Python the first time
+(about 60 MB, cached by the browser afterwards), previews in 1–6 s, full-quality Vista renders in about 15–20 s.
+Strata is faster (about 1 s previews). See `experiments/browser/README.md` on the `terrain-strata` branch for the
+breakdown, and `experiments/terrain/RUST_PORT.md` for how a Rust/WebAssembly core would make it interactive.
