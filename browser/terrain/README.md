@@ -52,6 +52,21 @@ rises where the ground comes up to meet it. Steps scale with the scene: about 8%
 the field of view, height in ×1.4 steps. The drawing shifts at once as a rough preview of the move and is replaced
 when the new render lands. Walk off the loaded square and a new area is loaded around you.
 
+## Saving scenes
+
+There's no server, so scenes live in files and links. **Save** downloads the current scene as JSON (area, eye, aim,
+renderer and every parameter); **Open**, or dropping the file on the drawing, brings it back. **Link** copies the
+address, which holds the same scene. A saved file has exactly the shape of a preset in `schema.mjs` (plus a
+`format`/`version` header), so a scene you like can be pasted into `PRESETS` as is. Files and links are checked on
+the way in (`scene.mjs`): values are clamped to their sliders, unknown options reset, and what was fixed is logged
+to the console. Older links (from before the scene format) still open.
+
+## Tests
+
+```bash
+cd browser && npm run test:terrain      # node --test: scene format, presets, saved files, links
+```
+
 ## Running locally
 
 ```bash

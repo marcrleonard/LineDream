@@ -104,6 +104,7 @@
     color: var(--faint); background: var(--sheet); border: 1px solid var(--rule); display: none; }
   #nav:hover + #nav-help { display: block; }
   @media (max-width: 600px) { #nav-help { display: none !important; } }
+  .sheet.drop { outline: 2px dashed var(--ink); outline-offset: -8px; }
   #empty { color: var(--faint); text-align: center; padding: 24px; max-width: 40ch; }
   #versions { margin-top: 8px; color: var(--faint); font: 11.5px/1.4 var(--mono); }
 
@@ -162,6 +163,12 @@
         <button type="button" data-mode="strata" aria-pressed="false">Strata</button>
       </div>
       <select id="preset" aria-label="Presets"></select>
+      <div class="seg scene" role="group" aria-label="Scene">
+        <button type="button" id="scene-save" title="Download this scene as a JSON file">Save</button>
+        <button type="button" id="scene-open" title="Open a saved scene (or drop the file on the drawing)">Open</button>
+        <button type="button" id="scene-link" title="Copy a link to this exact scene">Link</button>
+      </div>
+      <input type="file" id="scene-file" accept=".json,application/json" hidden>
       <span class="spacer"></span>
       <label class="auto"><input type="checkbox" id="auto" checked> Live preview</label>
       <button class="btn" id="render-preview" type="button">Preview</button>

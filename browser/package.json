@@ -4,7 +4,8 @@
   "description": "Runs LineDream under Pyodide (Node and the browser)",
   "type": "module",
   "scripts": {
-    "test": "node run_tests.mjs"
+    "test": "node run_tests.mjs",
+    "test:terrain": "node --test terrain/test/*.test.mjs"
   },
   "dependencies": {
     "pyodide": "314.0.7"

@@ -7,6 +7,7 @@
 // The whole scene (place, camera, mode, every parameter) lives in the URL hash, so a link reproduces a drawing.
 import { MODES, PALETTES, PRESETS, defaults } from "./schema.mjs";
 import { fetchDEM, hillshade, metersPerPixel, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
+import { decodeHash, encodeHash, parseScene, sceneFilename, sceneFromState } from "./scene.mjs";
 
 const PYODIDE_VERSION = "314.0.7";
 const query = new URLSearchParams(location.search);
@@ -230,34 +231,19 @@ async function loadArea(area, { keepCamera = false, pins = null } = {}) {
   saveHash();
 }
 
-async function applyPreset(i) {
-  const pr = PRESETS[i];
-  state.mode = pr.mode;
-  state.preset = pr.name;
-  state.params[pr.mode] = { ...defaults(pr.mode), ...pr.params };
-  if (pr.mode === "vista") {
-    // older presets give haze in map widths; turn that into km for this preset's area
-    const widthKm = (metersPerPixel(pr.area.lat, pr.area.zoom) * pr.area.size) / 1000, p = state.params.vista;
-    if (pr.params._haze_near_km === undefined) p._haze_near_km = (pr.params.haze_near ?? 0.1) * widthKm;
-    if (pr.params._haze_far_km === undefined) p._haze_far_km = (pr.params.haze_far ?? 1.0) * widthKm;
-    delete p.haze_near; delete p.haze_far;
-  }
+// Show a scene (a preset, an opened file or a link; see scene.mjs).
+async function applyScene(sc) {
+  state.mode = sc.mode;
+  state.preset = sc.name;
+  state.params[sc.mode] = sc.params;
+  Object.assign(state, { cam: sc.cam, target: sc.target, halo: sc.halo, center: sc.center });
+  const i = PRESETS.findIndex((p) => p.name === sc.name);
+  $("preset").value = i >= 0 ? String(i) : "";
   syncModeButtons();
-  const meta = { ...pr.area, ...gridOrigin(pr.area) };
-  const uv = (ll) => toUV(meta, ll[0], ll[1]);
-  state.cam = pr.cam ? uv(pr.cam) : [0.5, 0.93];
-  state.target = pr.target ? uv(pr.target) : [0.5, 0.45];
-  state.halo = pr.halo ? uv(pr.halo) : state.target.slice();
-  state.center = [0.5, 0.5];
-  await loadArea(pr.area, { keepCamera: true });
+  await loadArea(sc.area, { keepCamera: true });
 }
 
-function gridOrigin(area) {
-  // same rounding as tiles.fetchDEM, so presets can be pinned before the tiles arrive
-  const n = 2 ** area.zoom * 256, latR = (area.lat * Math.PI) / 180;
-  const cx = ((area.lon + 180) / 360) * n, cy = ((1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2) * n;
-  return { x0: Math.floor(cx - area.size / 2), y0: Math.floor(cy - area.size / 2) };
-}
+const applyPreset = (i) => applyScene(parseScene(PRESETS[i]));
 
 // ------------------------------------------------------------------------------------------- planner (top-down camera placement)
 
@@ -624,16 +610,44 @@ function setStatus(text, kind) {
 
 function saveHash() {
   if (!state.area) return;
-  const s = { m: state.mode, a: state.area, c: state.cam, t: state.target, h: state.halo, ce: state.center, p: state.params[state.mode], n: state.preset };
-  history.replaceState(null, "", "#" + encodeURIComponent(JSON.stringify(s)));
+  history.replaceState(null, "", encodeHash(sceneFromState(state)));
 }
 
-function readHash() {
+// ------------------------------------------------------------------------------------------- saving and opening scenes
+// No server: a scene saves as a small JSON file (the same shape as the presets in schema.mjs) and opens again from
+// the file picker or by dropping it on the drawing. The link in the address bar holds the same scene.
+
+function saveScene() {
+  if (!state.area) return;
+  const name = prompt("Name this scene", state.preset || "");
+  if (name === null) return;
+  const blob = new Blob([JSON.stringify(sceneFromState(state, name.trim()), null, 2) + "\n"], { type: "application/json" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: sceneFilename(name) });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+async function openScene(file) {
+  let sc;
   try {
-    const s = JSON.parse(decodeURIComponent(location.hash.slice(1)));
-    if (!s.a || !MODES[s.m]) return null;
-    return s;
-  } catch { return null; }
+    sc = parseScene(JSON.parse(await file.text()));
+  } catch (e) {
+    setStatus(`Couldn't open ${file.name}: ${e instanceof SyntaxError ? "not valid JSON" : e.message}`, "err");
+    return;
+  }
+  if (sc.warnings.length) console.warn(`${file.name}:`, sc.warnings);
+  await applyScene(sc);
+  if (sc.warnings.length) setStatus(`Opened ${file.name} with ${sc.warnings.length} setting(s) fixed (details in the console)`, "ok");
+}
+
+async function copyLink() {
+  saveHash();
+  try {
+    await navigator.clipboard.writeText(location.href);
+    setStatus("Link copied: it opens this exact scene", "ok");
+  } catch {
+    setStatus("Couldn't copy; the address bar has the link", "err");
+  }
 }
 
 // ------------------------------------------------------------------------------------------- wiring
@@ -672,6 +686,18 @@ $("auto").onchange = () => { if ($("auto").checked) schedulePreview(0); };
 $("download").onclick = download;
 $("use-view").onclick = useMapView;
 $("frame-view").onclick = () => frameView();
+$("scene-save").onclick = saveScene;
+$("scene-open").onclick = () => $("scene-file").click();
+$("scene-file").onchange = (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) openScene(f); };
+$("scene-link").onclick = copyLink;
+$("sheet").addEventListener("dragover", (e) => { if ([...e.dataTransfer.items].some((i) => i.kind === "file")) { e.preventDefault(); $("sheet").classList.add("drop"); } });
+$("sheet").addEventListener("dragleave", () => $("sheet").classList.remove("drop"));
+$("sheet").addEventListener("drop", (e) => {
+  e.preventDefault();
+  $("sheet").classList.remove("drop");
+  const f = e.dataTransfer.files[0];
+  if (f) openScene(f);
+});
 $("search-go").onclick = search;
 $("search").onkeydown = (e) => { if (e.key === "Enter") search(); };
 $("reset").onclick = () => { state.params[state.mode] = defaults(state.mode); fitElevationControls(); buildControls(); afterChange(); };
@@ -680,14 +706,6 @@ populatePresets();
 initMap();
 startWorker();
 
-const saved = readHash();
-if (saved) {
-  state.mode = saved.m;
-  state.params[saved.m] = { ...defaults(saved.m), ...saved.p };
-  Object.assign(state, { cam: saved.c, target: saved.t, halo: saved.h || saved.t, center: saved.ce || [0.5, 0.5], preset: saved.n || "" });
-  syncModeButtons();
-  loadArea(saved.a, { keepCamera: true });
-} else {
-  $("preset").value = "0";
-  applyPreset(0);
-}
+const saved = location.hash.length > 1 ? decodeHash(location.hash) : null;
+if (saved) applyScene(saved);
+else applyPreset(0);

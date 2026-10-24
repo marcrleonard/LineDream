@@ -343,7 +343,7 @@ def build_terrain():
 	src, dst = root / 'terrain', pathlib.Path(BUILD_FOLDER, 'terrain')
 	if dst.exists():
 		shutil.rmtree(dst)
-	shutil.copytree(src, dst, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+	shutil.copytree(src, dst, ignore=shutil.ignore_patterns('__pycache__', '*.pyc', 'test'))
 	shutil.copy2(root / 'packages.mjs', dst / 'packages.mjs')
 	wheel = next(pathlib.Path(BUILD_FOLDER, 'playground').glob('linedream-*.whl')).name
 	page = dst / 'index.html'

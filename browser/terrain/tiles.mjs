@@ -31,9 +31,14 @@ async function decodeTile(z, x, y) {
 }
 
 // A size x size grid of elevations (metres) centred on lat/lon at the given tile zoom.
-export async function fetchDEM(lat, lon, zoom, size, onProgress = () => {}) {
+// Global pixel of the grid's top-left corner. Exported so a camera can be pinned before the tiles arrive.
+export function gridOrigin({ lat, lon, zoom, size }) {
   const [cx, cy] = globalPx(lat, lon, zoom);
-  const x0 = Math.floor(cx - size / 2), y0 = Math.floor(cy - size / 2);
+  return { x0: Math.floor(cx - size / 2), y0: Math.floor(cy - size / 2) };
+}
+
+export async function fetchDEM(lat, lon, zoom, size, onProgress = () => {}) {
+  const { x0, y0 } = gridOrigin({ lat, lon, zoom, size });
   const tx0 = Math.floor(x0 / 256), ty0 = Math.floor(y0 / 256);
   const tx1 = Math.floor((x0 + size) / 256), ty1 = Math.floor((y0 + size) / 256);
   const jobs = [];
