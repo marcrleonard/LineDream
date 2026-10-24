@@ -34,6 +34,7 @@ export const MODES = {
         { k: "shift", label: "Lens shift (+ moves the scene up)", type: "range", min: -0.6, max: 0.6, step: 0.01, def: 0 },
         { k: "exaggeration", label: "Vertical exaggeration", type: "range", min: 0.5, max: 3, step: 0.05, def: 1.3 },
         { k: "smooth", label: "Terrain smoothing (px)", type: "range", min: 0, max: 3, step: 0.1, def: 0.7 },
+        { k: "curvature", label: "Earth curvature (matters past ~20 km)", type: "check", def: false },
       ]],
       ["Light", [
         { k: "sun_az", label: "Sun direction (° from north)", type: "range", min: 0, max: 360, step: 1, def: 120 },
@@ -76,8 +77,8 @@ export const MODES = {
       ]],
       ["Atmosphere", [
         { k: "haze", label: "Haze", type: "range", min: 0, max: 1, step: 0.01, def: 0.6 },
-        { k: "haze_near", label: "Haze starts (map widths)", type: "range", min: 0, max: 1.5, step: 0.01, def: 0.1, show: (p) => p.haze > 0 },
-        { k: "haze_far", label: "Haze full (map widths)", type: "range", min: 0.05, max: 2, step: 0.01, def: 1, show: (p) => p.haze > 0 },
+        { k: "_haze_near_km", label: "Haze starts (km)", type: "range", min: 0, max: 100, step: 0.5, def: 3, show: (p) => p.haze > 0 },
+        { k: "_haze_far_km", label: "Haze full (km)", type: "range", min: 0.5, max: 150, step: 0.5, def: 30, show: (p) => p.haze > 0 },
         { k: "_mist_on", label: "Mist / water level", type: "check", def: false },
         { k: "_mist_elev", label: "Mist level (m)", type: "range", elev: true, step: 1, def: 0, show: has("_mist_on", true) },
         { k: "mist_lines", label: "Lines on the mist", type: "range", min: 0, max: 100, step: 1, def: 0, show: has("_mist_on", true) },
@@ -181,7 +182,19 @@ const VM = { eye: 10, target_eye: -200, fov: 24, shift: -0.2, sun_az: 120, sun_a
   shade_floor: 0.08, sun_disc: 0.11, _sun_free: true, _sun_x: -0.5, _sun_y: 0.3, sun_lines: 12, rings: 380, haze: 0.2, haze_near: 0.03, haze_far: 0.5,
   _accent_on: true, _accent_elev: 3800 };
 
+const GRAND_TETON = [43.7411, -110.8024];
+const TETON_STYLE = { tone: "flow", flow_dir: 90, flow_sep: 2.4, flow_sep_max: 10, flow_min_tone: 0.3, shade_gamma: 0.8,
+  lost_edges: 0.2, overshoot: 3, wobble: 0.5, ...PEN, curvature: true };
+
+// Presets give haze in map widths (haze_near / haze_far, as the original renders did) or directly in km
+// (_haze_near_km / _haze_far_km); app.mjs converts the former using the preset area's real width.
 export const PRESETS = [
+  { name: "Grand Tetons from Mount Leidy (33 km)", mode: "vista", area: { lat: 43.73316, lon: -110.60424, zoom: 11, size: 1024 },
+    cam: [43.72521, -110.40607], target: GRAND_TETON,
+    params: { ...TETON_STYLE, eye: 5, target_eye: 0, fov: 22, shift: -0.08, sun_az: 240, sun_alt: 22, haze: 0.5, _haze_near_km: 10, _haze_far_km: 60 } },
+  { name: "Grand Tetons from Snake River Overlook", mode: "vista", area: { lat: 43.69925, lon: -110.7087, zoom: 12, size: 1024 },
+    cam: [43.6574, -110.615], target: GRAND_TETON,
+    params: { ...TETON_STYLE, eye: 5, target_eye: 0, fov: 26, shift: -0.1, sun_az: 250, sun_alt: 18, haze: 0.45, _haze_near_km: 4, _haze_far_km: 35 } },
   { name: "Topo duality · Cirque of the Towers", mode: "vista", area: CIRQUE, cam: JACKASS_PASS, target: CIRQUE_AIM,
     params: { ...PASS, ...FALL, shade_floor: 0, sun_az: 165, sun_alt: 28, topo_every: 120, topo_units: "ft", topo_label_every: 5, topo_label_size: 11 } },
   { name: "Topo duality · Yosemite", mode: "vista", area: YOSEMITE, cam: TUNNEL_VIEW, target: HALF_DOME,

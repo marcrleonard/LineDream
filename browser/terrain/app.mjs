@@ -6,7 +6,7 @@
 //   ?wheel=<url>    a LineDream wheel to install (the website build sets data-wheel on <html>; otherwise PyPI)
 // The whole scene (place, camera, mode, every parameter) lives in the URL hash, so a link reproduces a drawing.
 import { MODES, PALETTES, PRESETS, defaults } from "./schema.mjs";
-import { fetchDEM, hillshade, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
+import { fetchDEM, hillshade, metersPerPixel, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
 
 const PYODIDE_VERSION = "314.0.7";
 const query = new URLSearchParams(location.search);
@@ -98,6 +98,7 @@ function buildParams() {
     Object.assign(p, { paper: pal.paper, ink: pal.ink, accent: pal.accent, cam: state.cam, target: state.target });
     p.contours = p._accent_on ? [[p._accent_elev, "accent"]] : [];
     p.mist = p._mist_on ? p._mist_elev : null;
+    p.haze_km = [p._haze_near_km, Math.max(p._haze_far_km, p._haze_near_km + 0.1)];
     p.halo = p._halo_on ? [state.halo[0], state.halo[1], p._halo_elev, p._halo_radius] : null;
     p.sun_pos = p.sun_disc > 0 && p._sun_free ? [p._sun_x, p._sun_y] : null;
     const [x, y, s] = [p._window_x, p._window_y, p._window_size];
@@ -194,7 +195,8 @@ function fitElevationControls() {
 
 // ------------------------------------------------------------------------------------------- terrain + presets
 
-async function loadArea(area, { keepCamera = false } = {}) {
+// pins: {cam, target, halo} as [lat, lon]; each is placed in the new area if it falls inside it.
+async function loadArea(area, { keepCamera = false, pins = null } = {}) {
   state.area = { ...area };
   setStatus("Loading elevation…", "busy");
   $("area-info").textContent = "Loading elevation tiles…";
@@ -210,7 +212,14 @@ async function loadArea(area, { keepCamera = false } = {}) {
   c.width = c.height = 512;
   c.getContext("2d").putImageData(hillshade(dem.grid, m.size, m.mpp, 512), 0, 0);
   shadeImg = c;
-  if (!keepCamera) Object.assign(state, { cam: [0.5, 0.93], target: [0.5, 0.45], halo: [0.5, 0.45], center: [0.5, 0.5] });
+  if (!keepCamera) {
+    const fallback = { cam: [0.5, 0.93], target: [0.5, 0.45], halo: [0.5, 0.45] };
+    for (const k of Object.keys(fallback)) {
+      const uv = pins && pins[k] ? toUV(m, pins[k][0], pins[k][1]) : null;
+      state[k] = uv && uv.every((x) => x >= 0 && x <= 1) ? uv : fallback[k];
+    }
+    state.center = [0.5, 0.5];
+  }
   fitElevationControls();
   buildControls();
   drawPlanner();
@@ -224,6 +233,13 @@ async function applyPreset(i) {
   state.mode = pr.mode;
   state.preset = pr.name;
   state.params[pr.mode] = { ...defaults(pr.mode), ...pr.params };
+  if (pr.mode === "vista") {
+    // older presets give haze in map widths; turn that into km for this preset's area
+    const widthKm = (metersPerPixel(pr.area.lat, pr.area.zoom) * pr.area.size) / 1000, p = state.params.vista;
+    if (pr.params._haze_near_km === undefined) p._haze_near_km = (pr.params.haze_near ?? 0.1) * widthKm;
+    if (pr.params._haze_far_km === undefined) p._haze_far_km = (pr.params.haze_far ?? 1.0) * widthKm;
+    delete p.haze_near; delete p.haze_far;
+  }
   syncModeButtons();
   const meta = { ...pr.area, ...gridOrigin(pr.area) };
   const uv = (ll) => toUV(meta, ll[0], ll[1]);
@@ -318,7 +334,9 @@ function updatePlannerInfo() {
   if (state.mode === "vista") {
     const p = state.params.vista;
     const dist = Math.hypot(state.target[0] - state.cam[0], state.target[1] - state.cam[1]) * m.width_m;
-    $("planner-info").textContent = `Eye ${fmt(el(state.cam) + p.eye)} m (ground ${fmt(el(state.cam))} m) · aim ${fmt(el(state.target) + p.target_eye)} m · ${(dist / 1000).toFixed(1)} km away`;
+    const edge = Math.min(...state.cam, ...state.target.map((x) => x), 1 - Math.max(...state.cam, ...state.target));
+    $("planner-info").textContent = `Eye ${fmt(el(state.cam) + p.eye)} m (ground ${fmt(el(state.cam))} m) · aim ${fmt(el(state.target) + p.target_eye)} m · ${(dist / 1000).toFixed(1)} km away`
+      + (edge < 0.04 ? " · at the edge of the loaded area: zoom the map out and “Use this view” to go farther, then “Frame eye + aim”" : "");
   } else {
     $("planner-info").textContent = `Strata draws the whole map; the dot is the centre for radial, spiral and ring paths.`;
   }
@@ -402,6 +420,26 @@ function syncMapOverlay() {
   else sightLine = L.polyline(pts, { color: "#1c1b18", weight: 2, dashArray: "4 4", interactive: false }).addTo(map);
 }
 
+function currentPins() {
+  if (!dem) return null;
+  const ll = (uv) => toLatLon(dem.meta, uv[0], uv[1]);
+  return { cam: ll(state.cam), target: ll(state.target), halo: ll(state.halo) };
+}
+
+// Load an area that just fits the eye, the aim point and the ground 25% beyond it, at the finest zoom that does.
+function frameView() {
+  if (!dem) return;
+  const pins = currentPins(), { cam, target } = pins;
+  const back = [target[0] + (target[0] - cam[0]) * 0.25, target[1] + (target[1] - cam[1]) * 0.25];
+  const lat = (cam[0] + back[0]) / 2, lon = (cam[1] + back[1]) / 2;
+  const span = Math.max(Math.abs(back[1] - cam[1]) * 111320 * Math.cos((lat * Math.PI) / 180), Math.abs(back[0] - cam[0]) * 110540) * 1.15 + 1500;
+  const size = +$("area-size").value;
+  const zoom = Math.max(4, Math.min(MAX_ZOOM, Math.floor(Math.log2((size * metersPerPixel(lat, 0)) / span))));
+  state.preset = "";
+  $("preset").value = "";
+  loadArea({ lat, lon, zoom, size }, { pins });
+}
+
 function useMapView() {
   if (!map) return;
   const size = +$("area-size").value;
@@ -410,7 +448,7 @@ function useMapView() {
   const zoom = Math.max(4, Math.min(MAX_ZOOM, Math.round(map.getZoom() + Math.log2(size / widthPx))));
   state.preset = "";
   $("preset").value = "";
-  loadArea({ lat: c.lat, lon: c.lng, zoom, size });
+  loadArea({ lat: c.lat, lon: c.lng, zoom, size }, { pins: currentPins() });
 }
 
 async function search() {
@@ -482,6 +520,7 @@ function readHash() {
 function syncModeButtons() {
   for (const b of document.querySelectorAll("[data-mode]")) b.setAttribute("aria-pressed", b.dataset.mode === state.mode ? "true" : "false");
   $("vista-tools").hidden = state.mode !== "vista";
+  $("frame-row").hidden = state.mode !== "vista";
   $("sheet").classList.toggle("square", state.mode === "strata");
 }
 
@@ -510,6 +549,7 @@ $("render-preview").onclick = () => requestRender("preview");
 $("auto").onchange = () => { if ($("auto").checked) schedulePreview(0); };
 $("download").onclick = download;
 $("use-view").onclick = useMapView;
+$("frame-view").onclick = frameView;
 $("search-go").onclick = search;
 $("search").onkeydown = (e) => { if (e.key === "Enter") search(); };
 $("reset").onclick = () => { state.params[state.mode] = defaults(state.mode); fitElevationControls(); buildControls(); afterChange(); };

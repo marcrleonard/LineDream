@@ -34,6 +34,15 @@ what runs in the browser. `py/terrain_app.py` is the small API the worker calls.
 
 The whole scene (place, camera, mode, parameters) is kept in the URL hash, so a link reproduces a drawing.
 
+## Far views
+
+Vista only knows the ground inside the loaded square (512–1024 samples), so the camera and everything you want to
+see (plus a little beyond it) have to be inside it. To look at a range from 30+ km away: zoom the map out and
+**Use this view** (your eye and aim stay put if they're still inside), drag the eye out, then **Frame eye + aim** to
+reload just the ground you can see at the finest zoom that fits. At zoom 11 (about 55 m per sample) a range 30 km
+away still renders crisply. Haze is set in kilometres, so it means the same thing whatever area is loaded; **Earth
+curvature** sinks distant ground (about 75 m at 33 km) and matters past roughly 20 km. See the two Grand Teton presets.
+
 ## Running locally
 
 ```bash

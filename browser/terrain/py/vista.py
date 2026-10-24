@@ -97,6 +97,10 @@ class Scene:
 	haze: float = 0.6
 	haze_near: float = 0.1
 	haze_far: float = 1.0
+	haze_km: tuple = None        # (near, far) in kilometres; overrides haze_near/haze_far (map widths) so the
+	                             # atmosphere doesn't change with how large an area is loaded
+	curvature: bool = False      # sink distant terrain by the Earth's curvature (with standard refraction):
+	                             # ~20 m at 20 km, ~140 m at 50 km. Matters for far ranges.
 	mist: float = None           # elevation (m); terrain below becomes white sea
 	mist_lines: int = 0
 
@@ -160,9 +164,17 @@ class Vista:
 		self.zmax = self.Z.max()
 		self.px = 1.0 / (n - 1)
 
+		self.width_m = info.width_m
+
 		gv, gu = np.gradient(ndimage.gaussian_filter(self.Z, 1.2), self.px)
 		self.dzdx, self.dzdy = gu, -gv                # world y points north = -v
 		self.slope = np.percentile(np.hypot(gu, gv), 99.9)
+		if s.curvature:
+			# drop relative to the eye, not exaggerated (it's geometry, not relief); shading keeps the flat normals
+			vv, uu = np.mgrid[0:n, 0:n] * self.px
+			d_m = np.hypot(uu - s.cam[0], vv - s.cam[1]) * info.width_m
+			self.Z = self.Z - d_m ** 2 * (1 - 0.13) / (2 * 6.371e6) / info.width_m
+			self.zmax = self.Z.max()
 		self._camera()
 		self._shade()
 
@@ -244,7 +256,10 @@ class Vista:
 
 	def fade(self, P):
 		d = np.linalg.norm(P[:, :2] - self.C[:2], axis=1)
-		f = np.clip((d - self.s.haze_near) / (self.s.haze_far - self.s.haze_near), 0, 1)
+		near, far = self.s.haze_near, self.s.haze_far
+		if self.s.haze_km:
+			near, far = (km * 1000 / self.width_m for km in self.s.haze_km)
+		f = np.clip((d - near) / (far - near), 0, 1)
 		return self.s.haze * f * f * (3 - 2 * f)
 
 	def emit(self, P, keep, role, check_vis=True):
