@@ -8,6 +8,7 @@
 import { MODES, PALETTES, PRESETS, defaults } from "./schema.mjs";
 import { fetchDEM, hillshade, metersPerPixel, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
 import { compose } from "./compose.mjs";
+import { DEFAULT_SYSTEM, SYSTEMS, displayRange, fmtDistance, fmtLength, fromDisplay, niceStep, toDisplay, unitName } from "./units.mjs";
 import { deleteMyScene, listMyScenes, saveMyScene } from "./myscenes.mjs";
 import { decodeHash, encodeHash, parseScene, sceneFilename, sceneFromState } from "./scene.mjs";
 
@@ -37,6 +38,8 @@ let lastSvg = null, lastQuality = null, lastUrl = null;
 // Preview (half size, ~4x faster) or full; a per-browser preference, not part of the scene.
 let quality = (() => { try { return localStorage.getItem("linedream-terrain/quality") === "full" ? "full" : "preview"; } catch { return "preview"; } })();
 let placing = "cam";
+// feet/miles or metres/kilometres for what's shown; everything stored stays metric (units.mjs)
+let units = (() => { try { const u = localStorage.getItem("linedream-terrain/units"); return u in SYSTEMS ? u : DEFAULT_SYSTEM; } catch { return DEFAULT_SYSTEM; } })();
 let navT = { s: 1, x: 0, y: 0 }, sentNav = navT, navLoading = false;  // see "navigation" below
 
 // ------------------------------------------------------------------------------------------- worker
@@ -135,22 +138,21 @@ function buildControls() {
       row.dataset.key = c.k;
       const id = `c-${state.mode}-${c.k}`;
       if (c.type === "check") {
-        row.innerHTML = `<label><input type="checkbox" id="${id}"> <span>${c.label}</span></label>`;
+        row.innerHTML = `<label><input type="checkbox" id="${id}"> <span>${labelOf(c)}</span></label>`;
         const el = row.querySelector("input");
         el.checked = !!p[c.k];
         el.onchange = () => { p[c.k] = el.checked; afterChange(); };
       } else if (c.type === "select") {
-        row.innerHTML = `<label for="${id}">${c.label}</label><select id="${id}">${c.options.map(([v, l]) => `<option value="${v}">${l}</option>`).join("")}</select>`;
+        row.innerHTML = `<label for="${id}">${labelOf(c)}</label><select id="${id}">${c.options.map(([v, l]) => `<option value="${v}">${l}</option>`).join("")}</select>`;
         const el = row.querySelector("select");
         el.value = p[c.k];
         el.onchange = () => { p[c.k] = el.value; afterChange(); };
       } else {
-        row.innerHTML = `<label for="${id}">${c.label}<output></output></label><input type="range" id="${id}">`;
+        row.innerHTML = `<label for="${id}">${labelOf(c)}<output></output></label><input type="range" id="${id}">`;
         const el = row.querySelector("input"), out = row.querySelector("output");
         setRange(c, el);
-        el.value = p[c.k];
-        out.textContent = show(c, p[c.k]);
-        el.oninput = () => { p[c.k] = +el.value; out.textContent = show(c, +el.value); afterChange(); };
+        syncRange(c, el, p[c.k]);
+        el.oninput = () => { p[c.k] = c.unit ? fromDisplay(units, c.unit, +el.value) : +el.value; out.textContent = show(c, p[c.k]); afterChange(); };
       }
       group.appendChild(row);
     }
@@ -159,19 +161,29 @@ function buildControls() {
   refreshVisibility();
 }
 
+const labelOf = (c) => (c.unit ? c.label.replace("{u}", unitName(units, c.unit)) : c.label);
+
 function setRange(c, el) {
   let { min, max } = c;
   if (c.elev) {
     min = dem ? Math.floor(dem.meta.min) : 0;
     max = dem ? Math.ceil(dem.meta.max) + (c.headroom || 0) : 5000;
   }
-  Object.assign(el, { min, max, step: c.step });
+  Object.assign(el, c.unit ? displayRange(units, c.unit, min, max, c.step) : { min, max, step: c.step });
+}
+
+// v is the stored (metric) value; the slider and its readout are in display units
+function syncRange(c, el, v) {
+  el.value = c.unit ? toDisplay(units, c.unit, v) : v;
+  el.closest(".ctl").querySelector("output").textContent = show(c, v);
 }
 
 function show(c, v) {
-  if (c.elev) return `${fmt(v)} m`;
-  const decimals = (String(c.step).split(".")[1] || "").length;
-  return Number(v).toFixed(decimals);
+  if (c.unit === "m" && c.elev) return fmtLength(units, v);
+  const step = c.unit ? niceStep(units, c.unit, c.step) : c.step;
+  const decimals = (String(step).split(".")[1] || "").length;
+  const n = c.unit ? toDisplay(units, c.unit, v) : Number(v);
+  return c.unit ? n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) : n.toFixed(decimals);
 }
 
 function refreshVisibility() {
@@ -203,6 +215,21 @@ function fitElevationControls() {
 // ------------------------------------------------------------------------------------------- terrain + presets
 
 // pins: {cam, target, halo} as [lat, lon]; each is placed in the new area if it falls inside it.
+function showAreaInfo() {
+  if (!dem) return;
+  const m = dem.meta;
+  $("area-info").textContent = `${fmtDistance(units, m.width_m / 1000)} across · ${fmtLength(units, m.min)}–${fmtLength(units, m.max)} · ${fmtLength(units, m.mpp)} per sample · zoom ${m.zoom}`;
+}
+
+function setUnits(u) {
+  units = u;
+  try { localStorage.setItem("linedream-terrain/units", u); } catch {}
+  for (const b of document.querySelectorAll("[data-units]")) b.setAttribute("aria-pressed", b.dataset.units === u ? "true" : "false");
+  buildControls();
+  showAreaInfo();
+  updatePlannerInfo();
+}
+
 async function loadArea(area, { keepCamera = false, pins = null } = {}) {
   state.area = { ...area };
   setStatus("Loading elevation…", "busy");
@@ -214,7 +241,7 @@ async function loadArea(area, { keepCamera = false, pins = null } = {}) {
     return;
   }
   const m = dem.meta;
-  $("area-info").textContent = `${(m.width_m / 1000).toFixed(1)} km across · ${fmt(m.min)}–${fmt(m.max)} m · ${m.mpp.toFixed(0)} m per sample · zoom ${m.zoom}`;
+  showAreaInfo();
   const c = document.createElement("canvas");
   c.width = c.height = 512;
   c.getContext("2d").putImageData(hillshade(dem.grid, m.size, m.mpp, 512), 0, 0);
@@ -343,7 +370,7 @@ function updatePlannerInfo() {
     const p = state.params.vista;
     const dist = Math.hypot(state.target[0] - state.cam[0], state.target[1] - state.cam[1]) * m.width_m;
     const edge = Math.min(...state.cam, ...state.target.map((x) => x), 1 - Math.max(...state.cam, ...state.target));
-    $("planner-info").textContent = `Eye ${fmt(el(state.cam) + p.eye)} m (ground ${fmt(el(state.cam))} m) · aim ${fmt(el(state.target) + p.target_eye)} m · ${(dist / 1000).toFixed(1)} km away`
+    $("planner-info").textContent = `Eye ${fmtLength(units, el(state.cam) + p.eye)} (ground ${fmtLength(units, el(state.cam))}) · aim ${fmtLength(units, el(state.target) + p.target_eye)} · ${fmtDistance(units, dist / 1000)} away`
       + (edge < 0.04 ? " · at the edge of the loaded area: zoom the map out and “Use this view” to go farther, then “Frame eye + aim”" : "");
   } else {
     $("planner-info").textContent = `Strata draws the whole map; the dot is the centre for radial, spiral and ring paths.`;
@@ -411,7 +438,7 @@ function setParam(k, v) {
   if (!el || !c) return;
   if (c.type === "check") el.checked = !!v;
   else if (c.type === "select") el.value = v;
-  else { el.value = v; el.closest(".ctl").querySelector("output").textContent = show(c, v); }
+  else syncRange(c, el, v);
 }
 
 // Aim at the highest summit in view and pick lens, light and haze for it (see compose.mjs).
@@ -427,7 +454,7 @@ function composeView() {
   drawPlanner();
   syncMapOverlay();
   schedulePreview(0);
-  setStatus(`Composed on the summit at ${fmt(c.peak.z)} m, ${(c.peak.d / 1000).toFixed(1)} km away`, "ok");
+  setStatus(`Composed on the summit at ${fmtLength(units, c.peak.z)}, ${fmtDistance(units, c.peak.d / 1000)} away`, "ok");
 }
 
 function applyNavTransform(animate = true) {
@@ -783,6 +810,8 @@ $("download").onclick = download;
 $("use-view").onclick = useMapView;
 $("frame-view").onclick = () => frameView();
 $("compose").onclick = composeView;
+for (const b of document.querySelectorAll("[data-units]")) b.onclick = () => setUnits(b.dataset.units);
+for (const b of document.querySelectorAll("[data-units]")) b.setAttribute("aria-pressed", b.dataset.units === units ? "true" : "false");
 $("scene-save").onclick = keepScene;
 $("scene-delete").onclick = deleteScene;
 $("scene-download").onclick = downloadScene;
