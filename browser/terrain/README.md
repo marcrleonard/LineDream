@@ -101,4 +101,4 @@ Query parameters: `?pyodide=<url>` loads Pyodide from a local distribution inste
 Measured in headless Chromium (Pyodide 314.0.7) on a 4-core machine: about 15–20 s to start Python the first time
 (about 60 MB, cached by the browser afterwards), previews in 1–6 s, full-quality Vista renders in about 15–20 s.
 Strata is faster (about 1 s previews). See `experiments/browser/README.md` on the `terrain-strata` branch for the
-breakdown, and `experiments/terrain/RUST_PORT.md` for how a Rust/WebAssembly core would make it interactive.
+breakdown, and [`RUST_PORT.md`](RUST_PORT.md) for how a Rust/WebAssembly core would make it interactive.
