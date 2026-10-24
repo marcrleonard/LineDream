@@ -43,27 +43,27 @@ export const MODES = {
         { k: "invert", label: "Hatch the light instead of the dark", type: "check", def: false },
       ]],
       ["Tone", [
-        { k: "tone", label: "Hatching", type: "select", def: "screen", options: [
+        { k: "tone", label: "Hatching", type: "select", def: "flow", options: [
           ["flow", "Strokes that follow the form"], ["screen", "Etching (straight lines)"],
           ["rings", "Distance rings"], ["both", "Etching + rings"], ["none", "None (outlines only)"]] },
-        { k: "flow_dir", label: "Stroke direction: contour ↔ fall line", type: "range", min: 0, max: 90, step: 1, def: 0, show: has("tone", "flow") },
-        { k: "flow_sep", label: "Stroke spacing in shadow (px)", type: "range", min: 1.2, max: 8, step: 0.1, def: 2.6, show: has("tone", "flow") },
-        { k: "flow_sep_max", label: "Stroke spacing in half-light (px)", type: "range", min: 3, max: 30, step: 0.5, def: 14, show: has("tone", "flow") },
+        { k: "flow_dir", label: "Stroke direction: contour ↔ fall line", type: "range", min: 0, max: 90, step: 1, def: 90, show: has("tone", "flow") },
+        { k: "flow_sep", label: "Stroke spacing in shadow (px)", type: "range", min: 1.2, max: 8, step: 0.1, def: 2.4, show: has("tone", "flow") },
+        { k: "flow_sep_max", label: "Stroke spacing in half-light (px)", type: "range", min: 3, max: 30, step: 0.5, def: 10, show: has("tone", "flow") },
         { k: "flow_min_tone", label: "Lightest tone that gets strokes", type: "range", min: 0.02, max: 0.95, step: 0.01, def: 0.3, show: has("tone", "flow") },
         { k: "hatch_angle", label: "Etching angle (°)", type: "range", min: -90, max: 90, step: 1, def: 0, show: has("tone", "screen", "both") },
         { k: "hatch_spacing", label: "Etching spacing (px)", type: "range", min: 1.2, max: 10, step: 0.1, def: 3, show: has("tone", "screen", "both") },
         { k: "rings", label: "Distance rings", type: "range", min: 40, max: 800, step: 10, def: 320, show: has("tone", "rings", "both") },
         { k: "cross", label: "Cross-hatch the darkest (0 = off)", type: "range", min: 0, max: 1, step: 0.01, def: 0, show: has("tone", "flow", "screen", "both") },
         { k: "cross_angle", label: "Cross-hatch angle (°)", type: "range", min: 10, max: 90, step: 1, def: 55, show: (p) => p.cross > 0 && p.tone !== "flow" },
-        { k: "shade_gamma", label: "Tone curve (<1 darkens mid-tones)", type: "range", min: 0.3, max: 2.5, step: 0.05, def: 1 },
+        { k: "shade_gamma", label: "Tone curve (<1 darkens mid-tones)", type: "range", min: 0.3, max: 2.5, step: 0.05, def: 0.8 },
         { k: "shade_floor", label: "Base darkness everywhere", type: "range", min: 0, max: 0.6, step: 0.01, def: 0 },
         { k: "tone_scale", label: "Tone strength", type: "range", min: 0.2, max: 1, step: 0.01, def: 1 },
       ]],
       ["Lines", [
         { k: "silhouettes", label: "Outlines (silhouettes)", type: "check", def: true },
-        { k: "lost_edges", label: "Lose outlines in the light", type: "range", min: 0, max: 0.9, step: 0.01, def: 0, show: has("silhouettes", true) },
-        { k: "overshoot", label: "Outline overshoot (px)", type: "range", min: 0, max: 12, step: 0.5, def: 0, show: has("silhouettes", true) },
-        { k: "wobble", label: "Hand wobble (px)", type: "range", min: 0, max: 4, step: 0.1, def: 0 },
+        { k: "lost_edges", label: "Lose outlines in the light", type: "range", min: 0, max: 0.9, step: 0.01, def: 0.2, show: has("silhouettes", true) },
+        { k: "overshoot", label: "Outline overshoot (px)", type: "range", min: 0, max: 12, step: 0.5, def: 3, show: has("silhouettes", true) },
+        { k: "wobble", label: "Hand wobble (px)", type: "range", min: 0, max: 4, step: 0.1, def: 0.5 },
       ]],
       ["Contours", [
         { k: "topo_every", label: "Labelled contours in the light, every (0 = off)", type: "range", min: 0, max: 1000, step: 10, def: 0 },
@@ -189,6 +189,8 @@ const STROKES = { ...TETON_STYLE, curvature: false };
 
 const SANDIA_CREST = [35.2125, -106.4507], PETROGLYPH_HIGH = [35.14181, -106.77269];
 const MOUNT_HOOKER = [42.8525, -109.3042];
+const MOUNT_WASHINGTON = [44.2703, -71.3040];
+const PEMI = { lat: 44.12, lon: -71.59, zoom: 12, size: 1024 };
 const GRAVE_LAKE = { lat: 42.8565, lon: -109.272, zoom: 14, size: 1024 };
 const GRAVE_LAKE_STYLE = { ...STROKES, _mist_on: true, _mist_elev: 3039, mist_lines: 45, haze: 0.3, _haze_near_km: 1.5, _haze_far_km: 8,
   exaggeration: 1.1, smooth: 0.5, sun_az: 238, sun_alt: 16 };
@@ -206,6 +208,21 @@ export const PRESETS = [
     cam: PETROGLYPH_HIGH, target: SANDIA_CREST,
     params: { ...TETON_STYLE, eye: 20, target_eye: -1100, fov: 17, shift: -0.08, haze: 0.45, _haze_near_km: 8, _haze_far_km: 45, exaggeration: 1.4,
       sun_az: 80, sun_alt: 3.5, sun_disc: 0.08, sun_lines: 12 } },
+  { name: "Pemi Loop from above (mist in the basin)", mode: "vista", area: PEMI, cam: [44.045, -71.585], target: [44.15, -71.59],
+    params: { ...STROKES, eye: 3000, target_eye: 0, fov: 50, shift: 0.06, exaggeration: 1.5, haze: 0.2, _haze_near_km: 8, _haze_far_km: 30,
+      _mist_on: true, _mist_elev: 760, mist_lines: 40, _accent_on: true, _accent_elev: 1180, sun_az: 250, sun_alt: 20 } },
+  { name: "Mount Washington from Kearsarge North (26 km)", mode: "vista", area: { lat: 44.21256, lon: -71.23047, zoom: 11, size: 1024 },
+    cam: [44.10534, -71.0939], target: MOUNT_WASHINGTON,
+    params: { ...TETON_STYLE, eye: 15, target_eye: -500, fov: 22, shift: -0.06, exaggeration: 1.3, haze: 0.45, _haze_near_km: 6, _haze_far_km: 45,
+      sun_az: 245, sun_alt: 12 } },
+  { name: "Mount Washington from the Mount Washington Hotel", mode: "vista", area: { lat: 44.26652, lon: -71.35255, zoom: 12, size: 1024 },
+    cam: [44.2595, -71.4427], target: MOUNT_WASHINGTON,
+    params: { ...TETON_STYLE, eye: 20, target_eye: -500, fov: 36, shift: -0.1, exaggeration: 1.3, haze: 0.45, _haze_near_km: 3, _haze_far_km: 25,
+      sun_az: 160, sun_alt: 22 } },
+  { name: "Northern Presidentials from Jefferson", mode: "vista", area: { lat: 44.32084, lon: -71.36266, zoom: 11, size: 1024 },
+    cam: [44.4147, -71.4716], target: MOUNT_WASHINGTON,
+    params: { ...TETON_STYLE, eye: 10, target_eye: -150, fov: 26, shift: 0.04, exaggeration: 1.3, haze: 0.45, _haze_near_km: 4, _haze_far_km: 35,
+      sun_az: 215, sun_alt: 16 } },
   { name: "Grave Lake & Mount Hooker from the knob", mode: "vista", area: GRAVE_LAKE, cam: [42.8737, -109.23509], target: MOUNT_HOOKER,
     params: { ...GRAVE_LAKE_STYLE, eye: 3, target_eye: -900, fov: 48, shift: 0 } },
   { name: "Grave Lake & Mount Hooker from the high ridge", mode: "vista", area: GRAVE_LAKE, cam: [42.88357, -109.2447], target: MOUNT_HOOKER,
@@ -272,7 +289,14 @@ export const PRESETS = [
     params: { paths: "flow", count: 9000, flow_sep: 0.0045, flow_len: 600, pitch: 90, blur: 1.2, mask: "slope", mask_threshold: 0.12, stroke_width: 0.8 } },
   { name: "Ridgelines · Cirque of the Towers", mode: "strata", area: CIRQUE,
     params: { paths: "scan", count: 130, pitch: 26, relief: 0.12, clip: "circle", yaw: 200, _palette: "paper" } },
+  { name: "Pemi Loop · stacked contours", mode: "strata", area: { ...PEMI, lat: 44.145, size: 768 }, center: [44.148, -71.59],
+    params: { paths: "contour", count: 40, pitch: 34, relief: 0.2, blur: 1.5, clip: "circle", _palette: "paper" } },
 ];
+
+// Vista's defaults used to be a plain etching; they are now the fall-line strokes. Presets written against the old
+// defaults keep them, so they draw as they always did.
+const VISTA_LEGACY = { tone: "screen", flow_dir: 0, flow_sep: 2.6, flow_sep_max: 14, shade_gamma: 1, lost_edges: 0, overshoot: 0, wobble: 0 };
+for (const p of PRESETS) if (p.mode === "vista") p.params = { ...VISTA_LEGACY, ...p.params };
 
 export function defaults(mode) {
   const p = {};

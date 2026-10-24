@@ -170,3 +170,10 @@ test("file names come from the scene name", () => {
   assert.equal(sceneFilename(""), "terrain-scene.json");
   assert.equal(sceneFilename("🏔️"), "terrain-scene.json");
 });
+
+test("new places get the fall-line strokes; presets written for the old etching default keep it", () => {
+  assert.equal(defaults("vista").tone, "flow");
+  const etching = PRESETS.find((p) => p.name === "Etching · Yosemite Tunnel View");
+  assert.equal(parseScene(etching).params.tone, "screen");
+  assert.equal(parseScene(TETONS).params.tone, "flow");
+});

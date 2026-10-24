@@ -43,6 +43,15 @@ reload just the ground you can see at the finest zoom that fits. At zoom 11 (abo
 away still renders crisply. Haze is set in kilometres, so it means the same thing whatever area is loaded; **Earth
 curvature** sinks distant ground (about 75 m at 33 km) and matters past roughly 20 km. See the two Grand Teton presets.
 
+## Compose
+
+Put the eye somewhere and point roughly at what you want, then press **Compose**. It finds the highest summit the eye
+can actually see within 30° of that direction and aims at it, then sets what the presets were tuned by hand to have:
+a lens that fits about 10 km of mountain across the frame (so a range 30 km away gets ~19°, not the 55° default), the
+summit a third of the way down the frame, a low sun from the front-left, and haze and Earth curvature for that
+distance. The usual reason a new place looks flat is the light: with the sun behind you or behind the mountain every
+face is lit alike. New scenes also start with the fall-line strokes rather than a plain etching.
+
 ## Walking around
 
 In Vista, the pad in the corner of the drawing (or the keyboard) moves the camera like a game: **W A S D** or **↑ ↓**
@@ -64,7 +73,7 @@ to the console. Older links (from before the scene format) still open.
 ## Tests
 
 ```bash
-cd browser && npm run test:terrain      # node --test: scene format, presets, saved files, links
+cd browser && npm run test:terrain      # node --test: scene format, presets, saved files, links, Compose
 ```
 
 ## Running locally

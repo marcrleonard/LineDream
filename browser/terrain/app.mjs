@@ -7,6 +7,7 @@
 // The whole scene (place, camera, mode, every parameter) lives in the URL hash, so a link reproduces a drawing.
 import { MODES, PALETTES, PRESETS, defaults } from "./schema.mjs";
 import { fetchDEM, hillshade, metersPerPixel, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
+import { compose } from "./compose.mjs";
 import { decodeHash, encodeHash, parseScene, sceneFilename, sceneFromState } from "./scene.mjs";
 
 const PYODIDE_VERSION = "314.0.7";
@@ -388,7 +389,26 @@ const NAV_KEYS = {
 function setParam(k, v) {
   state.params.vista[k] = v;
   const el = $(`c-vista-${k}`), c = MODES.vista.groups.flatMap(([, items]) => items).find((c) => c.k === k);
-  if (el && c) { el.value = v; el.closest(".ctl").querySelector("output").textContent = show(c, v); }
+  if (!el || !c) return;
+  if (c.type === "check") el.checked = !!v;
+  else if (c.type === "select") el.value = v;
+  else { el.value = v; el.closest(".ctl").querySelector("output").textContent = show(c, v); }
+}
+
+// Aim at the highest summit in view and pick lens, light and haze for it (see compose.mjs).
+function composeView() {
+  if (state.mode !== "vista" || !dem) return;
+  const c = compose({ grid: dem.grid, size: dem.meta.size, width_m: dem.meta.width_m }, state, state.params.vista);
+  if (!c) { setStatus("Nothing stands out from here: move the eye or aim somewhere else", "err"); return; }
+  state.target = c.target;
+  for (const [k, v] of Object.entries(c.params)) setParam(k, v);
+  state.preset = "";
+  $("preset").value = "";
+  refreshVisibility();
+  drawPlanner();
+  syncMapOverlay();
+  schedulePreview(0);
+  setStatus(`Composed on the summit at ${fmt(c.peak.z)} m, ${(c.peak.d / 1000).toFixed(1)} km away`, "ok");
 }
 
 function applyNavTransform(animate = true) {
@@ -655,7 +675,7 @@ async function copyLink() {
 function syncModeButtons() {
   for (const b of document.querySelectorAll("[data-mode]")) b.setAttribute("aria-pressed", b.dataset.mode === state.mode ? "true" : "false");
   $("vista-tools").hidden = state.mode !== "vista";
-  $("frame-row").hidden = state.mode !== "vista";
+  $("frame-row").hidden = $("compose-row").hidden = state.mode !== "vista";
   $("nav").hidden = state.mode !== "vista";
   $("sheet").classList.toggle("square", state.mode === "strata");
 }
@@ -686,6 +706,7 @@ $("auto").onchange = () => { if ($("auto").checked) schedulePreview(0); };
 $("download").onclick = download;
 $("use-view").onclick = useMapView;
 $("frame-view").onclick = () => frameView();
+$("compose").onclick = composeView;
 $("scene-save").onclick = saveScene;
 $("scene-open").onclick = () => $("scene-file").click();
 $("scene-file").onchange = (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) openScene(f); };
