@@ -177,3 +177,16 @@ test("new places get the fall-line strokes; presets written for the old etching 
   assert.equal(parseScene(etching).params.tone, "screen");
   assert.equal(parseScene(TETONS).params.tone, "flow");
 });
+
+test("breakup: tails for new scenes, off for presets written before it, named styles set the strengths", async () => {
+  const { BREAKUP_STYLES, breakupParams } = await import("../schema.mjs");
+  assert.equal(defaults("vista")._breakup, "tails");
+  assert.equal(parseScene(PRESETS.find((p) => p.name === "Etching · Yosemite Tunnel View")).params._breakup, "off");
+  assert.equal(parseScene(TETONS).params._breakup, "off");
+  assert.equal(parseScene(PRESETS.find((p) => p.name === "Grand Tetons · dissolving light")).params._breakup, "artist");
+  assert.deepEqual(breakupParams({ _breakup: "off" }), { break_light: 0, break_dry: 0, break_tails: 0, break_far: 0 });
+  assert.equal(breakupParams({ _breakup: "tails" }).break_tails, 1);
+  assert.deepEqual(breakupParams({ _breakup: "artist" }), { break_light: 0.8, break_dry: 0.4, break_tails: 0.6, break_far: 0 });
+  assert.deepEqual(breakupParams({ _breakup: "custom", break_light: 0.3 }), {});   // sliders as they are
+  for (const style of Object.keys(BREAKUP_STYLES)) assert.ok(MODES.vista.groups.flatMap(([, i]) => i).find((c) => c.k === "_breakup").options.some(([v]) => v === style));
+});

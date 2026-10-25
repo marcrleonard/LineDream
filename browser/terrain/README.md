@@ -43,6 +43,15 @@ reload just the ground you can see at the finest zoom that fits. At zoom 11 (abo
 away still renders crisply. Haze is set in kilometres, so it means the same thing whatever area is loaded; **Earth
 curvature** sinks distant ground (about 75 m at 33 km) and matters past roughly 20 km. See the two Grand Teton presets.
 
+## Breakup
+
+Vista can break its strokes into dashes that shrink to dots, so a single pen can suggest light and texture without
+going grey (**Breakup**, under the controls). **Tails** (the default for new scenes) lets each stroke trail off into a
+few dots at its ends; **Artist** dissolves strokes into the light: solid in shadow, stippled on the lit faces, with a
+little dry-brush skipping. **Custom** exposes the four strengths (light, dry brush, tails, distance). Outlines are never
+broken. Every dash is a pen lift, so heavy breakup plots slower; **Dash length** trades texture for plot time. Presets
+made before breakup existed keep it off.
+
 ## Compose
 
 Put the eye somewhere and point roughly at what you want, then press **Compose**. It finds the highest summit the eye

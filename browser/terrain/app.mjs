@@ -5,7 +5,7 @@
 //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN)
 //   ?wheel=<url>    a LineDream wheel to install (the website build sets data-wheel on <html>; otherwise PyPI)
 // The whole scene (place, camera, mode, every parameter) lives in the URL hash, so a link reproduces a drawing.
-import { MODES, PALETTES, PRESETS, defaults } from "./schema.mjs";
+import { MODES, PALETTES, PRESETS, breakupParams, defaults } from "./schema.mjs";
 import { fetchDEM, hillshade, metersPerPixel, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
 import { compose } from "./compose.mjs";
 import { deleteMyScene, listMyScenes, saveMyScene } from "./myscenes.mjs";
@@ -105,6 +105,7 @@ function buildParams() {
     Object.assign(p, { paper: pal.paper, ink: pal.ink, accent: pal.accent, cam: state.cam, target: state.target });
     p.contours = p._accent_on ? [[p._accent_elev, "accent"]] : [];
     p.mist = p._mist_on ? p._mist_elev : null;
+    Object.assign(p, breakupParams(p));
     p.haze_km = [p._haze_near_km, Math.max(p._haze_far_km, p._haze_near_km + 0.1)];
     p.halo = p._halo_on ? [state.halo[0], state.halo[1], p._halo_elev, p._halo_radius] : null;
     p.sun_pos = p.sun_disc > 0 && p._sun_free ? [p._sun_x, p._sun_y] : null;
@@ -127,7 +128,7 @@ function buildControls() {
   const p = state.params[state.mode];
   for (const [title, items] of MODES[state.mode].groups) {
     const group = document.createElement("details");
-    group.open = ["Camera", "Light", "Tone", "Contours", "Paths", "Displace"].includes(title);
+    group.open = ["Camera", "Light", "Tone", "Breakup", "Contours", "Paths", "Displace"].includes(title);
     group.innerHTML = `<summary>${title}</summary>`;
     for (const c of items) {
       const row = document.createElement("div");
