@@ -7,8 +7,11 @@ A web page that turns real elevation data into line art, separate from the playg
    Terrarium tiles.
 2. **Camera:** drag the eye and aim handles on the top-down map; the cone shows the field of view and the compass
    shows the sun.
-3. **Render:** every change re-renders (turn off **Live** to render on demand); switch **Preview | Full** to **Full** for the final drawing; **Download SVG**
-   keeps the plotter layers (one pen per layer).
+3. **Compose and walk:** **Compose** frames the highest summit in view; the pad over the drawing (or WASD) moves the
+   camera. See below.
+4. **Render:** every change re-renders (turn off **Live** to render on demand); switch **Preview | Full** to **Full**
+   for the final drawing; **Download SVG** keeps the plotter layers (one pen per layer).
+5. **Keep it:** save to **My scenes**, download the scene as `.json`, or copy the link.
 
 Two renderers, both the Python terrain experiments running unchanged in Pyodide:
 
@@ -29,6 +32,11 @@ what runs in the browser. `py/terrain_app.py` is the small API the worker calls.
 | `app.mjs` | UI: map, camera planner, controls, render queue, URL-hash state |
 | `schema.mjs` | every control (defaults match `vista.Scene` / `strata.Params`) and the presets |
 | `tiles.mjs` | fetches and decodes elevation tiles; hillshade for the planner |
+| `scene.mjs` | the scene format shared by presets, saved files and the URL hash; checks what comes in |
+| `compose.mjs` | the Compose button: finds the summit, picks lens, light and haze |
+| `myscenes.mjs` | My scenes in localStorage |
+| `units.mjs` | feet/miles or metres/kilometres for the controls and readouts |
+| `test/` | `node --test` unit tests for the three modules above (no browser, no dependencies) |
 | `worker.mjs` | Pyodide in a worker: loads numpy/scipy/scikit-image + the LineDream wheel, runs renders |
 | `py/` | the renderers |
 
@@ -51,6 +59,13 @@ few dots at its ends; **Artist** dissolves strokes into the light: solid in shad
 little dry-brush skipping. **Custom** exposes the four strengths (light, dry brush, tails, distance). Outlines are never
 broken. Every dash is a pen lift, so heavy breakup plots slower; **Dash length** trades texture for plot time. Presets
 made before breakup existed keep it off.
+
+## Units
+
+The **ft · mi | m · km** switch in the header picks how heights and distances are shown (feet and miles by
+default; remembered per browser). It only changes the display: scenes, links, presets and the renderers stay in metres,
+so a link made in feet opens the same in metres. The contour labels drawn on the picture have their own setting
+(**Contour units**, under Contours).
 
 ## Compose
 
@@ -85,7 +100,7 @@ to the console. Older links (from before the scene format) still open.
 ## Tests
 
 ```bash
-cd browser && npm run test:terrain      # node --test: scene format, presets, files, links, My scenes, Compose
+cd browser && npm run test:terrain      # node --test: scene format, presets, files, links, My scenes, Compose, units
 ```
 
 ## Running locally
@@ -103,4 +118,4 @@ Query parameters: `?pyodide=<url>` loads Pyodide from a local distribution inste
 Measured in headless Chromium (Pyodide 314.0.7) on a 4-core machine: about 15–20 s to start Python the first time
 (about 60 MB, cached by the browser afterwards), previews in 1–6 s, full-quality Vista renders in about 15–20 s.
 Strata is faster (about 1 s previews). See `experiments/browser/README.md` on the `terrain-strata` branch for the
-breakdown, and `experiments/terrain/RUST_PORT.md` for how a Rust/WebAssembly core would make it interactive.
+breakdown, and [`RUST_PORT.md`](RUST_PORT.md) for how a Rust/WebAssembly core would make it interactive.
