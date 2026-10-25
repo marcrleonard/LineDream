@@ -22,6 +22,7 @@
 <p align="center">
   <a href="https://linedream.marcrleonard.com">Website</a> ·
   <a href="https://linedream.marcrleonard.com/playground/">Playground</a> ·
+  <a href="https://linedream.marcrleonard.com/terrain/">Terrain</a> ·
   <a href="https://linedream.marcrleonard.com/documentation/">Documentation</a> ·
   <a href="https://pypi.org/project/LineDream/">PyPI</a>
 </p>
@@ -36,6 +37,11 @@ plotter. There is no draw loop; a sketch renders a single frame, and a plain Pyt
 
 The **[playground](https://linedream.marcrleonard.com/playground/)** runs LineDream entirely client-side with
 [Pyodide](https://pyodide.org): edit a sketch, hit run, download the SVG. Nothing to install.
+
+**[Terrain](https://linedream.marcrleonard.com/terrain/)** turns real elevation data into line art, also in the
+browser: pick a place on a topo map, stand somewhere, and draw the view as fall-line strokes, etching, labelled
+contours or top-down curve families, ready for a pen plotter. Presets range from the Grand Tetons to the Pemi Loop;
+scenes save to the browser, to a `.json` file or to a link. See [`browser/terrain/README.md`](browser/terrain/README.md).
 
 ## Install
 
@@ -151,7 +157,8 @@ uv run coverage run -m pytest && uv run coverage html
 ```
 
 CI ([`tests.yml`](.github/workflows/tests.yml)) runs on every pull request: the suite on Python 3.9 to 3.14 on Linux
-plus macOS and Windows, a smoke test of the built wheel, and the suite again under Pyodide in Node.
+plus macOS and Windows, a smoke test of the built wheel, the suite again under Pyodide in Node, and the terrain app's
+unit tests.
 
 ### Pyodide and the playground
 
@@ -161,13 +168,15 @@ used by `open_viewer=True`) are skipped on emscripten.
 ```bash
 uv build --wheel
 cd browser && npm install && npm test      # LINEDREAM_TERRAIN=1 also loads scipy and scikit-image
+cd browser && npm run test:terrain         # terrain app unit tests (plain Node, no Pyodide)
 
 # Local playground: serve the repo root, then open
 # http://localhost:8000/browser/?wheel=../dist/linedream-<version>-py3-none-any.whl
 python -m http.server
 ```
 
-The website build copies the playground to `/playground/` along with a wheel built from the same checkout.
+The website build copies the playground to `/playground/` along with a wheel built from the same checkout, and the
+terrain app to `/terrain/`.
 
 ### Docs site
 
