@@ -77,6 +77,7 @@ class Scene:
 	wobble: float = 0.0          # hand tremor amplitude (px), seeded per stroke
 	# BREAKUP: strokes broken into dashes, shrinking to dots, where these say so (0 = off, 1 = strong). Each point of a
 	# stroke gets a gap amount from all four; the stroke is then cut into jittered dashes with a random phase.
+	# Silhouettes are never broken (use lost_edges to soften them).
 	break_light: float = 0.0     # dissolve into the light: solid in shadow, dashes then dots as the surface brightens
 	break_far: float = 0.0       # distance: far strokes break up (uses the haze range, even with haze off)
 	break_dry: float = 0.0       # dry brush: smooth random stretches along a stroke where the pen skips
@@ -779,7 +780,7 @@ class Vista:
 				xy = self._handmade(xy, role)
 			accent = role in ("sun", "accent")
 			breakup = None
-			if self._breaking() and role in ("hatch", "sil", "contour", "mist"):
+			if self._breaking() and role in ("hatch", "contour", "mist"):  # outlines stay whole: dotted ridgelines read as a diagram
 				breakup = self._gaps(S, xy)
 			if s.plotter:
 				col, width = (s.accent if accent else topo_ink if role in ("topo", "label") else s.ink), s.stroke_width
