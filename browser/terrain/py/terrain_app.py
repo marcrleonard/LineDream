@@ -27,7 +27,7 @@ VISTA_QUALITY = {
 	"preview": dict(size=512, gres=450, canvas=(800, 500)),
 	"full": dict(size=1024, gres=900, canvas=(1600, 1000)),
 }
-VISTA_PX = ("flow_sep", "flow_sep_max", "hatch_spacing", "topo_label_size", "overshoot", "wobble", "stroke_width")
+VISTA_PX = ("flow_sep", "flow_sep_max", "hatch_spacing", "topo_label_size", "overshoot", "wobble", "stroke_width", "break_len")
 STRATA_QUALITY = {
 	"preview": dict(size=300, canvas=(800, 800)),
 	"full": dict(size=400, canvas=(1600, 1600)),  # 400 = strata.Params default, so presets match the original renders

@@ -66,6 +66,16 @@ export const MODES = {
         { k: "overshoot", label: "Outline overshoot (px)", type: "range", min: 0, max: 12, step: 0.5, def: 3, show: has("silhouettes", true) },
         { k: "wobble", label: "Hand wobble (px)", type: "range", min: 0, max: 4, step: 0.1, def: 0.5 },
       ]],
+      ["Breakup", [
+        { k: "_breakup", label: "Break strokes into dashes", type: "select", def: "tails", options: [
+          ["off", "Off: whole strokes"], ["tails", "Tails: ends trail off into dots"], ["artist", "Artist: dissolve into the light"],
+          ["custom", "Custom"]] },
+        { k: "break_light", label: "Dissolve into the light", type: "range", min: 0, max: 1, step: 0.05, def: 0, show: has("_breakup", "custom") },
+        { k: "break_dry", label: "Dry brush (random skips)", type: "range", min: 0, max: 1, step: 0.05, def: 0, show: has("_breakup", "custom") },
+        { k: "break_tails", label: "Tails (ends trail off)", type: "range", min: 0, max: 1, step: 0.05, def: 0, show: has("_breakup", "custom") },
+        { k: "break_far", label: "Distance (far strokes break up)", type: "range", min: 0, max: 1, step: 0.05, def: 0, show: has("_breakup", "custom") },
+        { k: "break_len", label: "Dash length (px)", type: "range", min: 3, max: 30, step: 0.5, def: 9, show: (p) => p._breakup !== "off" },
+      ]],
       ["Contours", [
         { k: "topo_every", label: "Labelled contours in the light, every (0 = off)", type: "range", min: 0, max: 1000, step: 10, def: 0 },
         { k: "topo_units", label: "Contour units", type: "select", def: "m", options: [["m", "metres"], ["ft", "feet"]], show: (p) => p.topo_every > 0 },
@@ -202,6 +212,10 @@ export const PRESETS = [
   { name: "Grand Tetons from Mount Leidy (33 km)", mode: "vista", area: { lat: 43.73316, lon: -110.60424, zoom: 11, size: 1024 },
     cam: [43.72521, -110.40607], target: GRAND_TETON,
     params: { ...TETON_STYLE, eye: 5, target_eye: 0, fov: 22, shift: -0.08, sun_az: 240, sun_alt: 22, haze: 0.5, _haze_near_km: 10, _haze_far_km: 60 } },
+  { name: "Grand Tetons · dissolving light", mode: "vista", area: { lat: 43.73316, lon: -110.60424, zoom: 11, size: 1024 },
+    cam: [43.72521, -110.40607], target: GRAND_TETON,
+    params: { ...TETON_STYLE, eye: 5, target_eye: 0, fov: 22, shift: -0.08, sun_az: 240, sun_alt: 22, haze: 0.5, _haze_near_km: 10, _haze_far_km: 60,
+      _breakup: "artist" } },
   { name: "Grand Tetons from Snake River Overlook", mode: "vista", area: { lat: 43.69925, lon: -110.7087, zoom: 12, size: 1024 },
     cam: [43.6574, -110.615], target: GRAND_TETON,
     params: { ...TETON_STYLE, eye: 5, target_eye: 0, fov: 26, shift: -0.1, sun_az: 250, sun_alt: 18, haze: 0.45, _haze_near_km: 4, _haze_far_km: 35 } },
@@ -212,6 +226,9 @@ export const PRESETS = [
   { name: "Pemi Loop from above", mode: "vista", area: PEMI, cam: [44.045575, -71.561607], target: [44.145138, -71.60833],
     params: { ...STROKES, eye: 3000, target_eye: -371, fov: 50, shift: 0.06, exaggeration: 1.5, haze: 0, _haze_near_km: 8, _haze_far_km: 30,
       _accent_on: true, _accent_elev: 1144, sun_az: 250, sun_alt: 20 } },
+  { name: "Pemi Loop from above · tails", mode: "vista", area: PEMI, cam: [44.045575, -71.561607], target: [44.145138, -71.60833],
+    params: { ...STROKES, eye: 3000, target_eye: -371, fov: 50, shift: 0.06, exaggeration: 1.5, haze: 0, _haze_near_km: 8, _haze_far_km: 30,
+      _accent_on: true, _accent_elev: 1144, sun_az: 250, sun_alt: 20, _breakup: "tails" } },
   { name: "Mount Washington from Kearsarge North (26 km)", mode: "vista", area: { lat: 44.21256, lon: -71.23047, zoom: 11, size: 1024 },
     cam: [44.10534, -71.0939], target: MOUNT_WASHINGTON,
     params: { ...TETON_STYLE, eye: 15, target_eye: -500, fov: 22, shift: -0.06, exaggeration: 1.3, haze: 0.45, _haze_near_km: 6, _haze_far_km: 45,
@@ -296,8 +313,22 @@ export const PRESETS = [
 
 // Vista's defaults used to be a plain etching; they are now the fall-line strokes. Presets written against the old
 // defaults keep them, so they draw as they always did.
-const VISTA_LEGACY = { tone: "screen", flow_dir: 0, flow_sep: 2.6, flow_sep_max: 14, shade_gamma: 1, lost_edges: 0, overshoot: 0, wobble: 0 };
+const VISTA_LEGACY = { tone: "screen", flow_dir: 0, flow_sep: 2.6, flow_sep_max: 14, shade_gamma: 1, lost_edges: 0, overshoot: 0, wobble: 0,
+  _breakup: "off" };
 for (const p of PRESETS) if (p.mode === "vista") p.params = { ...VISTA_LEGACY, ...p.params };
+
+// Breakup styles: the named choices set the four strengths; "custom" uses the sliders as they are. Outlines are never
+// broken (py/vista.py). Tails is the default for new scenes; presets made before breakup existed keep it off.
+export const BREAKUP_STYLES = {
+  off: {},
+  tails: { break_tails: 1 },
+  artist: { break_light: 0.8, break_dry: 0.4, break_tails: 0.6 },
+};
+
+export function breakupParams(p) {
+  if (p._breakup === "custom") return {};
+  return { break_light: 0, break_dry: 0, break_tails: 0, break_far: 0, ...(BREAKUP_STYLES[p._breakup] || {}) };
+}
 
 export function defaults(mode) {
   const p = {};

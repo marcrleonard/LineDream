@@ -35,6 +35,7 @@ what runs in the browser. `py/terrain_app.py` is the small API the worker calls.
 | `scene.mjs` | the scene format shared by presets, saved files and the URL hash; checks what comes in |
 | `compose.mjs` | the Compose button: finds the summit, picks lens, light and haze |
 | `myscenes.mjs` | My scenes in localStorage |
+| `units.mjs` | feet/miles or metres/kilometres for the controls and readouts |
 | `test/` | `node --test` unit tests for the three modules above (no browser, no dependencies) |
 | `worker.mjs` | Pyodide in a worker: loads numpy/scipy/scikit-image + the LineDream wheel, runs renders |
 | `py/` | the renderers |
@@ -49,6 +50,15 @@ see (plus a little beyond it) have to be inside it. To look at a range from 30+ 
 reload just the ground you can see at the finest zoom that fits. At zoom 11 (about 55 m per sample) a range 30 km
 away still renders crisply. Haze is set in kilometres, so it means the same thing whatever area is loaded; **Earth
 curvature** sinks distant ground (about 75 m at 33 km) and matters past roughly 20 km. See the two Grand Teton presets.
+
+## Breakup
+
+Vista can break its strokes into dashes that shrink to dots, so a single pen can suggest light and texture without
+going grey (**Breakup**, under the controls). **Tails** (the default for new scenes) lets each stroke trail off into a
+few dots at its ends; **Artist** dissolves strokes into the light: solid in shadow, stippled on the lit faces, with a
+little dry-brush skipping. **Custom** exposes the four strengths (light, dry brush, tails, distance). Outlines are never
+broken. Every dash is a pen lift, so heavy breakup plots slower; **Dash length** trades texture for plot time. Presets
+made before breakup existed keep it off.
 
 ## Units
 
