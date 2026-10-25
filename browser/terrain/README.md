@@ -50,6 +50,13 @@ reload just the ground you can see at the finest zoom that fits. At zoom 11 (abo
 away still renders crisply. Haze is set in kilometres, so it means the same thing whatever area is loaded; **Earth
 curvature** sinks distant ground (about 75 m at 33 km) and matters past roughly 20 km. See the two Grand Teton presets.
 
+## Units
+
+The **ft · mi | m · km** switch in the header picks how heights and distances are shown (feet and miles by
+default; remembered per browser). It only changes the display: scenes, links, presets and the renderers stay in metres,
+so a link made in feet opens the same in metres. The contour labels drawn on the picture have their own setting
+(**Contour units**, under Contours).
+
 ## Compose
 
 Put the eye somewhere and point roughly at what you want, then press **Compose**. It finds the highest summit the eye
@@ -83,7 +90,7 @@ to the console. Older links (from before the scene format) still open.
 ## Tests
 
 ```bash
-cd browser && npm run test:terrain      # node --test: scene format, presets, files, links, My scenes, Compose
+cd browser && npm run test:terrain      # node --test: scene format, presets, files, links, My scenes, Compose, units
 ```
 
 ## Running locally

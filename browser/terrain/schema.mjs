@@ -3,7 +3,8 @@
 // A control is {k, label, type, ...}: type "range" (min, max, step), "select" (options), or "check". `def` matches the
 // Python default (vista.Scene / strata.Params). Keys starting with "_" are UI-only and are turned into real
 // parameters by app.mjs (contours, mist, halo, window, palette...). `show(p)` hides controls that don't apply.
-// `elev: true` ranges are in metres and get their min/max from the loaded terrain.
+// `elev: true` ranges are in metres and get their min/max from the loaded terrain. `unit: "m" | "km"` controls store
+// metres / kilometres and are shown in the chosen display units (units.mjs); "{u}" in the label is that unit's name.
 
 const has = (k, ...vals) => (p) => vals.includes(p[k]);
 
@@ -28,8 +29,8 @@ export const MODES = {
     blurb: "Perspective: stand somewhere and look. Tone hatching, outlines, labelled contours, haze, mist.",
     groups: [
       ["Camera", [
-        { k: "eye", label: "Eye height above ground (m)", type: "range", min: 0, max: 3000, step: 5, def: 30 },
-        { k: "target_eye", label: "Aim height above ground (m)", type: "range", min: -3000, max: 3000, step: 10, def: 0 },
+        { k: "eye", label: "Eye height above ground ({u})", unit: "m", type: "range", min: 0, max: 3000, step: 5, def: 30 },
+        { k: "target_eye", label: "Aim height above ground ({u})", unit: "m", type: "range", min: -3000, max: 3000, step: 10, def: 0 },
         { k: "fov", label: "Field of view (°)", type: "range", min: 8, max: 110, step: 1, def: 55 },
         { k: "shift", label: "Lens shift (+ moves the scene up)", type: "range", min: -0.6, max: 0.6, step: 0.01, def: 0 },
         { k: "exaggeration", label: "Vertical exaggeration", type: "range", min: 0.5, max: 3, step: 0.05, def: 1.3 },
@@ -71,16 +72,16 @@ export const MODES = {
         { k: "topo_label_every", label: "Label every Nth contour (0 = no labels)", type: "range", min: 0, max: 10, step: 1, def: 5, show: (p) => p.topo_every > 0 },
         { k: "topo_label_size", label: "Label size (px)", type: "range", min: 4, max: 20, step: 0.5, def: 7, show: (p) => p.topo_every > 0 && p.topo_label_every > 0 },
         { k: "topo_gap", label: "Blank margin next to the strokes", type: "range", min: 0, max: 0.4, step: 0.01, def: 0.08, show: (p) => p.topo_every > 0 },
-        { k: "contour_every", label: "Plain contours everywhere, every m (0 = off)", type: "range", min: 0, max: 1000, step: 10, def: 0 },
+        { k: "contour_every", label: "Plain contours everywhere, every N {u} (0 = off)", unit: "m", type: "range", min: 0, max: 1000, step: 10, def: 0 },
         { k: "_accent_on", label: "One accent contour", type: "check", def: false },
-        { k: "_accent_elev", label: "Accent contour elevation (m)", type: "range", elev: true, step: 10, def: 0, show: has("_accent_on", true) },
+        { k: "_accent_elev", label: "Accent contour elevation ({u})", unit: "m", type: "range", elev: true, step: 10, def: 0, show: has("_accent_on", true) },
       ]],
       ["Atmosphere", [
         { k: "haze", label: "Haze", type: "range", min: 0, max: 1, step: 0.01, def: 0.6 },
-        { k: "_haze_near_km", label: "Haze starts (km)", type: "range", min: 0, max: 100, step: 0.5, def: 3, show: (p) => p.haze > 0 },
-        { k: "_haze_far_km", label: "Haze full (km)", type: "range", min: 0.5, max: 150, step: 0.5, def: 30, show: (p) => p.haze > 0 },
+        { k: "_haze_near_km", label: "Haze starts ({u})", unit: "km", type: "range", min: 0, max: 100, step: 0.5, def: 3, show: (p) => p.haze > 0 },
+        { k: "_haze_far_km", label: "Haze full ({u})", unit: "km", type: "range", min: 0.5, max: 150, step: 0.5, def: 30, show: (p) => p.haze > 0 },
         { k: "_mist_on", label: "Mist / water level", type: "check", def: false },
-        { k: "_mist_elev", label: "Mist level (m)", type: "range", elev: true, step: 1, def: 0, show: has("_mist_on", true) },
+        { k: "_mist_elev", label: "Mist level ({u})", unit: "m", type: "range", elev: true, step: 1, def: 0, show: has("_mist_on", true) },
         { k: "mist_lines", label: "Lines on the mist", type: "range", min: 0, max: 100, step: 1, def: 0, show: has("_mist_on", true) },
       ]],
       ["Sky & accents", [
@@ -91,8 +92,8 @@ export const MODES = {
         { k: "_sun_y", label: "Disc y", type: "range", min: -0.6, max: 0.6, step: 0.01, def: 0.2, show: (p) => p.sun_disc > 0 && p._sun_free },
         { k: "sky_lines", label: "Sky streaks", type: "range", min: 0, max: 20, step: 1, def: 0 },
         { k: "_halo_on", label: "Floating ring (drag it on the map)", type: "check", def: false },
-        { k: "_halo_elev", label: "Ring centre elevation (m)", type: "range", elev: true, step: 10, def: 0, show: has("_halo_on", true), headroom: 1500 },
-        { k: "_halo_radius", label: "Ring radius (m)", type: "range", min: 20, max: 3000, step: 10, def: 300, show: has("_halo_on", true) },
+        { k: "_halo_elev", label: "Ring centre elevation ({u})", unit: "m", type: "range", elev: true, step: 10, def: 0, show: has("_halo_on", true), headroom: 1500 },
+        { k: "_halo_radius", label: "Ring radius ({u})", unit: "m", type: "range", min: 20, max: 3000, step: 10, def: 300, show: has("_halo_on", true) },
         { k: "_window", label: "Tone only inside", type: "select", def: "none", options: [["none", "everywhere"], ["circle", "a circle"], ["rect", "a rectangle"]] },
         { k: "_window_x", label: "Window x", type: "range", min: -1, max: 1, step: 0.01, def: 0, show: (p) => p._window !== "none" },
         { k: "_window_y", label: "Window y", type: "range", min: -0.6, max: 0.6, step: 0.01, def: 0.05, show: (p) => p._window !== "none" },
