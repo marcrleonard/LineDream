@@ -75,6 +75,13 @@ class Scene:
 	lost_edges: float = 0.0      # drop silhouette where the rock is lit (darkness below this): lost & found edges
 	overshoot: float = 0.0       # extend silhouette ends by this many px, like a quick pen stroke
 	wobble: float = 0.0          # hand tremor amplitude (px), seeded per stroke
+	# BREAKUP: strokes broken into dashes, shrinking to dots, where these say so (0 = off, 1 = strong). Each point of a
+	# stroke gets a gap amount from all four; the stroke is then cut into jittered dashes with a random phase.
+	break_light: float = 0.0     # dissolve into the light: solid in shadow, dashes then dots as the surface brightens
+	break_far: float = 0.0       # distance: far strokes break up (uses the haze range, even with haze off)
+	break_dry: float = 0.0       # dry brush: smooth random stretches along a stroke where the pen skips
+	break_tails: float = 0.0     # stroke ends trail off into dots
+	break_len: float = 9.0       # dash length (px) where a stroke just starts to break
 	sil_min: int = 10
 	contours: tuple = ()         # ((elevation_m, "ink" | "accent"), ...)
 	contour_every: float = 0.0   # regular contours, meters (0 = off) ...
@@ -262,6 +269,14 @@ class Vista:
 		f = np.clip((d - near) / (far - near), 0, 1)
 		return self.s.haze * f * f * (3 - 2 * f)
 
+	def far_frac(self, P):
+		'''0 at the near end of the haze range, 1 at the far end, whatever the haze strength.'''
+		d = np.linalg.norm(P[:, :2] - self.C[:2], axis=1)
+		near, far = self.s.haze_near, self.s.haze_far
+		if self.s.haze_km:
+			near, far = (km * 1000 / self.width_m for km in self.s.haze_km)
+		return np.clip((d - near) / max(far - near, 1e-9), 0, 1)
+
 	def emit(self, P, keep, role, check_vis=True):
 		'''Project 3D points, hide what the terrain covers, split into runs by role + haze depth.'''
 		S, zc = self.project(P)
@@ -318,6 +333,7 @@ class Vista:
 		self.g_tone = ndimage.gaussian_filter(tone.reshape(gh, gw), 0.7)
 		self.g_tone[hit.reshape(gh, gw) != 1] = -1
 		self.g_depth = np.minimum((self.fade(P) * 4).astype(int), 3).reshape(gh, gw)
+		self.g_far = np.where(hit == 1, self.far_frac(P), 1.0).reshape(gh, gw)
 		self.g_hit = hit.reshape(gh, gw)
 		self.g_P = P.reshape(gh, gw, 3)
 
@@ -636,6 +652,8 @@ class Vista:
 		self.sky()
 		self.halo()
 		self.window_border()
+		if self._breaking() and not hasattr(self, "g_tone"):
+			self.gbuffer()
 		return self.strokes
 
 	def window_border(self):
@@ -666,6 +684,68 @@ class Vista:
 			nrm = np.column_stack([-t[:, 1], t[:, 0]]) / (np.hypot(t[:, 0], t[:, 1])[:, None] + 1e-9)
 			xy = xy + nrm * off[:, None]
 		return xy
+
+	def _breaking(self):
+		s = self.s
+		return max(s.break_light, s.break_far, s.break_dry, s.break_tails) > 0
+
+	def _gaps(self, S, xy):
+		'''Gap amount 0..1 at each point of a stroke (S: screen coords for the g-buffer lookups, xy: px).'''
+		s = self.s
+		n = len(xy)
+		d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(xy, axis=0).T))])
+		keep = np.ones(n)
+		def pad(v):  # overshoot adds a point at each end
+			return np.pad(v, (n - len(v)) // 2, mode="edge") if len(v) < n else v
+		if s.break_light:
+			tone = pad(np.maximum(self._gsample(self.g_tone, S, order=1), 0))
+			keep *= 1 - s.break_light * np.clip((0.8 - tone) / 0.6, 0, 1)
+		if s.break_far:
+			far = pad(self._gsample(self.g_far, S, order=1))
+			keep *= 1 - s.break_far * far ** 1.5
+		if s.break_dry:
+			fr, ph = self.rng.uniform(0.008, 0.03, 3), self.rng.uniform(0, 6.3, 3)
+			noise = sum(np.sin(d * f + p) for f, p in zip(fr, ph)) / 3
+			keep *= 1 - s.break_dry * np.clip((noise - 0.15) / 0.5, 0, 1)
+		if s.break_tails:
+			T = min(6 * s.break_len, 0.3 * d[-1])  # at most the outer 30% at each end, so short strokes keep a body
+			end = np.minimum(d, d[-1] - d)
+			keep *= 1 - s.break_tails * np.clip(1 - end / T, 0, 1) ** 1.5
+		return d, 1 - keep
+
+	def _breakup(self, xy, d, g):
+		'''Cut a stroke into dashes: long and tight where g is small, short dots far apart where it is large.'''
+		if len(xy) < 2 or g.max() < 0.04:
+			return [xy]
+		L, base = d[-1], self.s.break_len
+		rng = self.rng
+		spans, t, on, first = [], 0.0, rng.random() < 0.5, True
+		while t < L:
+			gi = float(np.interp(t, d, g))
+			if on:
+				ln = max(0.8, base * (1 - gi) ** 1.5 * (4 if gi < 0.15 else 1)) * rng.uniform(0.7, 1.3)
+			else:
+				ln = base * 1.2 * gi * rng.uniform(0.6, 1.4) if gi >= 0.04 else 0.0
+			if first:  # random phase, so the gaps of neighbouring strokes don't line up
+				ln *= rng.uniform(0, 1)
+				first = False
+			if on:
+				spans.append((t, min(t + ln, L)))
+			t += max(ln, 0.25)
+			on = not on
+		merged = []
+		for a, b in spans:  # dashes separated by no gap are one dash
+			if merged and a - merged[-1][1] < 0.3:
+				merged[-1] = (merged[-1][0], b)
+			else:
+				merged.append((a, b))
+		out = []
+		for a, b in merged:
+			i, j = np.searchsorted(d, a, "right"), np.searchsorted(d, b, "left")
+			pa = np.array([np.interp(a, d, xy[:, 0]), np.interp(a, d, xy[:, 1])])
+			pb = np.array([np.interp(b, d, xy[:, 0]), np.interp(b, d, xy[:, 1])])
+			out.append(np.vstack([pa, xy[i:j], pb]))
+		return out
 
 	def _dashes(self, xy, depth):
 		# plotter haze: distant lines break into dashes instead of turning grey
@@ -698,9 +778,12 @@ class Vista:
 			if role not in ("topo", "label"):  # map lines stay crisp against the hand-drawn strokes
 				xy = self._handmade(xy, role)
 			accent = role in ("sun", "accent")
+			breakup = None
+			if self._breaking() and role in ("hatch", "sil", "contour", "mist"):
+				breakup = self._gaps(S, xy)
 			if s.plotter:
 				col, width = (s.accent if accent else topo_ink if role in ("topo", "label") else s.ink), s.stroke_width
-				parts = self._dashes(xy, depth) if role in ("sil", "contour") else [xy]
+				parts = self._dashes(xy, depth) if role in ("sil", "contour") and breakup is None else [xy]
 				label = "2-accent" if accent else "3-topo" if role in ("topo", "label") else "1-ink"
 			else:
 				wm, col = styles[role]
@@ -708,6 +791,8 @@ class Vista:
 					col = _mix(col, s.paper, depth / 4 * 0.85)
 				width = s.stroke_width * wm * (1 - depth * 0.12)
 				parts, label = [xy], f"{role}-{depth}"
+			if breakup is not None:
+				parts = self._breakup(xy, *breakup)
 			for part in parts:
 				part = fp.simplify(np.ascontiguousarray(part, dtype=np.float64), 0.3)
 				if len(part) < 2:
