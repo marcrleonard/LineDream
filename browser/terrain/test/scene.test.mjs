@@ -137,7 +137,7 @@ test("params: missing ones take defaults, bad ones are fixed and reported", () =
   assert.equal(params.contour_above, 1500);
   assert.ok(!("_secret" in params) && !("nested" in params));
   assert.equal(params.sun_az, d.sun_az);
-  assert.deepEqual(warnings, ["fov: 500 is outside 8–110", "shadows: expected true/false", "tone: unknown option \"pointillism\"", "_secret: dropped", "nested: dropped"]);
+  assert.deepEqual(warnings, ["fov: 500 is outside 4–110", "shadows: expected true/false", "tone: unknown option \"pointillism\"", "_secret: dropped", "nested: dropped"]);
   for (const k of Object.keys(d)) assert.ok(k in params, `${k} present`);
 });
 
