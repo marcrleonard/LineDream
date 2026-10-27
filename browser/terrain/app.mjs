@@ -423,7 +423,7 @@ function resizePlanner() {
 new ResizeObserver(resizePlanner).observe(planner);
 
 // ------------------------------------------------------------------------------------------- navigation
-// Walk the camera through the scene with the Move and Look gizmos under the drawing, or the keyboard. Moves carry the eye and the aim
+// Walk the camera through the scene with the Move and Look gizmos in the drawing's corner, or the keyboard. Moves carry the eye and the aim
 // together and fly level, so the view keeps its altitude, pitch and heading (the eye only rises where the ground comes up
 // to meet it); steps scale with how far away the aim is (moves) and how high the eye is (up/down). The current drawing is shifted and scaled at once as a rough stand-in until the new preview
 // lands. Walking off the loaded area loads a new one around the camera.
@@ -671,7 +671,7 @@ function download() {
 }
 
 // The status line also drives the overlay on the drawing: anything "busy" blurs the sheet and shows a spinner, with a
-// running clock while a render is in progress. The nav gizmos sit outside it, so moves keep queueing.
+// running clock while a render is in progress. The nav gizmos stay above it, so moves keep queueing.
 let busySince = 0, busyTimer = null;
 function setStatus(text, kind) {
   const el = $("status");
