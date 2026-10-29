@@ -8,6 +8,15 @@
 
 const has = (k, ...vals) => (p) => vals.includes(p[k]);
 
+// OpenStreetMap lines draped on the terrain (features.mjs fetches them once any is on); the same keys in both renderers
+const MAP = ["Map (OpenStreetMap)", [
+  { k: "roads", label: "Roads", type: "check", def: false },
+  { k: "trails", label: "Trails (dashed)", type: "check", def: false },
+  { k: "rivers", label: "Rivers and streams", type: "check", def: false },
+  { k: "lakes", label: "Lake and sea shores", type: "check", def: false },
+]];
+export const MAP_KEYS = MAP[1].map((c) => c.k);
+
 export const PALETTES = {
   vista: {
     paper: { label: "Paper", paper: "#f1ece2", ink: "#1c1b19", accent: "#cf4a1f" },
@@ -86,6 +95,7 @@ export const MODES = {
         { k: "_accent_on", label: "One accent contour", type: "check", def: false },
         { k: "_accent_elev", label: "Accent contour elevation ({u})", unit: "m", type: "range", elev: true, step: 10, def: 0, show: has("_accent_on", true) },
       ]],
+      MAP,
       ["Atmosphere", [
         { k: "haze", label: "Haze", type: "range", min: 0, max: 1, step: 0.01, def: 0.6 },
         { k: "_haze_near_km", label: "Haze starts ({u})", unit: "km", type: "range", min: 0, max: 100, step: 0.5, def: 3, show: (p) => p.haze > 0 },
@@ -154,6 +164,7 @@ export const MODES = {
         { k: "warp", label: "Domain warp", type: "range", min: 0, max: 0.15, step: 0.002, def: 0 },
         { k: "warp_scale", label: "Warp scale", type: "range", min: 0.02, max: 0.4, step: 0.01, def: 0.12, show: (p) => p.warp > 0 },
       ]],
+      MAP,
       ["Where ink lands", [
         { k: "mask", label: "Mask", type: "select", def: "none", options: [["none", "none"], ["noise", "noise"], ["slope", "steep ground"], ["inv_slope", "flat ground"], ["height", "high ground"]] },
         { k: "mask_threshold", label: "Mask threshold", type: "range", min: 0, max: 1, step: 0.01, def: 0.5, show: (p) => p.mask !== "none" },

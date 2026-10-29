@@ -65,6 +65,12 @@ class Params:
 	clip: str = "square"       # square | circle
 	min_run: int = 3           # drop fragments shorter than this many samples
 
+	# MAP: OpenStreetMap lines (uv polylines from the app, build(..., features=)), lifted with the terrain
+	roads: bool = False
+	trails: bool = False       # drawn dashed
+	rivers: bool = False
+	lakes: bool = False        # shorelines
+
 	# OUTPUT
 	canvas: tuple = (1200, 1200)
 	margin: float = 0.08
@@ -271,47 +277,69 @@ def _normals(poly):
 	return np.column_stack([-d[:, 1], d[:, 0]])
 
 
-def build(dem, p):
-	'''Run the whole pipeline. Returns a list of screen-space polylines (x right, y up).'''
+FEATURE_KINDS = ("roads", "trails", "rivers", "lakes")
+
+
+def build(dem, p, features=None, roles=False):
+	'''Run the whole pipeline. Returns a list of screen-space polylines (x right, y up), or with roles=True a list of
+	(role, polyline): "path" for the family of curves, else the map feature kind.'''
 	rng = np.random.default_rng(p.seed)
 	H = prepare_field(dem, p, rng)
 	step = 1.0 / p.size
-	polys = PATHS[p.paths](H, p, rng, step)
+	polys = [("path", poly) for poly in PATHS[p.paths](H, p, rng, step)]
+	for kind in FEATURE_KINDS:
+		if getattr(p, kind) and features:
+			polys += [(kind, _densify(np.asarray(uv, float), step)) for uv in features.get(kind, ())]
 	M = _mask_field(H, p, rng)
 	D = H - ndimage.gaussian_filter(H, p.highpass) if p.highpass else H
 	R, pit, to_cam = _camera(p)
 
 	out = []
-	for poly in polys:
+	for role, poly in polys:
 		if len(poly) < 2:
 			continue
 		h = _sample(D, poly)
-		relief = p.relief * (1 + p.jitter * rng.standard_normal())
+		relief = p.relief * (1 + p.jitter * rng.standard_normal()) if role == "path" else p.relief
 		keep = np.ones(len(poly), dtype=bool)
-		if M is not None:
+		if M is not None and role == "path":
 			keep &= _sample(M, poly) > p.mask_threshold
 		if p.clip == "circle":
 			keep &= np.hypot(*(poly - np.array(p.center)).T) <= 0.5
 
 		if p.mode == "offset":
-			flat = poly + _normals(poly) * (h * relief)[:, None]
+			# map lines stay where they are on the map: pushing them along their own normals would only scramble them
+			flat = poly + _normals(poly) * (h * relief)[:, None] if role == "path" else poly
 			scr = np.column_stack([flat[:, 0], -flat[:, 1]])
 		else:
-			P = np.column_stack([poly[:, 0] - 0.5, 0.5 - poly[:, 1], h * relief])
+			P = np.column_stack([poly[:, 0] - 0.5, 0.5 - poly[:, 1], h * relief + (0.5 / p.size if role != "path" else 0)])
 			keep &= _visible(D, P, p, to_cam) if keep.any() else keep
 			V = P @ R.T
 			scr = np.column_stack([V[:, 0], V[:, 1] * np.sin(pit) + V[:, 2] * np.cos(pit)])
 
-		out += [scr[a:b] for a, b in _runs(keep, p.min_run)]
-	return out
+		out += [(role, scr[a:b]) for a, b in _runs(keep, p.min_run)]
+	return out if roles else [poly for _, poly in out]
 
 
 # ---------------------------------------------------------------- RENDER
 
-def render(dem, p, filename):
-	polys = build(dem, p)
+def _dash(xy, on, off):
+	'''A polyline cut into dashes `on` long with `off` gaps (canvas px), starting with a dash.'''
+	d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(xy, axis=0).T))])
+	out, t = [], 0.0
+	while t < d[-1]:
+		a, b = t, min(t + on, d[-1])
+		i, j = np.searchsorted(d, a, "right"), np.searchsorted(d, b, "left")
+		pa = [np.interp(a, d, xy[:, 0]), np.interp(a, d, xy[:, 1])]
+		pb = [np.interp(b, d, xy[:, 0]), np.interp(b, d, xy[:, 1])]
+		out.append(np.vstack([pa, xy[i:j], pb]))
+		t += on + off
+	return out
+
+
+def render(dem, p, filename, features=None):
+	strokes = build(dem, p, features, roles=True)
 	W, Hc = p.canvas
-	allp = np.concatenate(polys)
+	allp = np.concatenate([poly for _, poly in strokes])
 	lo, hi = allp.min(0), allp.max(0)
 	s = min(W * (1 - 2 * p.margin) / (hi[0] - lo[0]), Hc * (1 - 2 * p.margin) / (hi[1] - lo[1]))
 	off = np.array([W, Hc]) / 2 - s * (lo + hi) / 2 * np.array([1, -1])
@@ -319,14 +347,17 @@ def render(dem, p, filename):
 	Canvas.flush()
 	Canvas.width, Canvas.height = W, Hc
 	Canvas.background_color = p.background
-	for poly in polys:
+	for role, poly in strokes:
 		xy = poly * np.array([s, -s]) + off
-		xy = fp.simplify(np.ascontiguousarray(xy, dtype=np.float64), 0.25)
-		if len(xy) < 2:
-			continue
-		Line.from_array(xy, stroke_color=p.stroke, stroke_width=p.stroke_width)
+		width = p.stroke_width * (1.0 if role in ("path", "trails") else 1.4)
+		parts = _dash(xy, 5 * width, 3.5 * width) if role == "trails" else [xy]
+		for part in parts:
+			part = fp.simplify(np.ascontiguousarray(part, dtype=np.float64), 0.25)
+			if len(part) < 2:
+				continue
+			Line.from_array(part, stroke_color=p.stroke, stroke_width=width)
 	Canvas.save(filename)
-	return len(polys)
+	return len(strokes)
 
 
 def variant(p, **kw):

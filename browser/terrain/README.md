@@ -35,8 +35,9 @@ what runs in the browser. `py/terrain_app.py` is the small API the worker calls.
 | `scene.mjs` | the scene format shared by presets, saved files and the URL hash; checks what comes in |
 | `compose.mjs` | the Compose button: finds the summit, picks lens, light and haze |
 | `myscenes.mjs` | My scenes in localStorage |
+| `features.mjs` | roads, trails and water: fetches and decodes OpenStreetMap vector tiles, clips them to the area |
 | `units.mjs` | feet/miles or metres/kilometres for the controls and readouts |
-| `test/` | `node --test` unit tests for the three modules above (no browser, no dependencies) |
+| `test/` | `node --test` unit tests for the modules above (no browser, no dependencies) |
 | `worker.mjs` | Pyodide in a worker: loads numpy/scipy/scikit-image + the LineDream wheel, runs renders |
 | `py/` | the renderers |
 
@@ -59,6 +60,20 @@ few dots at its ends; **Artist** dissolves strokes into the light: solid in shad
 little dry-brush skipping. **Custom** exposes the four strengths (light, dry brush, tails, distance). Outlines are never
 broken. Every dash is a pen lift, so heavy breakup plots slower; **Dash length** trades texture for plot time. Presets
 made before breakup existed keep it off.
+
+## Map lines
+
+**Map (OpenStreetMap)** drapes roads, trails (dashed), rivers and streams, and lake and sea shores on the terrain, in
+both renderers. They come from OpenFreeMap's vector tiles (OpenMapTiles schema, no key), fetched the first time a
+toggle is on and kept for the loaded area; `features.mjs` decodes the tiles (no library), clips them to the area and
+hands the worker polylines in grid coordinates. Vista lifts them a few metres off the ground so the surface they lie
+on doesn't swallow them, hides them behind terrain and under the mist, and fades them with the haze; in plotter mode
+they get their own pen (`4-map`). Strata lifts them with the relief (or leaves them flat in Sideways push).
+
+The tiles are as fine as 6 × 6 tiles over the area allows (up to zoom 14), so small areas get everything and large
+ones get what the coarser tiles keep: OpenMapTiles drops minor roads and footpaths below about zoom 13. Service roads,
+ditches and tunnels are left out. The toggles are part of the scene; the lines themselves are not, and are fetched
+again when a scene or link opens.
 
 ## Units
 
@@ -100,7 +115,7 @@ to the console. Older links (from before the scene format) still open.
 ## Tests
 
 ```bash
-cd browser && npm run test:terrain      # node --test: scene format, presets, files, links, My scenes, Compose, units
+cd browser && npm run test:terrain      # node --test: scene format, presets, files, links, My scenes, Compose, units, map tiles
 ```
 
 ## Running locally

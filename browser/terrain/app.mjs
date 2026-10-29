@@ -5,7 +5,8 @@
 //   ?pyodide=<url>  a Pyodide distribution to load from (default: the jsDelivr CDN)
 //   ?wheel=<url>    a LineDream wheel to install (the website build sets data-wheel on <html>; otherwise PyPI)
 // The whole scene (place, camera, mode, every parameter) lives in the URL hash, so a link reproduces a drawing.
-import { MODES, PALETTES, PRESETS, breakupParams, defaults } from "./schema.mjs";
+import { MAP_KEYS, MODES, PALETTES, PRESETS, breakupParams, defaults } from "./schema.mjs";
+import { ATTRIBUTION, fetchFeatures, pack } from "./features.mjs";
 import { fetchDEM, hillshade, metersPerPixel, sample, toLatLon, toUV, MAX_ZOOM } from "./tiles.mjs";
 import { compose } from "./compose.mjs";
 import { DEFAULT_SYSTEM, SYSTEMS, displayRange, fmtDistance, fmtLength, fromDisplay, niceStep, toDisplay, unitName } from "./units.mjs";
@@ -41,6 +42,8 @@ let placing = "cam";
 // feet/miles or metres/kilometres for what's shown; everything stored stays metric (units.mjs)
 let units = (() => { try { const u = localStorage.getItem("linedream-terrain/units"); return u in SYSTEMS ? u : DEFAULT_SYSTEM; } catch { return DEFAULT_SYSTEM; } })();
 let navT = { s: 1, x: 0, y: 0 }, sentNav = navT, navLoading = false;  // see "navigation" below
+// OpenStreetMap lines for the loaded area, fetched the first time a Map toggle is on (see "map lines" below)
+let mapLines = { key: null, packed: null, zoom: null, sent: false };
 
 // ------------------------------------------------------------------------------------------- worker
 
@@ -54,7 +57,8 @@ function startWorker() {
       setStatus("Python ready", "ok");
       sendDem();
     } else if (data.type === "fatal") setStatus("Python failed to start: " + data.error, "err");
-    else if (data.type === "dem") { demSent = true; schedulePreview(0); }
+    else if (data.type === "dem") { demSent = true; sendFeatures(); schedulePreview(0); }
+    else if (data.type === "features") schedulePreview(0);
     else if (data.type === "result") {
       busy = false;
       showSvg(data.svg, data.quality);
@@ -72,8 +76,40 @@ function startWorker() {
 function sendDem() {
   if (!workerReady || !dem) return;
   demSent = false;
+  mapLines.sent = false;  // a new grid clears them in the worker
   const grid = dem.grid.slice();
   worker.postMessage({ type: "dem", grid, size: dem.meta.size, width_m: dem.meta.width_m }, [grid.buffer]);
+}
+
+// ------------------------------------------------------------------------------------------- map lines
+
+const areaKey = (m) => `${m.zoom}/${m.x0}/${m.y0}/${m.size}`;
+const wantMap = () => MAP_KEYS.some((k) => state.params[state.mode][k]);
+
+// Fetch roads, trails and water for the loaded area once any Map toggle is on; the render goes ahead without them and
+// runs again when they arrive. A failed fetch is reported and retried on the next change.
+async function ensureMap() {
+  if (!dem || !wantMap() || mapLines.key === areaKey(dem.meta)) return;
+  const key = areaKey(dem.meta);
+  mapLines = { key, packed: null, zoom: null, sent: false };
+  try {
+    const { lines, zoom } = await fetchFeatures(dem.meta, (i, n) => { if (mapLines.key === key) $("area-info").textContent = `Loading map tiles ${i}/${n}…`; });
+    if (mapLines.key !== key) return;  // the area changed meanwhile
+    Object.assign(mapLines, { packed: pack(lines), zoom });
+    showAreaInfo();
+    sendFeatures();
+  } catch (e) {
+    if (mapLines.key !== key) return;
+    mapLines.key = null;
+    showAreaInfo();
+    setStatus("Could not load map lines: " + e.message, "err");
+  }
+}
+
+function sendFeatures() {
+  if (!workerReady || !demSent || !mapLines.packed || mapLines.sent || !dem || mapLines.key !== areaKey(dem.meta)) return;
+  mapLines.sent = true;
+  worker.postMessage({ type: "features", kinds: mapLines.packed });
 }
 
 function requestRender(quality) {
@@ -200,6 +236,7 @@ function refreshVisibility() {
 function afterChange() {
   refreshVisibility();
   drawPlanner();
+  ensureMap();
   schedulePreview();
 }
 
@@ -220,6 +257,11 @@ function showAreaInfo() {
   if (!dem) return;
   const m = dem.meta;
   $("area-info").textContent = `${fmtDistance(units, m.width_m / 1000)} across · ${fmtLength(units, m.min)}–${fmtLength(units, m.max)} · ${fmtLength(units, m.mpp)} per sample · zoom ${m.zoom}`;
+  if (mapLines.packed && mapLines.key === areaKey(m)) {
+    // OpenMapTiles leaves minor roads and footpaths out of its coarser tiles
+    const coarse = mapLines.zoom < 13 ? " (smaller roads and trails need a closer area)" : "";
+    $("area-info").textContent += ` · map lines at zoom ${mapLines.zoom}${coarse}\n${ATTRIBUTION}`;
+  }
 }
 
 function setUnits(u) {
@@ -260,6 +302,7 @@ async function loadArea(area, { keepCamera = false, pins = null } = {}) {
   drawPlanner();
   syncMap();
   sendDem();
+  ensureMap();
   saveHash();
 }
 
@@ -789,6 +832,7 @@ for (const b of document.querySelectorAll("[data-mode]")) {
     buildControls();
     drawPlanner();
     syncMapOverlay();
+    ensureMap();
     schedulePreview(0);
   };
 }

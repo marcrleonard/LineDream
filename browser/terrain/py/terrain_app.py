@@ -2,6 +2,7 @@
 for renders with a mode, a dict of parameters straight from the UI, and a quality level.
 
     set_dem(grid, size, width_m)                 -> {"min", "max"} elevation in metres
+    set_features(kind, coords, counts)           roads / trails / rivers / lakes for this area (features.mjs)
     render(mode, params_json, quality)           -> json {"svg", "seconds", "strokes"}
 
 mode is "vista" (perspective, vista.py) or "strata" (top-down / oblique, strata.py). Keys that aren't fields of
@@ -20,6 +21,7 @@ from vista import Scene, Vista
 
 DEM = None
 INFO = None
+FEATURES = {}  # kind -> [uv polyline (k, 2)], for the loaded area
 
 # Vista: preview halves the grid, the ray count and the image; pixel-sized settings scale with the image so a
 # preview looks like a small version of the full render rather than a coarser different one.
@@ -27,7 +29,8 @@ VISTA_QUALITY = {
 	"preview": dict(size=512, gres=450, canvas=(800, 500)),
 	"full": dict(size=1024, gres=900, canvas=(1600, 1000)),
 }
-VISTA_PX = ("flow_sep", "flow_sep_max", "hatch_spacing", "topo_label_size", "overshoot", "wobble", "stroke_width", "break_len")
+VISTA_PX = ("flow_sep", "flow_sep_max", "hatch_spacing", "topo_label_size", "overshoot", "wobble", "stroke_width", "break_len",
+	"trail_dash")
 STRATA_QUALITY = {
 	"preview": dict(size=300, canvas=(800, 800)),
 	"full": dict(size=400, canvas=(1600, 1600)),  # 400 = strata.Params default, so presets match the original renders
@@ -42,8 +45,17 @@ class _Info:
 def set_dem(grid, size, width_m):
 	global DEM, INFO
 	DEM = np.asarray(grid, dtype=np.float32).reshape(size, size)
+	FEATURES.clear()  # they belong to the old area
 	INFO = _Info(float(width_m))
 	return {"min": float(DEM.min()), "max": float(DEM.max())}
+
+
+def set_features(kind, coords, counts):
+	'''One kind of map line for the loaded area: coords is u, v, u, v, ... and counts the points per polyline.'''
+	xy = np.asarray(coords, dtype=np.float64).reshape(-1, 2)
+	counts = np.asarray(counts, dtype=np.int64)
+	FEATURES[kind] = np.split(xy, np.cumsum(counts)[:-1]) if len(counts) else []
+	return len(FEATURES[kind])
 
 
 def _tuples(v):
@@ -79,9 +91,9 @@ def render(mode, params_json, quality="preview"):
 	out = pathlib.Path(tempfile.gettempdir()) / "terrain_app.svg"
 	t = time.perf_counter()
 	if mode == "vista":
-		strokes = Vista(DEM, INFO, vista_scene(params, quality)).render(str(out))
+		strokes = Vista(DEM, INFO, vista_scene(params, quality), FEATURES).render(str(out))
 	elif mode == "strata":
-		strokes = strata_render(DEM, strata_params(params, quality), str(out))
+		strokes = strata_render(DEM, strata_params(params, quality), str(out), FEATURES)
 	else:
 		raise ValueError(f"unknown mode {mode!r}")
 	return json.dumps({"svg": out.read_text(), "seconds": round(time.perf_counter() - t, 2), "strokes": strokes})

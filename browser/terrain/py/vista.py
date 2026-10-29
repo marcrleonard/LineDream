@@ -101,6 +101,13 @@ class Scene:
 	topo_font: str = "futural"
 	topo_ink: str = None         # contour + label colour; default: ink mixed 45% toward paper (a finer / grey pen)
 
+	# MAP: OpenStreetMap lines draped on the ground; the polylines come from the app (Vista(..., features=))
+	roads: bool = False
+	trails: bool = False         # drawn dashed
+	rivers: bool = False
+	lakes: bool = False          # shorelines
+	trail_dash: float = 5.0      # trail dash length, canvas px (gaps are 0.7 of it)
+
 	# ATMOSPHERE
 	haze: float = 0.6
 	haze_near: float = 0.1
@@ -139,6 +146,33 @@ def place(scene, info, cam_latlon, target_latlon, halo_latlon=None, **kw):
 	return replace(scene, **kw)
 
 
+FEATURE_ROLES = {"roads": "road", "trails": "trail", "rivers": "water", "lakes": "water"}
+MAP_ROLES = ("road", "trail", "water")
+
+
+def _densify(poly, step):
+	'''Points at most `step` apart, so a line follows the ground between map nodes.'''
+	d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(poly, axis=0).T))])
+	if d[-1] <= step:
+		return poly
+	t = np.union1d(d, np.arange(0, d[-1], step))
+	return np.column_stack([np.interp(t, d, poly[:, 0]), np.interp(t, d, poly[:, 1])])
+
+
+def _dash(xy, on, off):
+	'''A polyline cut into dashes `on` long with `off` gaps (canvas px), starting with a dash.'''
+	d = np.concatenate([[0], np.cumsum(np.hypot(*np.diff(xy, axis=0).T))])
+	out, t = [], 0.0
+	while t < d[-1]:
+		a, b = t, min(t + on, d[-1])
+		i, j = np.searchsorted(d, a, "right"), np.searchsorted(d, b, "left")
+		pa = [np.interp(a, d, xy[:, 0]), np.interp(a, d, xy[:, 1])]
+		pb = [np.interp(b, d, xy[:, 0]), np.interp(b, d, xy[:, 1])]
+		out.append(np.vstack([pa, xy[i:j], pb]))
+		t += on + off
+	return out
+
+
 def _hex(c):
 	c = c.lstrip("#")
 	return np.array([int(c[i:i + 2], 16) for i in (0, 2, 4)], dtype=float)
@@ -161,8 +195,9 @@ def _runs(key):
 
 
 class Vista:
-	def __init__(self, dem, info, s: Scene):
+	def __init__(self, dem, info, s: Scene, features=None):
 		self.s = s
+		self.map_lines = features or {}  # {"roads" | "trails" | "rivers" | "lakes": [uv polyline (k, 2), ...]}
 		self.rng = np.random.default_rng(s.seed)
 		n = self.n = s.size
 		E = ndimage.zoom(np.nan_to_num(dem.astype(np.float64)), n / dem.shape[0], order=1)[:n, :n]
@@ -547,6 +582,22 @@ class Vista:
 			return [S], []
 		return [S[a:b] for a, b, _ in _runs(np.where(~cut, 0, -1))], labels
 
+	def features(self):
+		'''Roads, trails, rivers and shorelines, draped on the ground a few metres up so the surface they lie on
+		doesn't hide them; under the mist they drown with everything else.'''
+		s = self.s
+		for kind, role in FEATURE_ROLES.items():
+			if not getattr(s, kind):
+				continue
+			for uv in self.map_lines.get(kind, ()):
+				uv = _densify(np.asarray(uv, float), self.px)
+				P = self._world(uv[:, 0], uv[:, 1])
+				P[:, 2] += 3 * self.k
+				keep = np.ones(len(P), dtype=bool)
+				if s.mist is not None:
+					keep &= self.ground(P[:, 0], P[:, 1], self.E) > s.mist
+				self.emit(P, keep, role)
+
 	def mist_surface(self):
 		s = self.s
 		if s.mist is None or not s.mist_lines:
@@ -649,6 +700,7 @@ class Vista:
 			self.silhouettes()
 		self.contours()
 		self.topo()
+		self.features()
 		self.mist_surface()
 		self.sky()
 		self.halo()
@@ -769,6 +821,7 @@ class Vista:
 			"mist": (0.8, _mix(s.ink, s.paper, 0.45)), "sky": (0.9, _mix(s.ink, s.paper, 0.35)),
 			"sun": (1.2, s.accent), "accent": (1.6, s.accent),
 			"topo": (0.7, topo_ink), "label": (0.8, topo_ink),
+			"road": (1.3, s.ink), "trail": (1.0, s.ink), "water": (1.0, _mix(s.ink, s.paper, 0.3)),
 		}
 		Canvas.flush()
 		Canvas.width, Canvas.height = W, H
@@ -776,7 +829,7 @@ class Vista:
 		layers = {}
 		for role, depth, S in strokes:
 			xy = np.column_stack([W / 2 + S[:, 0] * half, H / 2 - S[:, 1] * half])
-			if role not in ("topo", "label"):  # map lines stay crisp against the hand-drawn strokes
+			if role not in ("topo", "label", *MAP_ROLES):  # map lines stay crisp against the hand-drawn strokes
 				xy = self._handmade(xy, role)
 			accent = role in ("sun", "accent")
 			breakup = None
@@ -784,8 +837,8 @@ class Vista:
 				breakup = self._gaps(S, xy)
 			if s.plotter:
 				col, width = (s.accent if accent else topo_ink if role in ("topo", "label") else s.ink), s.stroke_width
-				parts = self._dashes(xy, depth) if role in ("sil", "contour") and breakup is None else [xy]
-				label = "2-accent" if accent else "3-topo" if role in ("topo", "label") else "1-ink"
+				parts = self._dashes(xy, depth) if role in ("sil", "contour", "road", "water") and breakup is None else [xy]
+				label = "2-accent" if accent else "3-topo" if role in ("topo", "label") else "4-map" if role in MAP_ROLES else "1-ink"
 			else:
 				wm, col = styles[role]
 				if not accent:
@@ -794,6 +847,8 @@ class Vista:
 				parts, label = [xy], f"{role}-{depth}"
 			if breakup is not None:
 				parts = self._breakup(xy, *breakup)
+			if role == "trail":
+				parts = [d for part in parts for d in _dash(part, s.trail_dash, s.trail_dash * 0.7)]
 			for part in parts:
 				part = fp.simplify(np.ascontiguousarray(part, dtype=np.float64), 0.3)
 				if len(part) < 2:

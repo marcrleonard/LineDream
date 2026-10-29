@@ -16,7 +16,8 @@
 - Terrain, a second browser app at https://linedream.marcrleonard.com/terrain/: real elevation data (AWS Terrarium
   tiles) drawn as line art by two renderers, Vista (perspective) and Strata (curve families). Camera planner on a
   topo map, a Compose button, walk-around navigation, presets, and scenes saved to the browser, a `.json` file or a
-  link. See `browser/terrain/README.md`.
+  link. Optional roads, trails, rivers and shorelines from OpenStreetMap, draped on the terrain. See
+  `browser/terrain/README.md`.
 - `Line.from_array(xy, **style)` builds a line from an (N, 2) or (N, 3) array.
 - `Group.extend(items)` adds many shapes in one pass.
 
