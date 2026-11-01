@@ -7,8 +7,8 @@ A web page that turns real elevation data into line art, separate from the playg
    Terrarium tiles.
 2. **Camera:** drag the eye and aim handles on the top-down map; the cone shows the field of view and the compass
    shows the sun.
-3. **Compose and walk:** **Compose** frames the highest summit in view; the pad over the drawing (or WASD) moves the
-   camera. See below.
+3. **Compose and walk:** **Compose** frames the highest summit in view; the Move and Look gizmos in the drawing's corner
+   (or WASD) move the camera. See below.
 4. **Render:** every change re-renders (turn off **Live** to render on demand); switch **Preview | Full** to **Full**
    for the final drawing; **Download SVG** keeps the plotter layers (one pen per layer).
 5. **Keep it:** save to **My scenes**, download the scene as `.json`, or copy the link.
@@ -78,7 +78,9 @@ face is lit alike. New scenes also start with the fall-line strokes rather than 
 
 ## Walking around
 
-In Vista, the pad in the corner of the drawing (or the keyboard) moves the camera like a game: **W A S D** or **↑ ↓**
+In Vista, the two gizmos docked in the drawing's bottom-right corner (or the keyboard) move the camera. **Move** has an arrow per direction and
+**Look** has a ring for turning and one for tilting, coloured like Blender's axes (red across, green ahead, blue up); each
+handle is labelled with its key: **W A S D** or **↑ ↓**
 walk and step sideways, **← →** turn, **E / Q** rise and sink, **R / F** look up and down; hold **Shift** for bigger
 steps. Eye and aim move together and fly level, so altitude, heading and pitch hold while you move; the eye only
 rises where the ground comes up to meet it. Steps scale with the scene: about 8% of the distance to the aim point per step, turns of a sixth of
