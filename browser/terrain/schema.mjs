@@ -31,7 +31,7 @@ export const MODES = {
       ["Camera", [
         { k: "eye", label: "Eye height above ground ({u})", unit: "m", type: "range", min: 0, max: 3000, step: 5, def: 30 },
         { k: "target_eye", label: "Aim height above ground ({u})", unit: "m", type: "range", min: -3000, max: 3000, step: 10, def: 0 },
-        { k: "fov", label: "Field of view (°)", type: "range", min: 8, max: 110, step: 1, def: 55 },
+        { k: "fov", label: "Field of view (°)", type: "range", min: 4, max: 110, step: 1, def: 55 },
         { k: "shift", label: "Lens shift (+ moves the scene up)", type: "range", min: -0.6, max: 0.6, step: 0.01, def: 0 },
         { k: "exaggeration", label: "Vertical exaggeration", type: "range", min: 0.5, max: 3, step: 0.05, def: 1.3 },
         { k: "smooth", label: "Terrain smoothing (px)", type: "range", min: 0, max: 3, step: 0.1, def: 0.7 },
@@ -202,6 +202,9 @@ const SANDIA_CREST = [35.2125, -106.4507], PETROGLYPH_HIGH = [35.14181, -106.772
 const MOUNT_HOOKER = [42.8525, -109.3042];
 const MOUNT_WASHINGTON = [44.2703, -71.3040];
 const PEMI = { lat: 44.12, lon: -71.59, zoom: 12, size: 1024 };
+const TUCKERMAN = { lat: 44.258, lon: -71.255, zoom: 13, size: 1024 }, TUCKERMAN_BOWL = [44.2615, -71.293];
+const SACAGAWEA = [45.89548, -110.96868];
+const WHITES = { ...STROKES, _breakup: "tails", exaggeration: 1.3, haze: 0.3 };
 const GRAVE_LAKE = { lat: 42.8565, lon: -109.272, zoom: 14, size: 1024 };
 const GRAVE_LAKE_STYLE = { ...STROKES, _mist_on: true, _mist_elev: 3039, mist_lines: 45, haze: 0.3, _haze_near_km: 1.5, _haze_far_km: 8,
   exaggeration: 1.1, smooth: 0.5, sun_az: 238, sun_alt: 16 };
@@ -241,6 +244,34 @@ export const PRESETS = [
     cam: [44.4147, -71.4716], target: MOUNT_WASHINGTON,
     params: { ...TETON_STYLE, eye: 10, target_eye: -150, fov: 26, shift: 0.04, exaggeration: 1.3, haze: 0.45, _haze_near_km: 4, _haze_far_km: 35,
       sun_az: 215, sun_alt: 16 } },
+  // White Mountains: breakup Tails, light chosen so the faces turned to the eye are in shade (a lit concave cirque has
+  // no outlines and no strokes, and draws blank)
+  { name: "Tuckerman Ravine from Wildcat", mode: "vista", area: TUCKERMAN, cam: [44.25956, -71.20174], target: TUCKERMAN_BOWL,
+    params: { ...WHITES, eye: 5, target_eye: 60, fov: 28, shift: -0.05, _haze_near_km: 3, _haze_far_km: 15, sun_az: 210, sun_alt: 18 } },
+  { name: "Tuckerman Ravine from Hermit Lake", mode: "vista", area: TUCKERMAN, cam: [44.26, -71.2827], target: [44.2635, -71.2965],
+    params: { ...WHITES, eye: 3, target_eye: 150, fov: 80, shift: -0.15, _haze_near_km: 3, _haze_far_km: 15, sun_az: 225, sun_alt: 20 } },
+  { name: "Tuckerman Ravine from the air", mode: "vista", area: TUCKERMAN, cam: [44.247, -71.236], target: TUCKERMAN_BOWL,
+    params: { ...WHITES, eye: 1400, target_eye: 0, fov: 42, shift: 0, _haze_near_km: 3, _haze_far_km: 15, sun_az: 210, sun_alt: 20 } },
+  { name: "Crawford Notch from Mount Willard", mode: "vista", area: { lat: 44.17, lon: -71.39, zoom: 13, size: 1024 },
+    cam: [44.2022, -71.411], target: [44.14, -71.36],
+    params: { ...WHITES, eye: 40, target_eye: -200, fov: 46, shift: 0, _haze_near_km: 2, _haze_far_km: 14, sun_az: 235, sun_alt: 20 } },
+  { name: "Chocorua across Chocorua Lake", mode: "vista", area: { lat: 43.93, lon: -71.255, zoom: 13, size: 1024 },
+    cam: [43.9005, -71.2405], target: [43.95431, -71.27335],
+    params: { ...WHITES, eye: 4, target_eye: -300, fov: 24, shift: 0.06, _mist_on: true, _mist_elev: 175, mist_lines: 40,
+      _haze_near_km: 2, _haze_far_km: 12, sun_az: 240, sun_alt: 16 } },
+  { name: "Franconia Ridge from Cannon Mountain", mode: "vista", area: { lat: 44.145, lon: -71.67, zoom: 13, size: 1024 },
+    cam: [44.1567, -71.69867], target: [44.15, -71.6447],
+    params: { ...WHITES, eye: 3, target_eye: 0, fov: 48, shift: -0.05, _haze_near_km: 2, _haze_far_km: 12, sun_az: 185, sun_alt: 18 } },
+  // Bridger Range, Montana: long lenses straight up the crest to Sacagawea Peak, morning light so the steep west face is
+  // in shade
+  { name: "Down the Bridgers to Sacagawea (above Baldy)", mode: "vista", area: { lat: 45.835, lon: -110.96, zoom: 12, size: 1024 },
+    cam: [45.76582, -110.94396], target: SACAGAWEA,
+    params: { ...TETON_STYLE, _breakup: "tails", eye: 450, target_eye: -150, fov: 10, shift: -0.05, haze: 0.4, _haze_near_km: 4, _haze_far_km: 25,
+      sun_az: 105, sun_alt: 14 } },
+  { name: "Down the Bridgers from Mount Ellis (36 km)", mode: "vista", area: { lat: 45.74, lon: -110.96, zoom: 11, size: 1024 },
+    cam: [45.57747, -110.95601], target: SACAGAWEA,
+    params: { ...TETON_STYLE, _breakup: "tails", eye: 5, target_eye: -400, fov: 7, shift: -0.05, haze: 0.4, _haze_near_km: 10, _haze_far_km: 45,
+      sun_az: 105, sun_alt: 14 } },
   { name: "Grave Lake & Mount Hooker from the knob", mode: "vista", area: GRAVE_LAKE, cam: [42.8737, -109.23509], target: MOUNT_HOOKER,
     params: { ...GRAVE_LAKE_STYLE, eye: 3, target_eye: -900, fov: 48, shift: 0 } },
   { name: "Grave Lake & Mount Hooker from the high ridge", mode: "vista", area: GRAVE_LAKE, cam: [42.88357, -109.2447], target: MOUNT_HOOKER,
